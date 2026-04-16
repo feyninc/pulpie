@@ -1,0 +1,86 @@
+[
+  {
+    "id": "02_nodejs_dev",
+    "url": "https://nodejs.dev/en/learn/diagnostics/memory",
+    "source": "exa",
+    "title": "Node.js \u2014 Memory",
+    "ref_chars": 1721
+  },
+  {
+    "id": "03_numberanalytics_com",
+    "url": "https://www.numberanalytics.com/blog/actuarial-probability-models-for-insurance",
+    "source": "exa",
+    "title": "Actuarial Probability Models for Insurance",
+    "ref_chars": 9540
+  },
+  {
+    "id": "04_evisional_com",
+    "url": "https://evisional.com/an-in-depth-look-at-schema-evolution-in-apache-avro/",
+    "source": "exa",
+    "title": "An In-Depth Look at Schema Evolution in Apache Avro -",
+    "ref_chars": 6032
+  },
+  {
+    "id": "05_protobuf_dev",
+    "url": "https://protobuf.dev/getting-started/pythontutorial",
+    "source": "exa",
+    "title": "Protocol Buffer Basics: Python | Protocol Buffers Documentation",
+    "ref_chars": 9620
+  },
+  {
+    "id": "06_cobra_dev",
+    "url": "https://cobra.dev/",
+    "source": "exa",
+    "title": "The CLI Framework Developers Love | Cobra: A Commander for Modern CLI Apps",
+    "ref_chars": 8657
+  },
+  {
+    "id": "07_how2_sh",
+    "url": "https://how2.sh/posts/how-to-use-chrome-devtools-for-performance/",
+    "source": "exa",
+    "title": "How to Use Chrome DevTools for Performance",
+    "ref_chars": 10000
+  },
+  {
+    "id": "08_u11d_com",
+    "url": "https://u11d.com/blog/medusa-checkout-flow-step-by-step-guide/",
+    "source": "exa",
+    "title": "Medusa Checkout Flow: Step-by-Step Guide to Building a Complete E-Commerce Checkout | u11d",
+    "ref_chars": 9961
+  },
+  {
+    "id": "09_istio_io",
+    "url": "https://istio.io/docs/concepts/what-is-istio/",
+    "source": "exa",
+    "title": "Istio / The Istio service mesh",
+    "ref_chars": 3693
+  },
+  {
+    "id": "10_immunologyexplained_aai_org",
+    "url": "https://immunologyexplained.aai.org/what-is-immunology/what-is-the-immune-system/",
+    "source": "exa",
+    "title": "What Is The Immune System - Immunology Explained",
+    "ref_chars": 4912
+  },
+  {
+    "id": "11_tutorialspoint_com",
+    "url": "https://www.tutorialspoint.com/cprogramming/c_memory_layout.htm",
+    "source": "brave_jina",
+    "title": "Memory Layout in C",
+    "ref_chars": 39354
+  },
+  {
+    "id": "12_builtin_com",
+    "url": "https://builtin.com/data-science/time-series-forecasting-python",
+    "source": "brave_jina",
+    "title": "A Guide to Time Series Forecasting in Python | Built In",
+    "ref_chars": 23964
+  },
+  {
+    "id": "13_omnipod_com",
+    "url": "https://www.omnipod.com/diabetes-hub/learning-center/diabetes-technology/insulin-pump-explained",
+    "source": "brave_jina",
+    "title": "Insulin Pumps, Explained | A full Guide | Omnipod",
+    "ref_chars": 41354
+  }
+]

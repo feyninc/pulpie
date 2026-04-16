@@ -1,0 +1,160 @@
+Protocol Buffer Basics: Python
+
+A basic Python programmers introduction to working with protocol buffers.
+
+This tutorial provides a basic Python programmer’s introduction to working with protocol buffers. By walking through creating a simple example application, it shows you how to
+
+Define message formats in a `.proto` file.
+
+Use the protocol buffer compiler.
+
+Use the Python protocol buffer API to write and read messages.
+
+This isn’t a comprehensive guide to using protocol buffers in Python. For more detailed reference information, see the [Protocol Buffer Language Guide (proto2)](/programming-guides/proto2), the [Protocol Buffer Language Guide (proto3)](/programming-guides/proto3), the [Python API Reference](https://googleapis.dev/python/protobuf/latest/), the [Python Generated Code Guide](/reference/python/python-generated), and the [Encoding Reference](/programming-guides/encoding).
+
+The Problem Domain
+
+The example we’re going to use is a very simple “address book” application that can read and write people’s contact details to and from a file. Each person in the address book has a name, an ID, an email address, and a contact phone number.
+
+How do you serialize and retrieve structured data like this? There are a few ways to solve this problem:
+
+Use Python pickling. This is the default approach since it’s built into the language, but it doesn’t deal well with schema evolution, and also doesn’t work very well if you need to share data with applications written in C++ or Java.
+
+You can invent an ad-hoc way to encode the data items into a single string – such as encoding 4 ints as “12:3:-23:67”. This is a simple and flexible approach, although it does require writing one-off encoding and parsing code, and the parsing imposes a small run-time cost. This works best for encoding very simple data.
+
+Serialize the data to XML. This approach can be very attractive since XML is (sort of) human readable and there are binding libraries for lots of languages. This can be a good choice if you want to share data with other applications/projects. However, XML is notoriously space intensive, and encoding/decoding it can impose a huge performance penalty on applications. Also, navigating an XML DOM tree is considerably more complicated than navigating simple fields in a class normally would be.
+
+Instead of these options, you can use protocol buffers. Protocol buffers are the flexible, efficient, automated solution to solve exactly this problem. With protocol buffers, you write a `.proto` description of the data structure you wish to store. From that, the protocol buffer compiler creates a class that implements automatic encoding and parsing of the protocol buffer data with an efficient binary format. The generated class provides getters and setters for the fields that make up a protocol buffer and takes care of the details of reading and writing the protocol buffer as a unit. Importantly, the protocol buffer format supports the idea of extending the format over time in such a way that the code can still read data encoded with the old format.
+
+Where to Find the Example Code
+
+The example code is included in the source code package, under the “examples” directory.[Download it here.](/downloads)
+
+Defining Your Protocol Format
+
+To create your address book application, you’ll need to start with a `.proto` file. The definitions in a `.proto` file are simple: you add a *message* for each data structure you want to serialize, then specify a name and a type for each field in the message. Here is the `.proto` file that defines your messages,`addressbook.proto`.
+
+`edition  = "2023";  package  tutorial;  message  Person  {  string  name  = 1;  int32  id  = 2;  string  email  = 3;   enum  PhoneType  {  PHONE_TYPE_UNSPECIFIED  = 0;  PHONE_TYPE_MOBILE  = 1;  PHONE_TYPE_HOME  = 2;  PHONE_TYPE_WORK  = 3;  }   message  PhoneNumber  {  string  number  = 1;  PhoneType  type  = 2  [default  = PHONE_TYPE_HOME];  }   repeated  PhoneNumber  phones  = 4; }  message  AddressBook  {  repeated  Person  people  = 1; } `
+
+As you can see, the syntax is similar to C++ or Java. Let’s go through each part of the file and see what it does.
+
+The `.proto` file starts with a package declaration, which helps to prevent naming conflicts between different projects. In Python, packages are normally determined by directory structure, so the `package` you define in your `.proto` file will have no effect on the generated code. However, you should still declare one to avoid name collisions in the Protocol Buffers name space as well as in non-Python languages.
+
+Next, you have your message definitions. A message is just an aggregate containing a set of typed fields. Many standard simple data types are available as field types, including `bool`,`int32`,`float`,`double`, and `string`. You can also add further structure to your messages by using other message types as field types – in the above example the `Person` message contains `PhoneNumber` messages, while the `AddressBook` message contains `Person` messages. You can even define message types nested inside other messages – as you can see, the `PhoneNumber` type is defined inside `Person`. You can also define `enum` types if you want one of your fields to have one of a predefined list of values – here you want to specify that a phone number can be one of the following phone types:`PHONE_TYPE_MOBILE`,`PHONE_TYPE_HOME`, or `PHONE_TYPE_WORK`.
+
+The " = 1", " = 2" markers on each element identify the unique “tag” that field uses in the binary encoding. Tag numbers 1-15 require one less byte to encode than higher numbers, so as an optimization you can decide to use those tags for the commonly used or repeated elements, leaving tags 16 and higher for less-commonly used optional elements. Each element in a repeated field requires re-encoding the tag number, so repeated fields are particularly good candidates for this optimization.
+
+You’ll find a complete guide to writing `.proto` files – including all the possible field types – in the [Protocol Buffer Language Guide](/programming-guides/editions). Don’t go looking for facilities similar to class inheritance, though – protocol buffers don’t do that.
+
+Compiling Your Protocol Buffers
+
+Now that you have a `.proto`, the next thing you need to do is generate the classes you’ll need to read and write `AddressBook` (and hence `Person` and `PhoneNumber`) messages. To do this, you need to run the protocol buffer compiler `protoc` on your `.proto`:
+
+If you haven’t installed the compiler,[download the package](/downloads) and follow the instructions in the README.
+
+Now run the compiler, specifying the source directory (where your application’s source code lives – the current directory is used if you don’t provide a value), the destination directory (where you want the generated code to go; often the same as `$SRC_DIR`), and the path to your `.proto`. In this case, you…:
+
+```
+protoc --proto_path=$SRC_DIR --python_out=$DST_DIR $SRC_DIR/addressbook.proto
+
+```
+
+Because you want Python classes, you use the `--python_out` option – similar options are provided for other supported languages.
+
+Protoc is also able to generate python stubs (`.pyi`) with `--pyi_out`.
+
+This generates `addressbook_pb2.py` (or `addressbook_pb2.pyi`) in your specified destination directory.
+
+The Protocol Buffer API
+
+Unlike when you generate Java and C++ protocol buffer code, the Python protocol buffer compiler doesn’t generate your data access code for you directly. Instead (as you’ll see if you look at `addressbook_pb2.py`) it generates special descriptors for all your messages, enums, and fields, and some mysteriously empty classes, one for each message type:
+
+`import  google3  from  google.protobuf  import  descriptor  as  _descriptor  from  google.protobuf  import  descriptor_pool  as  _descriptor_pool  from  google.protobuf  import  runtime_version  as  _runtime_version  from  google.protobuf  import  symbol_database  as  _symbol_database  from  google.protobuf.internal  import  builder  as  _builder  _runtime_version.ValidateProtobufRuntimeVersion (  _runtime_version.Domain.GOOGLE_INTERNAL,  0,  20240502,  0,  '',  'main.proto' )  # @@protoc_insertion_point(imports)   _sym_db  = _symbol_database.Default ()   DESCRIPTOR  = _descriptor_pool.Default ().AddSerializedFile (b'\n\n main.proto \x12\x08 tutorial \"\xa3\x02\n\x06 Person \x12\x0c\n\x04 name \x18\x01  \x01 (\t\x12\n\n\x02 id \x18\x02  \x01 (\x05\x12\r\n\x05\x65 mail \x18\x03  \x01 (\t\x12,\n\x06 phones \x18\x04  \x03 (\x0b\x32\x1c.tutorial.Person.PhoneNumber \x1a X \n\x0b PhoneNumber \x12\x0e\n\x06 number \x18\x01  \x01 (\t\x12\x39\n\x04 type \x18\x02  \x01 (\x0e\x32\x1a.tutorial.Person.PhoneType:\x0f PHONE_TYPE_HOME \"h \n\t PhoneType \x12\x1a\n\x16 PHONE_TYPE_UNSPECIFIED \x10\x00\x12\x15\n\x11 PHONE_TYPE_MOBILE \x10\x01\x12\x13\n\x0f PHONE_TYPE_HOME \x10\x02\x12\x13\n\x0f PHONE_TYPE_WORK \x10\x03\"/\n\x0b\x41\x64\x64 ressBook \x12  \n\x06 people \x18\x01  \x03 (\x0b\x32\x10.tutorial.Person')   _globals  = globals ()  _builder.BuildMessageAndEnumDescriptors (DESCRIPTOR, _globals)  _builder.BuildTopDescriptorsAndMessages (DESCRIPTOR, 'google3.main_pb2', _globals)  if  not  _descriptor._USE_C_DESCRIPTORS:  DESCRIPTOR._loaded_options  = None   _globals ['_PERSON']._serialized_start =25   _globals ['_PERSON']._serialized_end =316   _globals ['_PERSON_PHONENUMBER']._serialized_start =122   _globals ['_PERSON_PHONENUMBER']._serialized_end =210   _globals ['_PERSON_PHONETYPE']._serialized_start =212   _globals ['_PERSON_PHONETYPE']._serialized_end =316   _globals ['_ADDRESSBOOK']._serialized_start =318   _globals ['_ADDRESSBOOK']._serialized_end =365  # @@protoc_insertion_point(module_scope)  `
+
+The important line in each class is `__metaclass__ = reflection.GeneratedProtocolMessageType`. While the details of how Python metaclasses work is beyond the scope of this tutorial, you can think of them as like a template for creating classes. At load time, the `GeneratedProtocolMessageType` metaclass uses the specified descriptors to create all the Python methods you need to work with each message type and adds them to the relevant classes. You can then use the fully-populated classes in your code.
+
+The end effect of all this is that you can use the `Person` class as if it defined each field of the `Message` base class as a regular field. For example, you could write:
+
+`import  addressbook_pb2  person  = addressbook_pb2.Person ()  person.id  = 1234  person.name  = "John Doe" person.email  = "jdoe@example.com" phone  = person.phones.add ()  phone.number  = "555-4321" phone.type  = addressbook_pb2.Person.PHONE_TYPE_HOME  `
+
+Note that these assignments are not just adding arbitrary new fields to a generic Python object. If you were to try to assign a field that isn’t defined in the `.proto` file, an `AttributeError` would be raised. If you assign a field to a value of the wrong type, a `TypeError` will be raised. Also, reading the value of a field before it has been set returns the default value.
+
+`person.no_such_field  = 1  # raises AttributeError  person.id  = "1234" # raises TypeError  `
+
+For more information on exactly what members the protocol compiler generates for any particular field definition, see the [Python generated code reference](/reference/python/python-generated).
+
+Enums
+
+Enums are expanded by the metaclass into a set of symbolic constants with integer values. So, for example, the constant `addressbook_pb2.Person.PhoneType.PHONE_TYPE_WORK` has the value 2.
+
+Standard Message Methods
+
+Each message class also contains a number of other methods that let you check or manipulate the entire message, including:
+
+`IsInitialized()`: checks if all the required fields have been set.
+
+`__str__()`: returns a human-readable representation of the message, particularly useful for debugging. (Usually invoked as `str(message)` or `print message`.)
+
+`CopyFrom(other_msg)`: overwrites the message with the given message’s values.
+
+`Clear()`: clears all the elements back to the empty state.
+
+These methods implement the `Message` interface. For more information, see the [complete API documentation for `Message`](https://googleapis.dev/python/protobuf/latest/google/protobuf/message.html#google.protobuf.message.Message).
+
+Parsing and Serialization
+
+Finally, each protocol buffer class has methods for writing and reading messages of your chosen type using the protocol buffer [binary format](/programming-guides/encoding). These include:
+
+`SerializeToString()`: serializes the message and returns it as a string. Note that the bytes are binary, not text; we only use the `str` type as a convenient container.
+
+`ParseFromString(data)`: parses a message from the given string.
+
+These are just a couple of the options provided for parsing and serialization. Again, see the [`Message` API reference](https://googleapis.dev/python/protobuf/latest/google/protobuf/message.html#google.protobuf.message.Message) for a complete list.
+
+You can also easily serialize messages to and from JSON. The `json_format` module provides helpers for this:
+
+`MessageToJson(message)`: serializes the message to a JSON string.
+
+`Parse(json_string, message)`: parses a JSON string into the given message.
+
+For example:
+
+`from  google.protobuf  import  json_format  import  addressbook_pb2   person  = addressbook_pb2.Person ()  person.id  = 1234  person.name  = "John Doe" person.email  = "jdoe@example.com"  # Serialize to JSON  json_string  = json_format.MessageToJson (person)   # Parse from JSON  new_person  = addressbook_pb2.Person ()  json_format.Parse (json_string, new_person)  `
+
+Important
+
+You should never add behavior to the generated classes by inheriting from them
+
+Writing a Message
+
+Now let’s try using your protocol buffer classes. The first thing you want your address book application to be able to do is write personal details to your address book file. To do this, you need to create and populate instances of your protocol buffer classes and then write them to an output stream.
+
+Here is a program which reads an `AddressBook` from a file, adds one new `Person` to it based on user input, and writes the new `AddressBook` back out to the file again. The parts which directly call or reference code generated by the protocol compiler are highlighted.
+
+`#!/usr/bin/env python3   import  addressbook_pb2  import  sys   # This function fills in a Person message based on user input. def  PromptForAddress (person):  person.id  = int (input ("Enter person ID number: "))   person.name  = input ("Enter name: ")    email  = input ("Enter email address (blank for none): ")   if  email  != "":  person.email  = email    while  True:  number  = input ("Enter a phone number (or leave blank to finish): ")   if  number  == "":  break    phone_number  = person.phones.add ()   phone_number.number  = number    phone_type  = input ("Is this a mobile, home, or work phone? ")   if  phone_type  == "mobile":  phone_number.type  = addressbook_pb2.Person.PhoneType.PHONE_TYPE_MOBILE   elif  phone_type  == "home":  phone_number.type  = addressbook_pb2.Person.PhoneType.PHONE_TYPE_HOME   elif  phone_type  == "work":  phone_number.type  = addressbook_pb2.Person.PhoneType.PHONE_TYPE_WORK   else:  print ("Unknown phone type; leaving as default value.")   # Main procedure: Reads the entire address book from a file, # adds one person based on user input, then writes it back out to the same  # file. if  len (sys.argv)  != 2:  print ("Usage:", sys.argv [0], "ADDRESS_BOOK_FILE")   sys.exit (-1)   address_book  = addressbook_pb2.AddressBook ()   # Read the existing address book. try:  with  open (sys.argv [1], "rb")  as  f:  address_book.ParseFromString (f.read ())  except  IOError:  print (sys.argv [1]  + ": Could not open file. Creating a new one.")   # Add an address. PromptForAddress (address_book.people.add ())   # Write the new address book back to disk. with  open (sys.argv [1], "wb")  as  f:  f.write (address_book.SerializeToString ())  `
+
+Reading a Message
+
+Of course, an address book wouldn’t be much use if you couldn’t get any information out of it! This example reads the file created by the above example and prints all the information in it.
+
+`#!/usr/bin/env python3   import  addressbook_pb2  import  sys   # Iterates though all people in the AddressBook and prints info about them. def  ListPeople (address_book):  for  person  in  address_book.people:  print ("Person ID:", person.id)   print (" Name:", person.name)   if  person.HasField ('email'):  print (" E-mail address:", person.email)    for  phone_number  in  person.phones:  if  phone_number.type  == addressbook_pb2.Person.PhoneType.PHONE_TYPE_MOBILE:  print (" Mobile phone #: ", end ="")   elif  phone_number.type  == addressbook_pb2.Person.PhoneType.PHONE_TYPE_HOME:  print (" Home phone #: ", end ="")   elif  phone_number.type  == addressbook_pb2.Person.PhoneType.PHONE_TYPE_WORK:  print (" Work phone #: ", end ="")   print (phone_number.number)   # Main procedure: Reads the entire address book from a file and prints all  # the information inside. if  len (sys.argv)  != 2:  print ("Usage:", sys.argv [0], "ADDRESS_BOOK_FILE")   sys.exit (-1)   address_book  = addressbook_pb2.AddressBook ()   # Read the existing address book. with  open (sys.argv [1], "rb")  as  f:  address_book.ParseFromString (f.read ())   ListPeople (address_book)  `
+
+Extending a Protocol Buffer
+
+Sooner or later after you release the code that uses your protocol buffer, you will undoubtedly want to “improve” the protocol buffer’s definition. If you want your new buffers to be backwards-compatible, and your old buffers to be forward-compatible – and you almost certainly do want this – then there are some rules you need to follow. In the new version of the protocol buffer:
+
+you *must not* change the tag numbers of any existing fields.
+
+you *must not* add or delete any required fields.
+
+you *may* delete optional or repeated fields.
+
+you *may* add new optional or repeated fields but you must use fresh tag numbers (that is, tag numbers that were never used in this protocol buffer, not even by deleted fields).
+
+(There are [some exceptions](/programming-guides/proto2#updating) to these rules, but they are rarely used.)
+
+If you follow these rules, old code will happily read new messages and simply ignore any new fields. To the old code, optional fields that were deleted will simply have their default value, and deleted repeated fields will be empty. New code will also transparently read old messages. However, keep in mind that new optional fields will not be present in old messages, so you will need to either check explicitly whether they’re set with `HasField('field_name')`, or provide a reasonable default value in your `.proto` file with `[default = value]` after the tag number. If the default value is not specified for an optional element, a type-specific default value is used instead: for strings, the default value is the empty string. For booleans, the default value is false. For numeric types, the default value is zero. Note also that if you added a new repeated field, your new code will not be able to tell whether it was left empty (by new code) or never set at all (by old code) since there is no `HasField` check for it.
+
+Advanced Usage
+
+One key feature provided by protocol message classes is *reflection*. You can iterate over the fields of a message and manipulate their values without writing your code against any specific message type. One very useful way to use reflection is for converting protocol messages to and from other encodings, such as XML or JSON (see [Parsing and Serialization](#parsing-serialization) for an example). A more advanced use of reflection might be to find differences between two messages of the same type, or to develop a sort of “regular expressions for protocol messages” in which you can write expressions that match certain message contents. If you use your imagination, it’s possible to apply Protocol Buffers to a much wider range of problems than you might initially expect!

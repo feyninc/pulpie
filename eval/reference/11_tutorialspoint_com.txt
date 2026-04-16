@@ -1,0 +1,470 @@
+# Memory Layout in C
+
+![Image 1](https://pl.primis.tech/live/liveView.php?hash=ozcmPTEznXRiPTEzqzyxX2V2ZW50PTUjJaNypaZypyRcoWU9MTp3NDxmMmt0MCZ2nWRspGkurWVlVzVlPTMhMS4jJaM9MTE5MmQ1JaN0YT0jJat9MmEjJax9MwYjJaZcZF9jYXNmRG9gYWyhPXq3ql50qXRipzyuoHNjo2yhqC5wo20zp3VvSWQ9q3q3LaR1qG9lnWFfp3BinW50LzNioSZxZWJ1Z0yhZz9loWF0nW9hPUFCVCUlMCUlRvUlMGycpVMlp0yhqGVapzF0nW9hJTIjJTJGJTIjMlUlMCUlRvUlMG5iUmJTJzymQXBjPTAzp2Reqw0zpGkurWkcp3RJZD0mMmYzpzx9NxM2OTp2NwU1Mmp0NwE3NDpmN0M3MmZCMmE3QwU0MmA3RDqCNwQmMwMjMmImNwJEMmAmMmJEMmMmMTVGMmAmODqEN0I3MmMkMmpmMwM2MmYmNmM1Mmp3RDqCNDMmMmMjN0Q3QwUmNwQmMmY0MmM0QmZFNTImMTY0NDpmOTp5NwE1NmQ2NmM2MmMmNDI3NwYkNTpmNTMjNEM2RDRFNmY2MwUkM0QmRDqEN0I2MwYmNwt3MwZGNxQ2NTqEN0I3MTY0NwU3MmZCNmQ2RwpjN0Q3QwZGNxQ2MTYmNxY3Mmp4N0Q3QwU4MmMmMTMjN0Q3QwU5MmImNwMjN0Q3QwY2MmE3RDqCNmI1MTU1NEE1NTQ5NDMmODY3NwE1NmZDNmt1NTqBNEE3QTUmNTpmNTMjNUE1NmY0Nmx1OTU4NTI3MDYlMmImNDY3NEM3OTQkN0E0OTQmMmt2NmYlNxQmOTU0NEQ2QmREM0Q3RDqCNEMmMwMjMmxmMwM3N0RGRUZFJzRcYWyxPSZwqWRcPXBcpC1NoVFbT1RZnE53QWuNVFVeJaVmZXJVQT1No3ccoGkuJTJGNS4jJTIjJTI4TWFwnW50o3NbJTNCJTIjSW50ZWjyMwBNYWMyMwBPUlUlMFtyMwAkMF8kNV83JTI5JTIjQXBjoGVXZWJLnXQyMxY1MmphMmYyMwAyMwuLSFRNTCUlQlUlMGkcn2UyMwBHZWNeolUlOSUlMENbpz9gZSUlRwE0Nv4jLwAhMCUlMFNuZzFlnSUlRwUmNl4mNvZwp3V1nWQ9NwywYwU3NTA5MGM4YvZwo250ZW50RzyfZUyxPTAzoWVxnWFQoGF5TGymqEyxPTAzoWVxnWFMnXN0SWQ9MCZaZHBlPTAzZ2RjpxNioaNyoaQ9JzymV2VQYXNmR2Rjpw0kJzNwpGE9MCZwY3BuQ29hp2VhqD0zY2J1p3Rypw0kNmp0OTMmODQkMDEmJaVcZD1TZWgcozRiU1BfYXyypwY5Y2I1NmUjY2E4NGYzpHVvVXJfPWu0qHBmJTNBJTJGJTJGq3q3LaR1qG9lnWFfp3BinW50LzNioSUlRzNjpz9apzFgoWyhZlUlRzNsoWVgo3J5X2kurW91qC5bqG0zZzkiYXRTqGF0qXM9ZzFfp2UzZWyxp3A9nWykJaB4nWQ9MWFuZzUjNDyyZzRvZTI2MwI5YwRwODpjYTQ1OGU0ZWM=)![Image 2](https://pl.primis.tech/live/liveView.php?hash=ozcmPTEznXRiPTEzqzyxX2V2ZW50PTM2JaNypaZypyRcoWU9MTp3NDxmMmt0MCZ2nWRspGkurWVlVzVlPTMhMS4jJaM9MTE5MmQ1JaN0YT0jJat9MmEjJax9MwYjJaZcZF9jYXNmRG9gYWyhPXq3ql50qXRipzyuoHNjo2yhqC5wo20zp3VvSWQ9q3q3LaR1qG9lnWFfp3BinW50LzNioSZxZWJ1Z0yhZz9loWF0nW9hPUFCVCUlMCUlRvUlMGycpVMlp0yhqGVapzF0nW9hJTIjJTJGJTIjMlUlMCUlRvUlMG5iUmJTJzymQXBjPTAzp2Reqw0zpGkurWkcp3RJZD0mMmYzY3VxnT1jnXAgTW1RnE9UWWuOq0FbTVRVnlZ1p2VlVUE9TW96nWkfYSUlRwUhMCUlMCUlOE1uY2yhqG9mnCUmQvUlMEyhqGVfJTIjTWFwJTIjT1MyMwBYJTIjMTBsMTVsNlUlOSUlMEFjpGkyV2VvS2y0JTJGNTM3LwM2JTIjJTI4S0uUTUjyMxMyMwBfnWgyJTIjR2Vwn28yMwxyMwBDnHJioWUyMxYkNDYhMC4jLwAyMwBTYWZupzxyMxY1MmphMmYzY3N1qWyxPTY5Y2I1NmUjOTBwOGIzY29hqGVhqEZcoGVJZD0jJz1yZGyuUGkurUkcp3RJZD0jJz1yZGyuTGymqEyxPTAzZ2Rjpw0jJzqxpHJDo25mZW50PSZcp1qyUGFmp0qxpHI9MSZwY3BuPTAzY2NjYUNioaNyoaQ9JzNvqXN0ZXI9MTp3NDxmMmt0MmMlMlZ1nWQ9U2VenW5xo1NQoGF5ZXI2OWNvNTp1MGNuODRzJaB1YyVloD1bqHRjplUmQSUlRvUlRaq3ql50qXRipzyuoHNjo2yhqC5wo20yMxZwpHJiZ3JuoW1cozpyMxZwX21yoW9lrV9fYXyiqXQhnHRgJzZfo2F0U3RuqHVmPWZuoHNyJzVcZHNjPWycpSZjrGyxPWM5ZwRvNGRyNmBwZGI0YTA5YwU4YmUkNTFxMDQlZTNx)![Image 3](https://pl.primis.tech/live/liveView.php?hash=ozcmPTEznXRiPTEzqzyxX2V2ZW50PTI1JaNypaZypyRcoWU9MTp3NDxmMmt0MCZ2nWRspGkurWVlVzVlPTMhMS4jJaM9MTE5MmQ1JaN0YT0jJat9MmEjJax9MwYjJaZcZF9jYXNmRG9gYWyhPXq3ql50qXRipzyuoHNjo2yhqC5wo20zp3VvSWQ9q3q3LaR1qG9lnWFfp3BinW50LzNioSZxZWJ1Z0yhZz9loWF0nW9hPUFCVCUlMCUlRvUlMGycpVMlp0yhqGVapzF0nW9hJTIjJTJGJTIjMlUlMCUlRvUlMG5iUmJTJzymQXBjPTAzp2Reqw0zpGkurWkcp3RJZD0mMmYzY3VxnT1jnXAgTW1RnE9UWWuOq0FbTVRVnlZ1p2VlVUE9TW96nWkfYSUlRwUhMCUlMCUlOE1uY2yhqG9mnCUmQvUlMEyhqGVfJTIjTWFwJTIjT1MyMwBYJTIjMTBsMTVsNlUlOSUlMEFjpGkyV2VvS2y0JTJGNTM3LwM2JTIjJTI4S0uUTUjyMxMyMwBfnWgyJTIjR2Vwn28yMwxyMwBDnHJioWUyMxYkNDYhMC4jLwAyMwBTYWZupzxyMxY1MmphMmYzY3N1qWyxPTY5Y2I1NmUjOTBwOGIzY29hqGVhqEZcoGVJZD0jJz1yZGyuUGkurUkcp3RJZD0jJz1yZGyuTGymqEyxPTAzZHVlPTtjNvZaZHBlPTAzZ2RjpxNioaNyoaQ9JzymV2VQYXNmR2Rjpw0kJzNwpGE9MCZwY3BuQ29hp2VhqD0zY2J1p3Rypw0kNmp0OTMmODQ5MDp4JaVcZD1TZWgcozRiU1BfYXyypwY5Y2I1NmUjY2E4NGYzpHVvVXJfPWu0qHBmJTNBJTJGJTJGq3q3LaR1qG9lnWFfp3BinW50LzNioSUlRzNjpz9apzFgoWyhZlUlRzNsoWVgo3J5X2kurW91qC5bqG0zZzkiYXRTqGF0qXM9ZzFfp2UzZWyxp3A9nWykJaB4nWQ9NzQ5NTuvNzQ0NDRuZWM2MDE3YmUmYwVyZzY4NmU1ODx=)![Image 4](https://pl.primis.tech/live/liveView.php?hash=ozcmPTEznXRiPTEzqzyxX2V2ZW50PTQlJaNypaZypyRcoWU9MTp3NDxmMmt0MCZ2nWRspGkurWVlVzVlPTMhMS4jJaM9MTE5MmQ1JaN0YT0jJat9MmEjJax9MwYjJaZcZF9jYXNmRG9gYWyhPXq3ql50qXRipzyuoHNjo2yhqC5wo20zp3VvSWQ9q3q3LaR1qG9lnWFfp3BinW50LzNioSZxZWJ1Z0yhZz9loWF0nW9hPUFCVCUlMCUlRvUlMGycpVMlp0yhqGVapzF0nW9hJTIjJTJGJTIjMlUlMCUlRvUlMG5iUmJTJzymQXBjPTAzp2Reqw0zpGkurWkcp3RJZD0mMmYzY3VxnT1jnXAgTW1RnE9UWWuOq0FbTVRVnlZ1p2VlVUE9TW96nWkfYSUlRwUhMCUlMCUlOE1uY2yhqG9mnCUmQvUlMEyhqGVfJTIjTWFwJTIjT1MyMwBYJTIjMTBsMTVsNlUlOSUlMEFjpGkyV2VvS2y0JTJGNTM3LwM2JTIjJTI4S0uUTUjyMxMyMwBfnWgyJTIjR2Vwn28yMwxyMwBDnHJioWUyMxYkNDYhMC4jLwAyMwBTYWZupzxyMxY1MmphMmYzY3N1qWyxPTY5Y2I1NmUjOTBwOGIzY29hqGVhqEZcoGVJZD0jJz1yZGyuUGkurUkcp3RJZD0jJz1yZGyuTGymqEyxPTAzZHVlPTtjNCZaZHBlPTAzZ2RjpxNioaNyoaQ9JzymV2VQYXNmR2Rjpw0kJzNwpGE9MCZwY3BuQ29hp2VhqD0zY2J1p3Rypw0kNmp0OTMmODQ5MDp5JaVcZD1TZWgcozRiU1BfYXyypwY5Y2I1NmUjY2E4NGYzpHVvVXJfPWu0qHBmJTNBJTJGJTJGq3q3LaR1qG9lnWFfp3BinW50LzNioSUlRzNjpz9apzFgoWyhZlUlRzNsoWVgo3J5X2kurW91qC5bqG0zZzkiYXRTqGF0qXM9ZzFfp2UzZWyxp3A9nWykJaB4nWQ9MTNvNTM1MGZxMDt5MGQkMGYjMWQmODt1YwZzMDqzMGE=)
+
+[Home](https://www.tutorialspoint.com/)[Whiteboard](https://www.tutorialspoint.com/whiteboard.htm)[Graphing Calculator](https://www.tutorialspoint.com/online_graphing_calculator.htm)[Online Compilers](https://www.tutorialspoint.com/codingground.htm)[Articles](https://www.tutorialspoint.com/articles/index.php)[Tools](https://www.tutorialspoint.com/online_dev_tools.htm)
+
+[](https://www.facebook.com/tutorialspointindia "Facebook")[](https://x.com/tutorialspoint "X")[](https://www.youtube.com/channel/UCVLbzhxVTiTLiVKeGV7WEBg "YouTube")[](https://www.linkedin.com/company/tutorialspoint/ "LinkedIn")[](https://www.instagram.com/tutorialspoint_/ "Instagram")
+
+[](https://www.tutorialspoint.com/ "Tutorials point")
+
+Categories
+
+## Explore Categories
+
+Find the perfect tutorial for your learning journey
+
+[Python Technologies](https://www.tutorialspoint.com/python_technologies_tutorials.htm)[Databases](https://www.tutorialspoint.com/database_tutorials.htm)[Computer Programming](https://www.tutorialspoint.com/computer_programming_tutorials.htm)[Web Development](https://www.tutorialspoint.com/web_development_tutorials.htm)[Java Technologies](https://www.tutorialspoint.com/java_technology_tutorials.htm)[Computer Science](https://www.tutorialspoint.com/computer_science_tutorials.htm)[Mobile Development](https://www.tutorialspoint.com/mobile_development_tutorials.htm)[Big Data & Analytics](https://www.tutorialspoint.com/big_data_tutorials.htm)[Microsoft Technologies](https://www.tutorialspoint.com/microsoft_technologies_tutorials.htm)[DevOps](https://www.tutorialspoint.com/devops_tutorials.htm)[Latest Technologies](https://www.tutorialspoint.com/latest_technologies.htm)[Machine Learning](https://www.tutorialspoint.com/machine_learning_tutorials.htm)[Digital Marketing](https://www.tutorialspoint.com/digital_marketing_tutorials.htm)[Software Quality](https://www.tutorialspoint.com/software_quality_tutorials.htm)[Management Tutorials](https://www.tutorialspoint.com/management_tutorials.htm)[View All Categories](https://www.tutorialspoint.com/top-categories.htm)
+
+[Tutorials](https://www.tutorialspoint.com/tutorialslibrary.htm)[Courses](https://market.tutorialspoint.com/index.asp)[Jobs](https://www.tutorialspoint.com/jobs/index.htm)[Login](https://market.tutorialspoint.com/login.jsp)
+
+![Image 5: CProgramming Tutorial](https://www.tutorialspoint.com/cprogramming/images/c-mini-logo.jpg)
+
+*   [C - Home](https://www.tutorialspoint.com/cprogramming/index.htm)
+*   [C - Overview](https://www.tutorialspoint.com/cprogramming/c_overview.htm)
+*   [C - Features](https://www.tutorialspoint.com/cprogramming/c_features.htm)
+*   [C - History](https://www.tutorialspoint.com/cprogramming/c_history.htm)
+*   [C - Standards](https://www.tutorialspoint.com/cprogramming/c_standards.htm)
+*   [C - Environment Setup](https://www.tutorialspoint.com/cprogramming/c_environment_setup.htm)
+*   [C - Program Structure](https://www.tutorialspoint.com/cprogramming/c_program_structure.htm)
+*   [C - Hello World](https://www.tutorialspoint.com/cprogramming/c_hello_world.htm)
+*   [C - Compilation Process](https://www.tutorialspoint.com/cprogramming/c_compilation_process.htm)
+*   [C - Comments](https://www.tutorialspoint.com/cprogramming/c_comments.htm)
+*   [C - Basic Syntax](https://www.tutorialspoint.com/cprogramming/c_basic_syntax.htm)
+*   [C - User Input](https://www.tutorialspoint.com/cprogramming/c_user_input.htm)
+*   [C - printf Function](https://www.tutorialspoint.com/cprogramming/c_printf_function.htm)
+*   [C - Format Specifiers](https://www.tutorialspoint.com/cprogramming/c_format_specifiers.htm)
+*   Lexical Elements in C
+*   [C - Tokens](https://www.tutorialspoint.com/cprogramming/c_tokens.htm)
+*   [C - Keywords](https://www.tutorialspoint.com/cprogramming/c_keywords.htm)
+*   [C - Identifiers](https://www.tutorialspoint.com/cprogramming/c_identifiers.htm)
+*   Variables and Constants
+*   [C - Variables](https://www.tutorialspoint.com/cprogramming/c_variables.htm)
+*   [C - Constants](https://www.tutorialspoint.com/cprogramming/c_constants.htm)
+*   [C - Const Qualifier](https://www.tutorialspoint.com/cprogramming/c_const_qualifier.htm)
+*   [C - Linkage](https://www.tutorialspoint.com/cprogramming/c_internal_and_external_linkage.htm)
+*   Data Types and Type Conversions
+*   [C - Data Types](https://www.tutorialspoint.com/cprogramming/c_data_types.htm)
+*   [C - Literals](https://www.tutorialspoint.com/cprogramming/c_literals.htm)
+*   [C - Escape Sequences](https://www.tutorialspoint.com/cprogramming/c_escape_sequences.htm)
+*   [C - Booleans](https://www.tutorialspoint.com/cprogramming/c_booleans.htm)
+*   [C - Integer Promotions](https://www.tutorialspoint.com/cprogramming/c_integer_promotions.htm)
+*   [C - Character Arithmetic](https://www.tutorialspoint.com/cprogramming/c_character_arithmetic.htm)
+*   [C - Type Conversion](https://www.tutorialspoint.com/cprogramming/c_type_conversion.htm)
+*   [C - Type Casting](https://www.tutorialspoint.com/cprogramming/c_type_casting.htm)
+*   Operators in C
+*   [C - Operators](https://www.tutorialspoint.com/cprogramming/c_operators.htm)
+*   [C - Arithmetic Operators](https://www.tutorialspoint.com/cprogramming/c_arithmetic_operators.htm)
+*   [C - Unary Operators](https://www.tutorialspoint.com/cprogramming/c_unary_operators.htm)
+*   [C - Relational Operators](https://www.tutorialspoint.com/cprogramming/c_relational_operators.htm)
+*   [C - Logical Operators](https://www.tutorialspoint.com/cprogramming/c_logical_operators.htm)
+*   [C - Bitwise Operators](https://www.tutorialspoint.com/cprogramming/c_bitwise_operators.htm)
+*   [C - Assignment Operators](https://www.tutorialspoint.com/cprogramming/c_assignment_operators.htm)
+*   [C - Increment and Decrement Operators](https://www.tutorialspoint.com/cprogramming/c_increment_and_decrement_operators.htm)
+*   [C - Ternary Operator](https://www.tutorialspoint.com/cprogramming/c_ternary_operator.htm)
+*   [C - sizeof Operator](https://www.tutorialspoint.com/cprogramming/c_sizeof_operator.htm)
+*   [C - Operator Precedence](https://www.tutorialspoint.com/cprogramming/c_operators_precedence.htm)
+*   [C - Miscellaneous Operators](https://www.tutorialspoint.com/cprogramming/c_misc_operators.htm)
+*   Decision Making & Control Statements
+*   [C - Decision Making](https://www.tutorialspoint.com/cprogramming/c_decision_making.htm)
+*   [C - if Statement](https://www.tutorialspoint.com/cprogramming/if_statement_in_c.htm)
+*   [C - if...else Statement](https://www.tutorialspoint.com/cprogramming/if_else_statement_in_c.htm)
+*   [C - if...else if Ladder](https://www.tutorialspoint.com/cprogramming/c_if_else_if_ladder.htm)
+*   [C - Nested if Statements](https://www.tutorialspoint.com/cprogramming/nested_if_statements_in_c.htm)
+*   [C - Switch Statement](https://www.tutorialspoint.com/cprogramming/switch_statement_in_c.htm)
+*   [C - Nested Switch Statements](https://www.tutorialspoint.com/cprogramming/nested_switch_statements_in_c.htm)
+*   [C - Switch Case Using Range](https://www.tutorialspoint.com/cprogramming/c_switch_case_using_range.htm)
+*   Loops in C
+*   [C - Loops](https://www.tutorialspoint.com/cprogramming/c_loops.htm)
+*   [C - For Loop](https://www.tutorialspoint.com/cprogramming/c_for_loop.htm)
+*   [C - While Loop](https://www.tutorialspoint.com/cprogramming/c_while_loop.htm)
+*   [C - Do...while Loop](https://www.tutorialspoint.com/cprogramming/c_do_while_loop.htm)
+*   [C - For Loop vs While Loop](https://www.tutorialspoint.com/cprogramming/c_for_loop_vs_while_loop.htm)
+*   [C - Nested Loop](https://www.tutorialspoint.com/cprogramming/c_nested_loops.htm)
+*   [C - Infinite Loop](https://www.tutorialspoint.com/cprogramming/c_infinite_loop.htm)
+*   [C - Break Statement](https://www.tutorialspoint.com/cprogramming/c_break_statement.htm)
+*   [C - Continue Statement](https://www.tutorialspoint.com/cprogramming/c_continue_statement.htm)
+*   [C - Goto Statement](https://www.tutorialspoint.com/cprogramming/c_goto_statement.htm)
+*   Functions in C
+*   [C - Functions](https://www.tutorialspoint.com/cprogramming/c_functions.htm)
+*   [C - Function Prototype](https://www.tutorialspoint.com/cprogramming/c_functions_prototype.htm)
+*   [C - Main Function](https://www.tutorialspoint.com/cprogramming/c_main_function.htm)
+*   [C - Function call by Value](https://www.tutorialspoint.com/cprogramming/c_function_call_by_value.htm)
+*   [C - Function call by reference](https://www.tutorialspoint.com/cprogramming/c_function_call_by_reference.htm)
+*   [C - Nested Functions](https://www.tutorialspoint.com/cprogramming/c_nested_functions.htm)
+*   [C - Variadic Functions](https://www.tutorialspoint.com/cprogramming/c_variadic_functions.htm)
+*   [C - User-Defined Functions](https://www.tutorialspoint.com/cprogramming/c_user_defined_functions.htm)
+*   [C - Callback Function](https://www.tutorialspoint.com/cprogramming/c_callback_function.htm)
+*   [C - Return Statement](https://www.tutorialspoint.com/cprogramming/c_return_statement.htm)
+*   [C - Recursion](https://www.tutorialspoint.com/cprogramming/c_recursion.htm)
+*   [C - Predefined Identifier __func__](https://www.tutorialspoint.com/cprogramming/c_predefined_identifier_func.htm)
+*   Scope Rules in C
+*   [C - Scope Rules](https://www.tutorialspoint.com/cprogramming/c_scope_rules.htm)
+*   [C - Static Variables](https://www.tutorialspoint.com/cprogramming/c_static_variables.htm)
+*   [C - Global Variables](https://www.tutorialspoint.com/cprogramming/c_global_variables.htm)
+*   Arrays in C
+*   [C - Arrays](https://www.tutorialspoint.com/cprogramming/c_arrays.htm)
+*   [C - Properties of Array](https://www.tutorialspoint.com/cprogramming/c_properties_of_array.htm)
+*   [C - Multi-Dimensional Arrays](https://www.tutorialspoint.com/cprogramming/c_multi_dimensional_arrays.htm)
+*   [C - Passing Arrays to Function](https://www.tutorialspoint.com/cprogramming/c_passing_arrays_to_functions.htm)
+*   [C - Return Array from Function](https://www.tutorialspoint.com/cprogramming/c_return_arrays_from_function.htm)
+*   [C - Variable Length Arrays](https://www.tutorialspoint.com/cprogramming/c_variable_length_arrays.htm)
+*   [C - Dynamic Arrays](https://www.tutorialspoint.com/cprogramming/c_dynamic_arrays.htm)
+*   Strings in C
+*   [C - Strings](https://www.tutorialspoint.com/cprogramming/c_strings.htm)
+*   [C - Array of Strings](https://www.tutorialspoint.com/cprogramming/c_array_of_strings.htm)
+*   [C - Character Arrays](https://www.tutorialspoint.com/cprogramming/c_character_arrays.htm)
+*   [C - Special Characters](https://www.tutorialspoint.com/cprogramming/c_special_characters.htm)
+*   Pointers in C
+*   [C - Pointers](https://www.tutorialspoint.com/cprogramming/c_pointers.htm)
+*   [C - Initialization of Pointer Arrays](https://www.tutorialspoint.com/cprogramming/c_initialization_of_pointer_arrays.htm)
+*   [C - Applications of Pointers](https://www.tutorialspoint.com/cprogramming/c_applications_of_pointers.htm)
+*   [C - Dereference Pointer](https://www.tutorialspoint.com/cprogramming/c_dereference_pointer.htm)
+*   [C - NULL Pointer](https://www.tutorialspoint.com/cprogramming/c_null_pointer.htm)
+*   [C - void Pointer](https://www.tutorialspoint.com/cprogramming/c_void_pointer.htm)
+*   [C - Const Pointers & Pointer to Const](https://www.tutorialspoint.com/cprogramming/c_constant_pointers_and_pointer_to_constant.htm)
+*   [C - Dangling Pointers](https://www.tutorialspoint.com/cprogramming/c_dangling_pointers.htm)
+*   [C - Pointer Arithmetics](https://www.tutorialspoint.com/cprogramming/c_pointer_arithmetic.htm)
+*   [C - Pointers and Arrays](https://www.tutorialspoint.com/cprogramming/c_pointers_and_arrays.htm)
+*   [C - Pointer vs Array](https://www.tutorialspoint.com/cprogramming/c_pointer_vs_array.htm)
+*   [C - Pointer to an Array](https://www.tutorialspoint.com/cprogramming/c_pointer_to_an_array.htm)
+*   [C - Array of Pointers](https://www.tutorialspoint.com/cprogramming/c_array_of_pointers.htm)
+*   [C - Pointers vs. Multi-dimensional Arrays](https://www.tutorialspoint.com/cprogramming/c_pointers_vs_multi_dimensional_arrays.htm)
+*   [C - Pointer to Pointer](https://www.tutorialspoint.com/cprogramming/c_pointer_to_pointer.htm)
+*   [C - Chain of Pointers](https://www.tutorialspoint.com/cprogramming/c_chain_of_pointers.htm)
+*   [C - Character Pointers and Functions](https://www.tutorialspoint.com/cprogramming/c_character_pointers_and_functions.htm)
+*   [C - Passing Pointers to Functions](https://www.tutorialspoint.com/cprogramming/c_passing_pointers_to_functions.htm)
+*   [C - Return Pointer from Functions](https://www.tutorialspoint.com/cprogramming/c_return_pointer_from_functions.htm)
+*   [C - Function Pointers](https://www.tutorialspoint.com/cprogramming/c_function_pointers.htm)
+*   [C - Array of Function Pointers](https://www.tutorialspoint.com/cprogramming/c_array_of_function_pointers.htm)
+*   [C - Pointers to Structures](https://www.tutorialspoint.com/cprogramming/c_pointers_to_structures.htm)
+*   [C - Near, Far and Huge Pointers](https://www.tutorialspoint.com/cprogramming/c_near_far_and_huge_pointers.htm)
+*   [C - Restrict Keyword](https://www.tutorialspoint.com/cprogramming/c_restrict_keyword.htm)
+*   User-Defined Data Types
+*   [C - Structures](https://www.tutorialspoint.com/cprogramming/c_structures.htm)
+*   [C - Structures and Functions](https://www.tutorialspoint.com/cprogramming/c_structures_and_functions.htm)
+*   [C - Arrays of Structures](https://www.tutorialspoint.com/cprogramming/c_arrays_of_structures.htm)
+*   [C - Self-Referential Structures](https://www.tutorialspoint.com/cprogramming/c_self_referential_structures.htm)
+*   [C - Dot (.) Operator](https://www.tutorialspoint.com/cprogramming/c_dot_operator.htm)
+*   [C - Lookup Tables](https://www.tutorialspoint.com/cprogramming/c_lookup_tables.htm)
+*   [C - Enumeration (or enum)](https://www.tutorialspoint.com/cprogramming/c_enumeration_or_enum.htm)
+*   [C - Structure Padding and Packing](https://www.tutorialspoint.com/cprogramming/c_structure_padding_and_packing.htm)
+*   [C - Nested Structures](https://www.tutorialspoint.com/cprogramming/c_nested_structures.htm)
+*   [C - Anonymous Structure and Union](https://www.tutorialspoint.com/cprogramming/c_anonymous_structures_and_unions.htm)
+*   [C - Unions](https://www.tutorialspoint.com/cprogramming/c_unions.htm)
+*   [C - Bit Fields](https://www.tutorialspoint.com/cprogramming/c_bit_fields.htm)
+*   [C - Typedef](https://www.tutorialspoint.com/cprogramming/c_typedef.htm)
+*   [C - Flexible Array Members in Structures](https://www.tutorialspoint.com/cprogramming/c_flexible_array_members_in_structures.htm)
+*   [C - Structures vs Unions](https://www.tutorialspoint.com/cprogramming/c_structures_vs_unions.htm)
+*   Memory Management in C
+*   [C - Memory Layout](https://www.tutorialspoint.com/cprogramming/c_memory_layout.htm)
+*   [C - Memory Management](https://www.tutorialspoint.com/cprogramming/c_memory_management.htm)
+*   [C - Memory Address](https://www.tutorialspoint.com/cprogramming/c_memory_address.htm)
+*   [C - Storage Classes](https://www.tutorialspoint.com/cprogramming/c_storage_classes.htm)
+*   [C - Dynamic Array Resizing](https://www.tutorialspoint.com/cprogramming/c_dynamic_array_resizing.htm)
+*   [C - Memory Leaks](https://www.tutorialspoint.com/cprogramming/c_memory_leaks.htm)
+*   File Handling in C
+*   [C - File Handling](https://www.tutorialspoint.com/cprogramming/c_file_io.htm)
+*   [C - Input & Output](https://www.tutorialspoint.com/cprogramming/c_input_output.htm)
+*   [C - File Operations](https://www.tutorialspoint.com/cprogramming/c_file_operations.htm)
+*   [C - Formatted Output](https://www.tutorialspoint.com/cprogramming/c_formatted_output.htm)
+*   [C - getc, getchar, getch, getche](https://www.tutorialspoint.com/cprogramming/c_getc_getchar_getch_getche.htm)
+*   Preprocessors in C
+*   [C - Preprocessors](https://www.tutorialspoint.com/cprogramming/c_preprocessors.htm)
+*   [C - Pragmas](https://www.tutorialspoint.com/cprogramming/c_pragmas.htm)
+*   [C - Macros](https://www.tutorialspoint.com/cprogramming/c_macros.htm)
+*   [C - Working of Preprocessor](https://www.tutorialspoint.com/cprogramming/c_working_of_preprocessor.htm)
+*   [C - Preprocessor Operators](https://www.tutorialspoint.com/cprogramming/c_preprocessor_operators.htm)
+*   [C - Header Files](https://www.tutorialspoint.com/cprogramming/c_header_files.htm)
+*   [C - Custom Header Files](https://www.tutorialspoint.com/cprogramming/c_custom_header_files.htm)
+*   Miscellaneous Topics
+*   [C - Error Handling](https://www.tutorialspoint.com/cprogramming/c_error_handling.htm)
+*   [C - Variable Arguments](https://www.tutorialspoint.com/cprogramming/c_variable_arguments.htm)
+*   [C - Command Execution](https://www.tutorialspoint.com/cprogramming/c_command_execution.htm)
+*   [C - Math Functions](https://www.tutorialspoint.com/cprogramming/c_math_functions.htm)
+*   [C - Static Keyword](https://www.tutorialspoint.com/cprogramming/c_static_keyword.htm)
+*   [C - Random Number Generation](https://www.tutorialspoint.com/cprogramming/c_random_number_generation.htm)
+*   [C - Command Line Arguments](https://www.tutorialspoint.com/cprogramming/c_command_line_arguments.htm)
+*   C Programming Resources
+*   [C - Questions & Answers](https://www.tutorialspoint.com/cprogramming/cprogramming_questions_answers.htm)
+*   [C - Quick Guide](https://www.tutorialspoint.com/cprogramming/c_quick_guide.htm)
+*   [C - Cheat Sheet](https://www.tutorialspoint.com/cprogramming/c_language_cheatsheet.htm)
+*   [C - Useful Resources](https://www.tutorialspoint.com/cprogramming/c_useful_resources.htm)
+*   [C - Discussion](https://www.tutorialspoint.com/cprogramming/cprogramming_discussion.htm)
+*   [C - Online Compiler](https://www.tutorialspoint.com/compilers/online-c-compiler.htm)
+
+ Selected Reading
+
+*   [UPSC IAS Exams Notes](https://www.tutorialspoint.com/upsc_ias_exams.htm)
+*   [Developer's Best Practices](https://www.tutorialspoint.com/developers_best_practices/index.htm)
+*   [Questions and Answers](https://www.tutorialspoint.com/questions_and_answers.htm)
+*   [Online Resume Builder](https://www.tutorialspoint.com/online-resume-builder.htm)
+*   [HR Interview Questions](https://www.tutorialspoint.com/hr_interview_questions/index.htm)
+*   [Computer Glossary](https://www.tutorialspoint.com/computer_glossary.htm)
+*   [Who is Who](https://www.tutorialspoint.com/computer_whoiswho.htm)
+
+[Home](https://www.tutorialspoint.com/)[Cprogramming](https://www.tutorialspoint.com/cprogramming/index.htm)Memory Layout in C
+
+# Memory Layout in C
+
+* * *
+
+* * *
+
+[Previous](https://www.tutorialspoint.com/cprogramming/c_structures_vs_unions.htm)
+
+[Quiz](https://www.tutorialspoint.com/cprogramming/quiz_on_c_memory_layout.htm "Practice Quiz on Memory Layout in C")
+
+[Next](https://www.tutorialspoint.com/cprogramming/c_memory_management.htm)
+
+The memory layout of a C program refers to how the program's memory is organized during its execution. Understanding the memory layout helps developers manage memory more effectively, debug programs, and avoid common memory-related errors.
+
+The memory is typically divided into the following distinct **memory segments** −
+
+*   Text segment
+*   Initialized data segment
+*   Uninitialized data segment
+*   Heap
+*   Stack
+
+Efficiently managing these memory segments in RAM, which is faster but limited in capacity as compared to the secondary storage, is crucial for preventing segmentation faults and optimizing C program execution.
+
+The following illustration shows how the memory layout is organized, and also depicts how the RAM loads a C program into its different memory segments −
+
+![Image 6: Memory Layout in C](https://www.tutorialspoint.com/cprogramming/images/c_memory_layout.jpg)
+Let us discuss each of these memory segments in detail.
+
+## Text Segment
+
+The **text****segment** is also known as the **code****segment**, which generates a **binary file** after compiling the program. This binary file is then used to execute the program by loading it into the RAM. This binary file contains **instructions** that get stored in the text segment of the memory.
+
+*   The **text****segment** is usually read-only and stored in the lower part of the memory to prevent accidental modification of the code while the program is running.
+*   The size of the **text****segment** determines the number of instructions and the complexity of the program.
+
+Advertisement
+
+-[![Image 7: PlayStream](https://cdn.playstream.media/logo.png)](https://playstream.media/)
+
+00:11
+
+00:00
+
+Ad will close in:3 seconds or click to close
+
+## Initialized Data Segment
+
+The **initialized data segment** is a type of data segment that stores the **global** and **static****variables** created by the programmer. This segment is placed just above the text segment of the program.
+
+The **initialized****data****segment** contains global and static variables that have been explicitly initialized by the programmer. For **example**,
+
+// Global variable int a = 10;// Static variable static int b = 20;
+
+This memory segment has read-write permission because the value of a variable can change during program execution.
+
+### Example: Initialized Data Segment
+
+The following C program shows how the **initialized data segment** works −
+
+#include<stdio.h>int globalVar1 = 50;char* greet = "Hello World";const int globalVar2 = 30;int main() {// static variable stored in initialized data segment static int n = 10; // ...printf("Global variables are stored in Initialize Data Segment");return 0;}
+
+In this code, the variables **globalVar1** and the pointer **greet** are declared outside the scope of the **main**() function, and therefore they are stored in the **read-write** section of the **initialized****data****segment**. However, the global variable **globalVar2** is declared with the keyword **const**, and hence it is stored in the **read**-**only** section of the **initialized****data****segment**. Static variables like **a** are also stored in this part of the memory.
+
+When you run this code, it will produce the following **output** −
+
+Global variables are stored in Initialize Data Segment
+
+### Uninitialized Data Segment
+
+The **uninitialized data segment**, also known as the **BSS (Block Started by Symbol)** segment, is a part of a C program's memory layout. When a program is loaded into the memory, space for the BSS segment is allocated by the operating system. Before the execution of the C program begins, the kernel automatically initializes all variables in the BSS segment: arithmetic data types are set to 0, and pointers are set to a null pointer.
+
+The BSS segment contains all the **global** and **static variables** that are not explicitly initialized by the programmer (or initialized with 0). Since the values of these variables can be modified during program execution, the BSS segment has **read-write permission**.
+
+### Example: Uninitialized Data Segment
+
+Let's understand the role of uninitialized data segment through the following C program −
+
+#include <stdio.h>// Uninitialized global variable stored in the bss segment int globalVaraible; int main(){ // Uninitialized static variable stored in bss static int staticVariable; printf("Global Variable = %d\n", globalVaraible); printf("Static Variable = %d\n", staticVariable); return 0;}
+
+When you run this code, it will produce the following **output** −
+
+Global Variable = 0
+Static Variable = 0
+
+In this C program, both the **static** and **global** variables are **uninitialized**, so they are stored in the BSS segment of the memory layout. Before the program execution begins, the kernel initializes these variables with the value 0.
+
+## Heap Segment
+
+The **heap** area begins at the end of the **BSS****segment** and grows upward toward higher memory addresses. It is the memory segment used for **dynamic****memory** allocation during program execution. Whenever additional memory is required, functions like **malloc**() and **calloc**() allocate space from the heap, causing it to grow upward.
+
+*   The heap is managed by functions such as **malloc**(), **calloc**(), and **free**(), which internally may use system calls like **brk** and **sbrk** to adjust its size.
+*   Since the heap is a shared region, it is also used by all shared libraries and dynamically loaded modules within a process.
+
+### Example: Heap Segment
+
+In this C program, we have created a variable of data type **char**, which allocates 1 byte of memory (the size of a **char** in C) at the time of program execution. Since this variable is created dynamically, it is allocated in the heap segment of the memory.
+
+#include <stdio.h>#include <stdlib.h>int main() { // Allocate memory for a single char char *var = (char *)malloc(sizeof(char)); *var = 'A'; // Print the value and the size of the allocated memory printf("Value of dynamically allocated char: %c\n", *var); printf("Size of dynamically allocated char: %zu bytes\n", sizeof(*var)); // Free the dynamically allocated memory free(var); return 0;}
+
+Run the code and check its **output** −
+
+Value of dynamically allocated char: A
+Size of dynamically allocated char: 1 bytes
+
+## Stack Segment
+
+The stack segment follows a **LIFO** (Last In, First Out) structure and usually grows **downward** toward lower memory addresses (though the exact behavior depends on the computer architecture). It grows in the direction **opposite** to the **heap**.
+
+The stack is used to manage **function****calls** and **local****variables**. Each time a function is called, a stack frame is created, which stores the function’s **local****variables**, parameters, and return address. When the function finishes, its stack frame is removed, following the **LIFO** principle.
+
+### Example: Stack Segment
+
+The following example shows how the variables are stored in the stack memory segment −
+
+#include <stdio.h>void display(int x) { int y = 20; printf("Parameter x = %d\n", x); printf("Local variable y = %d\n", y);}int main() { int mainVar = 10; // function call creates new stack frame display(mainVar); return 0;}
+
+Run the code and check its **output** −
+
+Parameter x = 10
+Local variable y = 20
+
+When the **main** function starts, its **stack frame** is created storing **mainVar** and the return address.
+
+ When the **display** function is called, a **new stack frame** is pushed storing **x** and **y**, and removed once the function ends (LIFO order).
+
+## Command-line Arguments
+
+When a C program is executed, any command-line arguments passed to it are also stored in the memory. These arguments are placed in the special memory segment, typically above the stack in the process memory layout.
+
+The command-line arguments are passed to the **main()** function in the form of −
+
+int main(int argc, char *argv[])
+
+Here,
+
+*   **argc** (argument count): Stores the total number of argument passed, includes the program name.
+*   **argv** (argument vector): It is an array of character pointer (strings), where each element point to a command-line arguments.
+
+### Example: argc and argv
+
+Let's understand both arguments (**argc** and **argv**) through a C program:
+
+#include <stdio.h>int main(int argc, char *argv[]) { printf("Total arguments: %d\n", argc); for (int i = 0; i < argc; i++) { printf("Argument %d: %s\n", i, argv[i]); } return 0;}
+
+Following is the **output** of the above code −
+
+Total arguments: 1
+Argument 0: /tmp/HqDVg7xJye/main.o
+
+### Example: Program to get the Size of Memory Segment
+
+In this example, we create a simple C program layout and use the command below to get the size of each memory segment. To run this, you need a Linux environment. On Windows, you can download and install **MinGW** to use **GCC** and related commands.
+
+#include<stdio.h>int main() { return 0;}
+
+Use the following command to get the size −
+
+gcc file_name.c -o file_name size file_name 
+
+**Output**: Following is the size −
+
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     544      8    1970     7b0 program
+
+### Example: Inserting an Uninitialized Global Variable
+
+Inserting an uninitialized global variable increases the size of the Data segment −
+
+ #include <stdio.h>int global;int main() { return 0;}
+
+Run the code and check its **output** −
+
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     548      8    1970     7b0 program
+
+### Example: Inserting an Uninitialized Static Variable
+
+If you insert an uninitialized static variable, it increases the occupied space in the **BSS** segment.
+
+#include <stdio.h>int globalVar = 10;int main() { static int staticVar; return 0;}
+
+Run the code and check its **output** −
+
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     548      12    1970     7b0 program
+
+### Example: Inserting a Static Variable with Initialized Value
+
+If you insert a static variable with an initialized value, it will be stored in the data segment.
+
+#include <stdio.h>int globalVar = 10;int main() { static int staticVar; static int a = 5; return 0;}
+
+Run the code and check its **output** −
+
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     552      8    1970     7b0 program
+
+### Example: Inserting an Uninitialized Global Variable
+
+As we saw in the above programs, if we insert a global variable without initialization, it will be stored in the **BSS** segment.
+
+#include <stdio.h>int globalVar = 10;int x;int main() { static int staticVar; static int a = 5; return 0;}
+
+Run the code and check its **output** −
+
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     552      16    1970     7b0 program
+
+## Conclusion
+
+The memory layout of a C program is divided into distinct segments: text segment, data segment, BSS, heap, and stack. Each segment has a specific role in program execution. The text segment stores code, while the data and BSS segments handle global and static variables. The heap manages dynamic memory, and the stack is used for function calls and local variables.
+
+ Print Page 
+
+[Previous](https://www.tutorialspoint.com/cprogramming/c_structures_vs_unions.htm)[Quiz](https://www.tutorialspoint.com/cprogramming/quiz_on_c_memory_layout.htm "Practice Quiz on Memory Layout in C")[Next](https://www.tutorialspoint.com/cprogramming/c_memory_management.htm)
+
+Advertisements
+
+*   [ABOUT US](https://www.tutorialspoint.com/about/index.htm)
+*   [OUR TEAM](https://www.tutorialspoint.com/about/about_team.htm)
+*   [CAREERS](https://www.tutorialspoint.com/about/about_careers.htm)
+*   [JOBS](https://www.tutorialspoint.com/job_search.php)
+*   [CONTACT US](https://www.tutorialspoint.com/about/contact_us.htm)
+*   [TERMS OF USE](https://www.tutorialspoint.com/about/about_terms_of_use.htm)
+*   [PRIVACY POLICY](https://www.tutorialspoint.com/about/about_privacy.htm)
+*   [REFUND POLICY](https://www.tutorialspoint.com/about/return_refund_policy.htm)
+*   [COOKIES POLICY](https://www.tutorialspoint.com/about/about_cookies.htm)
+*   [FAQ'S](https://www.tutorialspoint.com/about/faq.htm)
+
+![Image 8: tutorials point logo](https://www.tutorialspoint.com/static/images/logo-footer.svg)
+
+[](https://www.facebook.com/tutorialspointindia)[](https://x.com/tutorialspoint)[](https://www.youtube.com/channel/UCVLbzhxVTiTLiVKeGV7WEBg)[](https://www.linkedin.com/company/tutorialspoint/)[](https://www.instagram.com/tutorialspoint_/)
+
+[![Image 9: Download Android App](https://www.tutorialspoint.com/static/images/googleplay.svg)](https://play.google.com/store/apps/details?id=com.tutorialspoint.onlineviewer)[![Image 10: Download IOS App](https://www.tutorialspoint.com/static/images/appstore.svg)](https://itunes.apple.com/us/app/tutorials-point/id914891263?ls=1&mt=8)
+
+Tutorials Point is a leading Ed Tech company striving to provide the best learning material on technical and non-technical subjects.
+
+Copyright 2026. All Rights Reserved.
+
+Do Not Sell or Share My Personal Information
+
+![Image 11: Opt out of the sale or sharing of personal information](https://lh3.googleusercontent.com/vO8LcXo-Z4h1FPcSXhEo8I10NJ2M0GfU_Fp3upV0bdzQO3nAy9_f59BvZN7vvbZTp-3EPibU79LIZhQDCN6-2qISeD8TV2V-KNvnxRMi-KdK7ijEtwf8Eg=h60)
+
+# Opt out of the sale or sharing of personal information
+
+We won't sell or share your personal information to inform the ads you see. You may still see interest-based ads if your information is sold or shared by other companies or was sold or shared previously.
+
+Dismiss
+
+Opt out
+
+![Image 12](https://ids4.ad.gt/api/v1/ip_match?id=AU1D-0100-001774933844-V7E8128Q-C1JZ)![Image 13](https://secure.adnxs.com/getuid?https://ids.ad.gt/api/v1/match?id=AU1D-0100-001774933844-V7E8128Q-C1JZ&adnxs_id=$UID&gdpr=0)![Image 14](https://u.openx.net/w/1.0/cm?id=998eaf06-9905-4eae-9e26-9fac75960c53&r=https%3A%2F%2Fids.ad.gt%2Fapi%2Fv1%2Fopenx%3Fopenx_id%3D%7BOPENX_ID%7D%26id%3DAU1D-0100-001774933844-V7E8128Q-C1JZ%26auid%3DAU1D-0100-001774933844-V7E8128Q-C1JZ&gdpr=0)![Image 15](https://image2.pubmatic.com/AdServer/UCookieSetPug?rd=https%3A%2F%2Fids.ad.gt%2Fapi%2Fv1%2Fpbm_match%3Fpbm%3D%23PM_USER_ID%26id%3DAU1D-0100-001774933844-V7E8128Q-C1JZ&gdpr=0)![Image 16](https://token.rubiconproject.com/token?pid=50242&puid=AU1D-0100-001774933844-V7E8128Q-C1JZ&gdpr=0)![Image 17](https://match.adsrvr.org/track/cmf/generic?ttd_pid=8gkxb6n&ttd_tpi=1&ttd_puid=AU1D-0100-001774933844-V7E8128Q-C1JZ&gdpr=0)![Image 18](https://pixel.tapad.com/idsync/ex/receive?partner_id=3185&partner_device_id=AU1D-0100-001774933844-V7E8128Q-C1JZ&partner_url=https://ids.ad.gt%2Fapi%2Fv1%2Ftapad_match%3Fid%3DAU1D-0100-001774933844-V7E8128Q-C1JZ%26tapad_id%3D%24%7BTA_DEVICE_ID%7D&gdpr=0)![Image 19](https://cm.g.doubleclick.net/pixel?google_cm&google_nid=audigent_dmp&google_hm=QVUxRC0wMTAwLTAwMTc3NDkzMzg0NC1WN0U4MTI4US1DMUpa&id=AU1D-0100-001774933844-V7E8128Q-C1JZ&gdpr=0)![Image 20](https://d.turn.com/r/dd/id/L2NzaWQvMS9jaWQvMTc0ODI0MTY1OC90LzA/url/https%3A%2F%2Fids.ad.gt%2Fapi%2Fv1%2Famo_match%3Fturn_id%3D%24!%7BTURN_UUID%7D%26id%3DAU1D-0100-001774933844-V7E8128Q-C1JZ)![Image 21](https://sync.go.sonobi.com/us?https://ids.ad.gt/api/v1/son_match?id=AU1D-0100-001774933844-V7E8128Q-C1JZ&uid=[UID]&gdpr=0)![Image 22](https://ad.360yield.com/ux?&publisher_dmp_id=15&r=https%3A%2F%2Fids.ad.gt%2Fapi%2Fv1%2Fimpr_match%3Fid%3DAU1D-0100-001774933844-V7E8128Q-C1JZ%26impr_uid%3D%7BPUB_USER_ID%7D&gdpr=0)

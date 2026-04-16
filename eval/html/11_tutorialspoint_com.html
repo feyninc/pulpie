@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<title>Memory Layout in C</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+<meta name="description" content="The memory layout of a C program refers to how the program's memory is organized during its execution. Understanding the memory layout helps developers manage memory more effectively, debug programs, and avoid common memory-related errors.">
+<link rel="icon" href="https://www.tutorialspoint.com/images/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+<link rel="canonical" href="https://www.tutorialspoint.com/cprogramming/c_memory_layout.htm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Memory Layout in C">
+<meta property="og:description" content="The memory layout of a C program refers to how the program's memory is organized during its execution. Understanding the memory layout helps developers manage memory more effectively, debug programs, and avoid common memory-related errors.">
+<meta property="og:url" content="https://www.tutorialspoint.com/cprogramming/c_memory_layout.htm">
+<meta property="og:image" content="https://www.tutorialspoint.com/images/tp_logo_436.png">
+
+<link rel="stylesheet" href="/jobs/styles.css?v=73.M" media="screen, print">
+
+
+
+<script>
+  window.googletag = window.googletag || {};
+  window.googletag.cmd = window.googletag.cmd || [];
+  window.googletag.cmd.push(() => {
+    window.googletag.pubads().enableAsyncRendering();
+    window.googletag.pubads().disableInitialLoad();
+  });
+  const injectPgScript = (src, isAsync, onLoadCallback) => {
+    if (!src) return;
+    const script = document.createElement("script");
+    script.src = src;
+    if (isAsync) script.async = isAsync;
+    if (onLoadCallback) script.onload = onLoadCallback;
+    document.head.appendChild(script);
+  };
+  const initiatePgAds = () => {
+    !!window.__tcfapi && window.__tcfapi("addEventListener", 2, (tcData, success) => {
+      if (success && (tcData.eventStatus === "useractioncomplete" || tcData.eventStatus === "tcloaded" || tcData.gdprApplies === false)) {
+        if (!window._initAds) {
+          window._initAds = true;
+          injectPgScript("//dsh7ky7308k4b.cloudfront.net/publishers/tutorialspointcom.min.js", true);
+          injectPgScript("//btloader.com/tag?o=5184339635601408&upapi=true", true);
+        }
+      }
+    });
+  };
+  injectPgScript("https://securepubads.g.doubleclick.net/tag/js/gpt.js?network-code=8095840", true, () => {
+    window.googlefc = window.googlefc || { callbackQueue: [] };
+    window.googlefc.callbackQueue.push({ "CONSENT_API_READY": () => initiatePgAds() });
+  });
+</script>
+<script type="text/javascript" src="https://live.primis.tech/live/liveView.php?s=119345&schain=1.0,1!pubgalaxy.com,13467,1&cbuster=%%CACHEBUSTER%%"></script>
+
+
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="tp-topbar">
+        <div class="tp-topbar-inner-page">
+            <div class="tp-topbar-left">
+                <a href="/" class="tp-topbar-link"><i class="fa-sharp fa-light fa-house"></i><span>Home</span></a>
+                <a href="/whiteboard.htm" class="tp-topbar-link"><i class="fa-sharp fa-light fa-chalkboard"></i><span>Whiteboard</span></a>
+                <a href="/practice/index.htm" class="tp-topbar-link"><i class="fa-sharp fa-light fa-rectangle-terminal"></i> <span>Practice Code</span></a>
+                <a href="/online_graphing_calculator.htm" class="tp-topbar-link"><i class="fa-sharp fa-light fa-calculator"></i><span>Graphing Calculator</span></a>
+                <a href="/codingground.htm" class="tp-topbar-link"><i class="fa-sharp fa-light fa-code"></i><span>Online Compilers</span></a>
+                <a href="/articles/index.php" class="tp-topbar-link"><i class="fa-sharp fa-light fa-pen-to-square"></i><span>Articles</span></a>
+                <a href="/online_dev_tools.htm" class="tp-topbar-link"><i class="fa-sharp fa-light fa-gear"></i><span>Tools</span></a>
+            </div>
+            <div class="tp-topbar-right">
+                <a href="https://www.facebook.com/tutorialspointindia" class="tp-social-link tp-social-fb" title="Facebook" rel="nofollow" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://x.com/tutorialspoint" class="tp-social-link tp-social-x" title="X" rel="nofollow" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://www.youtube.com/channel/UCVLbzhxVTiTLiVKeGV7WEBg" class="tp-social-link tp-social-yt" title="YouTube" rel="nofollow" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.linkedin.com/company/tutorialspoint/" class="tp-social-link tp-social-li" title="LinkedIn" rel="nofollow" target="_blank"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="https://www.instagram.com/tutorialspoint_/" class="tp-social-link tp-social-ig" title="Instagram" rel="nofollow" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+    <!-- Header -->
+    <header class="tp-header">
+        <div class="tp-header-inner-page">
+            <div class="tp-header-left">
+                <a href="https://www.tutorialspoint.com" title="Tutorials point">
+                    <svg class="tp-logo-desktop" xmlns="http://www.w3.org/2000/svg" width="226" height="42" viewBox="0 0 226 42" fill="none"><path d="M76.2136 13.8408V27.7576H72.3845V26.1045C71.3229 27.3193 69.7701 27.9689 68.0642 27.9689C64.5731 27.9689 62.1172 26.0042 62.1172 21.7103V13.8461H66.1523V21.1135C66.1523 23.4426 67.1874 24.4778 68.9726 24.4778C70.7577 24.4778 72.1785 23.2895 72.1785 20.7279V13.8461H76.2136V13.8408Z" fill="#40A944"/><path d="M89.1484 20.7959C89.1484 16.6077 92.3807 13.6289 96.8066 13.6289C101.233 13.6289 104.438 16.6024 104.438 20.7959C104.438 24.9894 101.233 27.9629 96.8066 27.9629C92.3807 27.9629 89.1484 24.9894 89.1484 20.7959ZM100.351 20.7959C100.351 18.3928 98.8242 16.9404 96.8066 16.9404C94.7891 16.9404 93.2363 18.3876 93.2363 20.7959C93.2363 23.2043 94.7891 24.6514 96.8066 24.6514C98.8242 24.6514 100.351 23.2043 100.351 20.7959Z" fill="#40A944"/><path d="M115.28 13.6348V17.3582C114.942 17.3318 114.683 17.3054 114.377 17.3054C112.153 17.3054 110.68 18.5202 110.68 21.1873V27.7575H106.645V13.8407H110.5V15.6787C111.482 14.3319 113.141 13.6348 115.285 13.6348H115.28Z" fill="#40A944"/><path d="M117.695 13.8408H121.73V27.7576H117.695V13.8408Z" fill="#40A944"/><path d="M139.119 13.8402V27.757H135.263V26.1514C134.255 27.3661 132.781 27.9629 130.917 27.9629C126.987 27.9629 123.961 25.169 123.961 20.7959C123.961 16.4228 126.987 13.6289 130.917 13.6289C132.623 13.6289 134.07 14.1729 135.079 15.3084V13.8349H139.114L139.119 13.8402ZM135.163 20.7959C135.163 18.3928 133.61 16.9404 131.619 16.9404C129.628 16.9404 128.049 18.3876 128.049 20.7959C128.049 23.2043 129.602 24.6514 131.619 24.6514C133.637 24.6514 135.163 23.2043 135.163 20.7959Z" fill="#40A944"/><path d="M146.402 8.5625H142.367V27.7555H146.402V8.5625Z" fill="#40A944"/><path d="M149.141 26.4622L150.487 23.5679C151.729 24.3707 153.619 24.9147 155.325 24.9147C157.19 24.9147 157.887 24.4235 157.887 23.6471C157.887 21.3708 149.479 23.7 149.479 18.1385C149.479 15.4978 151.861 13.6387 155.917 13.6387C157.829 13.6387 159.952 14.077 161.272 14.8534L159.925 17.7266C158.552 16.9502 157.184 16.6914 155.917 16.6914C154.105 16.6914 153.329 17.2618 153.329 17.9854C153.329 20.3673 161.737 18.0646 161.737 23.5468C161.737 26.1347 159.334 27.9674 155.167 27.9674C152.811 27.9674 150.435 27.3231 149.141 26.4675V26.4622Z" fill="#40A944"/><path d="M178.226 20.9541C178.226 25.0948 175.332 27.8835 171.45 27.8835C169.279 27.8835 167.415 26.9539 166.279 25.1952V32.7742H164.441V14.1515H166.2V16.8398C167.315 15.0283 169.2 14.0459 171.45 14.0459C175.332 14.0459 178.226 16.8398 178.226 20.9541ZM176.388 20.9541C176.388 17.8011 174.191 15.6515 171.318 15.6515C168.445 15.6515 166.248 17.7958 166.248 20.9541C166.248 24.1125 168.418 26.2568 171.318 26.2568C174.218 26.2568 176.388 24.1336 176.388 20.9541Z" fill="#000"/><path d="M180.129 20.9541C180.129 16.919 183.076 14.0459 187.058 14.0459C191.041 14.0459 193.966 16.919 193.966 20.9541C193.966 24.9892 191.046 27.8835 187.058 27.8835C183.071 27.8835 180.129 24.9892 180.129 20.9541ZM192.102 20.9541C192.102 17.7747 189.953 15.6515 187.058 15.6515C184.164 15.6515 181.988 17.7747 181.988 20.9541C181.988 24.1336 184.159 26.2568 187.058 26.2568C189.958 26.2568 192.102 24.1336 192.102 20.9541Z" fill="#000"/><path d="M196.754 14.1523H198.592V27.7575H196.754V14.1523Z" fill="#000"/><path d="M215.288 19.8661V27.7567H213.45V20.051C213.45 17.1778 211.95 15.7043 209.362 15.7043C206.442 15.7043 204.604 17.5159 204.604 20.6161V27.7567H202.766V14.1515H204.524V16.6602C205.507 15.0071 207.345 14.0459 209.695 14.0459C213.006 14.0459 215.283 15.9578 215.283 19.8661H215.288Z" fill="#000"/><path d="M59.3346 24.2389C58.8699 24.5769 58.2731 24.7565 57.6815 24.7565C56.5935 24.7565 55.9756 24.1122 55.9756 22.9185V17.2568H59.4139V14.1512H55.9756V10.2852L51.9405 11.2411V14.1512H50.2188V17.2568H51.9405V22.9714C51.9405 26.2829 53.8313 27.9624 57.1375 27.9624C58.3523 27.9624 59.567 27.6772 60.3962 27.0804L59.3346 24.2336V24.2389Z" fill="#40A944"/><path d="M87.2878 24.2389C86.823 24.5769 86.2262 24.7565 85.6347 24.7565C84.5467 24.7565 83.9287 24.1122 83.9287 22.9185V17.2568H87.367V14.1512H83.9287V10.2852L79.8936 11.2411V14.1512H78.1719V17.2568H79.8936V22.9714C79.8936 26.2829 81.7844 27.9624 85.0907 27.9624C86.3054 27.9624 87.5202 27.6772 88.3494 27.0804L87.2878 24.2336V24.2389Z" fill="#40A944"/><path d="M119.713 11.8222C120.827 11.8222 121.73 10.9189 121.73 9.80465C121.73 8.69039 120.827 7.78711 119.713 7.78711C118.599 7.78711 117.695 8.69039 117.695 9.80465C117.695 10.9189 118.599 11.8222 119.713 11.8222Z" fill="#40A944"/><path d="M197.674 11.8222C198.788 11.8222 199.691 10.9189 199.691 9.80465C199.691 8.69039 198.788 7.78711 197.674 7.78711C196.56 7.78711 195.656 8.69039 195.656 9.80465C195.656 10.9189 196.56 11.8222 197.674 11.8222Z" fill="#40A944"/><path d="M225.15 25.6071C224.633 26.0719 223.909 26.3043 223.133 26.3043C221.606 26.3043 220.803 25.4223 220.803 23.822V15.699H224.918V14.1462H220.803V10.2168L218.965 11.1728V14.1462H217.043V15.699H218.965V23.9223C218.965 26.4311 220.386 27.8782 222.948 27.8782C224.009 27.8782 225.097 27.5666 225.794 26.9222L225.15 25.6019V25.6071Z" fill="#000"/><path d="M27.3002 39.5829C33.1626 39.4561 38.4072 35.87 40.8842 30.5568C42.3208 27.4829 43.0444 24.013 42.8542 20.3582C42.2785 9.30395 33.1521 0.394029 22.082 0.0718569C9.95038 -0.282005 0 9.44655 0 21.5043C0 30.7099 5.80439 38.5583 13.9485 41.6004C13.1721 40.7871 12.6017 39.7941 12.2531 38.6217C11.7091 36.8101 11.725 34.6711 12.2954 32.2046L15.2319 19.8881H9.16343L10.1564 15.5837L10.4257 14.4429H16.5259L16.6368 13.9411L18.0628 7.76175L26.9727 6.05582L25.1506 13.9411L23.8408 19.8881L20.8197 33.2609C20.3602 35.2626 20.5398 36.8101 21.3743 37.8928C21.3743 37.8928 22.6207 39.6832 27.3002 39.5829ZM29.4128 13.4605C31.8951 12.9904 34.0288 15.1242 33.5588 17.6065C33.2947 18.9902 32.1803 20.1099 30.7912 20.374C28.3089 20.8441 26.1752 18.7103 26.6453 16.228C26.9093 14.8443 28.0237 13.7246 29.4128 13.4605Z" fill="#40A944"/></svg>
+                    <svg class="tp-logo-mobile" xmlns="http://www.w3.org/2000/svg" width="43" height="42" viewBox="0 0 43 42" fill="none"><path d="M27.3002 39.5829C33.1626 39.4561 38.4072 35.87 40.8842 30.5568C42.3208 27.4829 43.0444 24.013 42.8542 20.3582C42.2785 9.30395 33.1521 0.394029 22.082 0.0718569C9.95038 -0.282005 0 9.44655 0 21.5043C0 30.7099 5.80439 38.5583 13.9485 41.6004C13.1721 40.7871 12.6017 39.7941 12.2531 38.6217C11.7091 36.8101 11.725 34.6711 12.2954 32.2046L15.2319 19.8881H9.16343L10.1564 15.5837L10.4257 14.4429H16.5259L16.6368 13.9411L18.0628 7.76175L26.9727 6.05582L25.1506 13.9411L23.8408 19.8881L20.8197 33.2609C20.3602 35.2626 20.5398 36.8101 21.3743 37.8928C21.3743 37.8928 22.6207 39.6832 27.3002 39.5829ZM29.4128 13.4605C31.8951 12.9904 34.0288 15.1242 33.5588 17.6065C33.2947 18.9902 32.1803 20.1099 30.7912 20.374C28.3089 20.8441 26.1752 18.7103 26.6453 16.228C26.9093 14.8443 28.0237 13.7246 29.4128 13.4605Z" fill="#40A944"/></svg>
+                </a>
+                <button class="al-panel-toggle" onclick="document.getElementById('alPanel').classList.toggle('open');document.getElementById('alPanelOverlay').classList.toggle('open')" title="Categories">
+                    <i class="fa-sharp fa-light fa-bars"></i>
+                </button>
+                <div class="tp-categories-wrapper">
+                    <button class="tp-categories-btn" onclick="toggleCategoriesDropdown()"><i class="fa-sharp fa-light fa-grid-2"></i><span>Categories</span><i class="fa-sharp fa-light fa-chevron-down"></i></button>
+                    <div class="tp-categories-dropdown category-menu-adjustment" id="categoriesDropdown">
+                        <button class="tp-categories-close" onclick="closeCategoriesDropdown()"><i class="fa-sharp fa-light fa-xmark"></i></button>
+                        <div class="tp-categories-header-title"><h2>Explore <span>Categories</span></h2><p>Find the perfect tutorial for your learning journey</p></div>
+                        <div class="tp-categories-grid">
+                            <a href="/python_technologies_tutorials.htm" class="tp-cat-link">Python Technologies</a><a href="/database_tutorials.htm" class="tp-cat-link">Databases</a><a href="/computer_programming_tutorials.htm" class="tp-cat-link">Computer Programming</a><a href="/web_development_tutorials.htm" class="tp-cat-link">Web Development</a><a href="/java_technology_tutorials.htm" class="tp-cat-link">Java Technologies</a><a href="/computer_science_tutorials.htm" class="tp-cat-link">Computer Science</a><a href="/mobile_development_tutorials.htm" class="tp-cat-link">Mobile Development</a><a href="/big_data_tutorials.htm" class="tp-cat-link">Big Data &amp; Analytics</a><a href="/microsoft_technologies_tutorials.htm" class="tp-cat-link">Microsoft Technologies</a><a href="/devops_tutorials.htm" class="tp-cat-link">DevOps</a><a href="/latest_technologies.htm" class="tp-cat-link">Latest Technologies</a><a href="/machine_learning_tutorials.htm" class="tp-cat-link">Machine Learning</a><a href="/digital_marketing_tutorials.htm" class="tp-cat-link">Digital Marketing</a><a href="/software_quality_tutorials.htm" class="tp-cat-link">Software Quality</a><a href="/management_tutorials.htm" class="tp-cat-link">Management Tutorials</a><a href="/top-categories.htm" class="tp-cat-link-all"><i class="fa-sharp fa-light fa-grid-2"></i> View All Categories</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tp-header-right">
+                <a class="tp-nav-link" href="/tutorialslibrary.htm"><i class="fa-sharp fa-light fa-books" style="margin-right:6px;"></i> Tutorials</a>
+                <a class="tp-nav-link" href="https://market.tutorialspoint.com/index.asp"><i class="fa-sharp fa-light fa-circle-play" style="margin-right:6px;color:#ff0000;"></i> Courses</a>
+                <a class="tp-nav-link" href="/jobs/index.htm" style="display:flex!important"><i class="fa-sharp fa-light fa-briefcase" style="margin-right:6px;"></i> Jobs</a>
+                <a class="tp-login-btn" href="https://market.tutorialspoint.com/login.jsp">Login</a>
+            </div>
+        </div>
+    </header>
+    <script>
+    function toggleCategoriesDropdown(){document.getElementById('categoriesDropdown').classList.toggle('active');}
+    function closeCategoriesDropdown(){document.getElementById('categoriesDropdown').classList.remove('active');}
+    document.addEventListener('click',function(e){var dd=document.getElementById('categoriesDropdown');var btn=document.querySelector('.tp-categories-btn');if(dd&&dd.classList.contains('active')&&!dd.contains(e.target)&&!btn.contains(e.target)){dd.classList.remove('active');}});
+    </script>
+
+<main class="al-main">
+<div class="tp-header-inner-page al-main-inner">
+<div class="articles-layout-row">
+
+<!-- LEFT PANEL: Tutorial TOC -->
+<div class="al-panel-overlay" id="alPanelOverlay" onclick="document.getElementById('alPanel').classList.remove('open');this.classList.remove('open')"></div>
+<div class="al-panel" id="alPanel">
+    <div class="al-panel-header">
+        <button class="al-panel-close" onclick="document.getElementById('alPanel').classList.remove('open');document.getElementById('alPanelOverlay').classList.remove('open')"><i class="fa-sharp fa-light fa-xmark"></i></button>
+    </div>
+    <div class="mini-logo">
+<img src="/cprogramming/images/c-mini-logo.jpg" alt="CProgramming Tutorial" />
+</div>
+<ul class="toc chapters" >
+<li><a href="/cprogramming/index.htm">C - Home</a></li>
+<li><a href="/cprogramming/c_overview.htm">C - Overview</a></li>
+<li><a href="/cprogramming/c_features.htm">C - Features</a></li>
+<li><a href="/cprogramming/c_history.htm">C - History</a></li>
+<li><a href="/cprogramming/c_standards.htm">C - Standards</a></li>
+<li><a href="/cprogramming/c_environment_setup.htm">C - Environment Setup</a></li>
+<li><a href="/cprogramming/c_program_structure.htm">C - Program Structure</a></li>
+<li><a href="/cprogramming/c_hello_world.htm">C - Hello World</a></li>
+<li><a href="/cprogramming/c_compilation_process.htm">C - Compilation Process</a></li>
+<li><a href="/cprogramming/c_comments.htm">C - Comments</a></li>
+<li><a href="/cprogramming/c_basic_syntax.htm">C - Basic Syntax</a></li>
+<li><a href="/cprogramming/c_user_input.htm">C - User Input</a></li>
+<li><a href="/cprogramming/c_printf_function.htm">C - printf Function</a></li>
+<li><a href="/cprogramming/c_format_specifiers.htm">C - Format Specifiers</a></li>
+<li class="heading">Lexical Elements in C</li>
+<li><a href="/cprogramming/c_tokens.htm">C - Tokens</a></li>
+<li><a href="/cprogramming/c_keywords.htm">C - Keywords</a></li>
+<li><a href="/cprogramming/c_identifiers.htm">C - Identifiers</a></li>
+<li class="heading">Variables and Constants</li>
+<li><a href="/cprogramming/c_variables.htm">C - Variables</a></li>
+<li><a href="/cprogramming/c_constants.htm">C - Constants</a></li>
+<li><a href="/cprogramming/c_const_qualifier.htm">C - Const Qualifier</a></li>
+<li><a href="/cprogramming/c_internal_and_external_linkage.htm">C - Linkage</a></li>
+<li class="heading">Data Types and Type Conversions</li>
+<li><a href="/cprogramming/c_data_types.htm">C - Data Types</a></li>
+<li><a href="/cprogramming/c_literals.htm">C - Literals</a></li>
+<li><a href="/cprogramming/c_escape_sequences.htm">C - Escape Sequences</a></li>
+<li><a href="/cprogramming/c_booleans.htm">C - Booleans</a></li>
+<li><a href="/cprogramming/c_integer_promotions.htm">C - Integer Promotions</a></li>
+<li><a href="/cprogramming/c_character_arithmetic.htm">C - Character Arithmetic</a></li>
+<li><a href="/cprogramming/c_type_conversion.htm">C - Type Conversion</a></li>
+<li><a href="/cprogramming/c_type_casting.htm">C - Type Casting</a></li>
+<li class="heading">Operators in C</li>
+<li><a href="/cprogramming/c_operators.htm">C - Operators</a></li>
+<li><a href="/cprogramming/c_arithmetic_operators.htm">C - Arithmetic Operators</a></li>
+<li><a href="/cprogramming/c_unary_operators.htm">C - Unary Operators</a></li>
+<li><a href="/cprogramming/c_relational_operators.htm">C - Relational Operators</a></li>
+<li><a href="/cprogramming/c_logical_operators.htm">C - Logical Operators</a></li>
+<li><a href="/cprogramming/c_bitwise_operators.htm">C - Bitwise Operators</a></li>
+<li><a href="/cprogramming/c_assignment_operators.htm">C - Assignment Operators</a></li>
+<li><a href="/cprogramming/c_increment_and_decrement_operators.htm">C - Increment and Decrement Operators</a></li>
+<li><a href="/cprogramming/c_ternary_operator.htm">C - Ternary Operator</a></li>
+<li><a href="/cprogramming/c_sizeof_operator.htm">C - sizeof Operator</a></li>
+<li><a href="/cprogramming/c_operators_precedence.htm">C - Operator Precedence</a></li>
+<li><a href="/cprogramming/c_misc_operators.htm">C - Miscellaneous Operators</a></li>
+<li class="heading">Decision Making &amp; Control Statements</li>
+<li><a href="/cprogramming/c_decision_making.htm">C - Decision Making</a></li>
+<li><a href="/cprogramming/if_statement_in_c.htm">C - if Statement</a></li>
+<li><a href="/cprogramming/if_else_statement_in_c.htm">C - if...else Statement</a></li>
+<li><a href="/cprogramming/c_if_else_if_ladder.htm">C - if...else if Ladder</a></li>
+<li><a href="/cprogramming/nested_if_statements_in_c.htm">C - Nested if Statements</a></li>
+<li><a href="/cprogramming/switch_statement_in_c.htm">C - Switch Statement</a></li>
+<li><a href="/cprogramming/nested_switch_statements_in_c.htm">C - Nested Switch Statements</a></li>
+<li><a href="/cprogramming/c_switch_case_using_range.htm">C - Switch Case Using Range</a></li>
+<li class="heading">Loops in C</li>
+<li><a href="/cprogramming/c_loops.htm">C - Loops</a></li>
+<li><a href="/cprogramming/c_for_loop.htm">C - For Loop</a></li>
+<li><a href="/cprogramming/c_while_loop.htm">C - While Loop</a></li>
+<li><a href="/cprogramming/c_do_while_loop.htm">C - Do...while Loop</a></li>
+<li><a href="/cprogramming/c_for_loop_vs_while_loop.htm">C - For Loop vs While Loop</a></li>
+<li><a href="/cprogramming/c_nested_loops.htm">C - Nested Loop</a></li>
+<li><a href="/cprogramming/c_infinite_loop.htm">C - Infinite Loop</a></li>
+<li><a href="/cprogramming/c_break_statement.htm">C - Break Statement</a></li>
+<li><a href="/cprogramming/c_continue_statement.htm">C - Continue Statement</a></li>
+<li><a href="/cprogramming/c_goto_statement.htm">C - Goto Statement</a></li>
+<li class="heading">Functions in C</li>
+<li><a href="/cprogramming/c_functions.htm">C - Functions</a></li>
+<li><a href="/cprogramming/c_functions_prototype.htm">C - Function Prototype</a></li>
+<li><a href="/cprogramming/c_main_function.htm">C - Main Function</a></li>
+<li><a href="/cprogramming/c_function_call_by_value.htm">C - Function call by Value</a></li>
+<li><a href="/cprogramming/c_function_call_by_reference.htm">C - Function call by reference</a></li>
+<li><a href="/cprogramming/c_nested_functions.htm">C - Nested Functions</a></li>
+<li><a href="/cprogramming/c_variadic_functions.htm">C - Variadic Functions</a></li>
+<li><a href="/cprogramming/c_user_defined_functions.htm">C - User-Defined Functions</a></li>
+<li><a href="/cprogramming/c_callback_function.htm">C - Callback Function</a></li>
+<li><a href="/cprogramming/c_return_statement.htm">C - Return Statement</a></li>
+<li><a href="/cprogramming/c_recursion.htm">C - Recursion</a></li>
+<li><a href="/cprogramming/c_predefined_identifier_func.htm">C - Predefined Identifier __func__</a></li>
+<li class="heading">Scope Rules in C</li>
+<li><a href="/cprogramming/c_scope_rules.htm">C - Scope Rules</a></li>
+<li><a href="/cprogramming/c_static_variables.htm">C - Static Variables</a></li>
+<li><a href="/cprogramming/c_global_variables.htm">C - Global Variables</a></li>
+<li class="heading">Arrays in C</li>
+<li><a href="/cprogramming/c_arrays.htm">C - Arrays</a></li>
+<li><a href="/cprogramming/c_properties_of_array.htm">C - Properties of Array</a></li>
+<li><a href="/cprogramming/c_multi_dimensional_arrays.htm">C - Multi-Dimensional Arrays</a></li>
+<li><a href="/cprogramming/c_passing_arrays_to_functions.htm">C - Passing Arrays to Function</a></li>
+<li><a href="/cprogramming/c_return_arrays_from_function.htm">C - Return Array from Function</a></li>
+<li><a href="/cprogramming/c_variable_length_arrays.htm">C - Variable Length Arrays</a></li>
+<li><a href="/cprogramming/c_dynamic_arrays.htm">C - Dynamic Arrays</a></li>
+<li class="heading">Strings in C</li>
+<li><a href="/cprogramming/c_strings.htm">C - Strings</a></li>
+<li><a href="/cprogramming/c_array_of_strings.htm">C - Array of Strings</a></li>
+<li><a href="/cprogramming/c_character_arrays.htm">C - Character Arrays</a></li>
+<li><a href="/cprogramming/c_special_characters.htm">C - Special Characters</a></li>
+<li class="heading">Pointers in C</li>
+<li><a href="/cprogramming/c_pointers.htm">C - Pointers</a></li>
+<li><a href="/cprogramming/c_initialization_of_pointer_arrays.htm">C - Initialization of Pointer Arrays</a></li>
+<li><a href="/cprogramming/c_applications_of_pointers.htm">C - Applications of Pointers</a></li>
+<li><a href="/cprogramming/c_dereference_pointer.htm">C - Dereference Pointer</a></li>
+<li><a href="/cprogramming/c_null_pointer.htm">C - NULL Pointer</a></li>
+<li><a href="/cprogramming/c_void_pointer.htm">C - void Pointer</a></li>
+<li><a href="/cprogramming/c_constant_pointers_and_pointer_to_constant.htm">C - Const Pointers &amp; Pointer to Const</a></li>
+<li><a href="/cprogramming/c_dangling_pointers.htm">C - Dangling Pointers</a></li>
+<li><a href="/cprogramming/c_pointer_arithmetic.htm">C - Pointer Arithmetics</a></li>
+<li><a href="/cprogramming/c_pointers_and_arrays.htm">C - Pointers and Arrays</a></li>
+<li><a href="/cprogramming/c_pointer_vs_array.htm">C - Pointer vs Array</a></li>
+<li><a href="/cprogramming/c_pointer_to_an_array.htm">C - Pointer to an Array</a></li>
+<li><a href="/cprogramming/c_array_of_pointers.htm">C - Array of Pointers</a></li>
+<li><a href="/cprogramming/c_pointers_vs_multi_dimensional_arrays.htm">C - Pointers vs. Multi-dimensional Arrays</a></li>
+<li><a href="/cprogramming/c_pointer_to_pointer.htm">C - Pointer to Pointer</a></li>
+<li><a href="/cprogramming/c_chain_of_pointers.htm">C - Chain of Pointers</a></li>
+<li><a href="/cprogramming/c_character_pointers_and_functions.htm">C - Character Pointers and Functions</a></li>
+<li><a href="/cprogramming/c_passing_pointers_to_functions.htm">C - Passing Pointers to Functions</a></li>
+<li><a href="/cprogramming/c_return_pointer_from_functions.htm">C - Return Pointer from Functions</a></li>
+<li><a href="/cprogramming/c_function_pointers.htm">C - Function Pointers</a></li>
+<li><a href="/cprogramming/c_array_of_function_pointers.htm">C - Array of Function Pointers</a></li>
+<li><a href="/cprogramming/c_pointers_to_structures.htm">C - Pointers to Structures</a></li>
+<li><a href="/cprogramming/c_near_far_and_huge_pointers.htm">C - Near, Far and Huge Pointers</a></li>
+<li><a href="/cprogramming/c_restrict_keyword.htm">C - Restrict Keyword</a></li>
+<li class="heading">User-Defined Data Types</li>
+<li><a href="/cprogramming/c_structures.htm">C - Structures</a></li>
+<li><a href="/cprogramming/c_structures_and_functions.htm">C - Structures and Functions</a></li>
+<li><a href="/cprogramming/c_arrays_of_structures.htm">C - Arrays of Structures</a></li>
+<li><a href="/cprogramming/c_self_referential_structures.htm">C - Self-Referential Structures</a></li>
+<li><a href="/cprogramming/c_dot_operator.htm">C - Dot (.) Operator</a></li>
+<li><a href="/cprogramming/c_lookup_tables.htm">C - Lookup Tables</a></li>
+<li><a href="/cprogramming/c_enumeration_or_enum.htm">C - Enumeration (or enum)</a></li>
+<li><a href="/cprogramming/c_structure_padding_and_packing.htm">C - Structure Padding and Packing</a></li>
+<li><a href="/cprogramming/c_nested_structures.htm">C - Nested Structures</a></li>
+<li><a href="/cprogramming/c_anonymous_structures_and_unions.htm">C - Anonymous Structure and Union</a></li>
+<li><a href="/cprogramming/c_unions.htm">C - Unions</a></li>
+<li><a href="/cprogramming/c_bit_fields.htm">C - Bit Fields</a></li>
+<li><a href="/cprogramming/c_typedef.htm">C - Typedef</a></li>
+<li><a href="/cprogramming/c_flexible_array_members_in_structures.htm">C - Flexible Array Members in Structures</a></li>
+<li><a href="/cprogramming/c_structures_vs_unions.htm">C - Structures vs Unions</a></li>
+<li class="heading">Memory Management in C</li>
+<li><a href="/cprogramming/c_memory_layout.htm">C - Memory Layout</a></li>
+<li><a href="/cprogramming/c_memory_management.htm">C - Memory Management</a></li>
+<li><a href="/cprogramming/c_memory_address.htm">C - Memory Address</a></li>
+<li><a href="/cprogramming/c_storage_classes.htm">C - Storage Classes</a></li>
+<li><a href="/cprogramming/c_dynamic_array_resizing.htm">C - Dynamic Array Resizing</a></li>
+<li><a href="/cprogramming/c_memory_leaks.htm">C - Memory Leaks</a></li>
+<li class="heading">File Handling in C</li>
+<li><a href="/cprogramming/c_file_io.htm">C - File Handling</a></li>
+<li><a href="/cprogramming/c_input_output.htm">C - Input &amp; Output</a></li>
+<li><a href="/cprogramming/c_file_operations.htm">C -  File Operations</a></li>
+<li><a href="/cprogramming/c_formatted_output.htm">C -  Formatted Output</a></li>
+<li><a href="/cprogramming/c_getc_getchar_getch_getche.htm">C -  getc, getchar, getch, getche</a></li>
+<li class="heading">Preprocessors in C</li>
+<li><a href="/cprogramming/c_preprocessors.htm">C - Preprocessors</a></li>
+<li><a href="/cprogramming/c_pragmas.htm">C - Pragmas</a></li>
+<li><a href="/cprogramming/c_macros.htm">C - Macros</a></li>
+<li><a href="/cprogramming/c_working_of_preprocessor.htm">C - Working of Preprocessor</a></li>
+<li><a href="/cprogramming/c_preprocessor_operators.htm">C - Preprocessor Operators</a></li>
+<li><a href="/cprogramming/c_header_files.htm">C - Header Files</a></li>
+<li><a href="/cprogramming/c_custom_header_files.htm">C - Custom Header Files</a></li>
+<li class="heading">Miscellaneous Topics</li>
+<li><a href="/cprogramming/c_error_handling.htm">C - Error Handling</a></li>
+<li><a href="/cprogramming/c_variable_arguments.htm">C - Variable Arguments</a></li>
+<li><a href="/cprogramming/c_command_execution.htm">C - Command Execution</a></li>
+<li><a href="/cprogramming/c_math_functions.htm">C - Math Functions</a></li>
+<li><a href="/cprogramming/c_static_keyword.htm">C - Static Keyword</a></li>
+<li><a href="/cprogramming/c_random_number_generation.htm">C - Random Number Generation</a></li>
+<li><a href="/cprogramming/c_command_line_arguments.htm">C - Command Line Arguments</a></li>
+<li class="heading">C Programming Resources</li>
+<li><a href="/cprogramming/cprogramming_questions_answers.htm">C -  Questions &amp; Answers</a></li>
+<li><a href="/cprogramming/c_quick_guide.htm">C -  Quick Guide</a></li>
+<li><a href="/cprogramming/c_language_cheatsheet.htm">C -  Cheat Sheet</a></li>
+<li><a href="/cprogramming/c_useful_resources.htm">C - Useful Resources</a></li>
+<li><a href="/cprogramming/cprogramming_discussion.htm">C - Discussion</a></li>
+<li><a href="/compilers/online-c-compiler.htm" target="_blank">C - Online Compiler</a></li>
+</ul>
+    <div class="al-reading-header"><svg class="svg-inline--fa fa-book-open-reader" style="color: #6366f1;" aria-hidden="true" focusable="false" data-prefix="fasdl" data-icon="book-open-reader" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><g class="fa-duotone-group"><path class="fa-secondary" fill="currentColor" d="M32 224.5l0 208.1c68.5 2.7 124.2 13.5 164.4 24.5c17.5 4.8 32.1 9.6 43.6 13.7L240 268l-2.9-2.2c-.2-.1-.5-.3-1.1-.7c-1.3-.8-3.7-2.2-7.4-4c-7.3-3.6-19.6-9-37.9-14.5C158.6 237 107.5 226.8 32 224.5zM192 96a64 64 0 1 0 128 0A64 64 0 1 0 192 96zm80 172l0 202.9c11.5-4.2 26.1-9 43.6-13.7c40.3-11 96-21.8 164.4-24.5l0-208.1c-75.5 2.3-126.6 12.5-158.8 22.2c-18.3 5.5-30.6 10.8-37.9 14.5c-3.7 1.8-6.1 3.2-7.4 4c-.6 .3-.9 .6-1.1 .7L272 268z"></path><path class="fa-primary" fill="currentColor" d="M256 32a64 64 0 1 1 0 128 64 64 0 1 1 0-128zm0 160A96 96 0 1 0 256 0a96 96 0 1 0 0 192zm0 48s-56.8-42.6-224-47.5c-10.2-.3-20.9-.5-32-.5l0 32L0 432l0 32c160 0 256 48 256 48s96-48 256-48l0-32 0-208 0-32c-11.1 0-21.8 .2-32 .5C312.8 197.4 256 240 256 240zm224-15.5l0 208.1c-68.5 2.7-124.2 13.5-164.4 24.5c-17.5 4.8-32.1 9.6-43.6 13.7L272 268l2.9-2.2c.2-.1 .5-.3 1.1-.7c1.3-.8 3.7-2.2 7.4-4c7.3-3.6 19.6-9 37.9-14.5c32.2-9.7 83.3-19.9 158.8-22.2zM240 470.9c-11.5-4.2-26.1-9-43.6-13.7c-40.3-11-96-21.8-164.4-24.5l0-208.1c75.5 2.3 126.6 12.5 158.8 22.2c18.3 5.5 30.6 10.8 37.9 14.5c3.7 1.8 6.1 3.2 7.4 4c.6 .3 .9 .6 1.1 .7L240 268l0 202.9z"></path></g></svg> Selected Reading</div>
+    <ul class="al-reading-list">
+        <li><a href="/upsc_ias_exams.htm">UPSC IAS Exams Notes</a></li>
+        <li><a href="/developers_best_practices/index.htm">Developer's Best Practices</a></li>
+        <li><a href="/questions_and_answers.htm">Questions and Answers</a></li>
+        <li><a href="/online-resume-builder.htm">Online Resume Builder</a></li>
+        <li><a href="/hr_interview_questions/index.htm">HR Interview Questions</a></li>
+        <li><a href="/computer_glossary.htm">Computer Glossary</a></li>
+        <li><a href="/computer_whoiswho.htm">Who is Who</a></li>
+    </ul>
+</div>
+
+<!-- MIDDLE PANEL: Tutorial Content -->
+<div class="al-content">
+    <div class="al-detail-card">
+
+        <nav aria-label="Breadcrumb" style="font-size:13px;color:#6b7280;margin-bottom:16px;">
+            <a href="/" style="color:#6366f1;text-decoration:none;">Home</a>
+            <i class="fa-sharp fa-light fa-angle-right" style="font-size:11px;margin:0 4px;color:#bbb;"></i>
+                        <a href="/cprogramming/index.htm" style="color:#6366f1;text-decoration:none;">Cprogramming</a>
+            <i class="fa-sharp fa-light fa-angle-right" style="font-size:11px;margin:0 4px;color:#bbb;"></i>
+            <span>Memory Layout in C</span>
+                    </nav>
+
+        <div class="al-detail-answer tutorial-content" id="mainContent">
+            <h1>Memory Layout in C</h1>
+<hr>
+<!-- TAGNAME: 728x90_Top -->
+   <div class="adp_top_ads" style="height:90px; overflow: hidden; display: block;width: 728px;">
+      <!-- TAGNAME: 728x90_Top -->
+      <div id='tutorialspointcom47470'>
+      </div>
+    </div>
+<hr>
+<div class="library-page-top-nav">
+   <div class="button button--neutral" id="btn_top_previous">
+   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M1.03117 8.48836C0.64065 8.09783 0.64065 7.46467 1.03117 7.07414L7.39514 0.710183C7.78566 0.319658 8.41883 0.319658 8.80935 0.710183C9.19987 1.10071 9.19987 1.73387 8.80935 2.1244L3.15249 7.78125L8.80935 13.4381C9.19987 13.8286 9.19987 14.4618 8.80935 14.8523C8.41882 15.2428 7.78566 15.2428 7.39513 14.8523L1.03117 8.48836ZM3.12109 8.78125L1.73828 8.78125L1.73828 6.78125L3.12109 6.78125L3.12109 8.78125Z" fill="black" /></svg>
+   <a href="/cprogramming/c_structures_vs_unions.htm">
+      Previous
+   </a>
+   </div>
+   <div class="flex-group">
+      <a href="/cprogramming/quiz_on_c_memory_layout.htm" target="_blank" title="Practice Quiz on Memory Layout in C"><span class="button button--neutral">Quiz</span></a>
+      <div class="button " id="btn_top_next">
+   <a href="/cprogramming/c_memory_management.htm">
+    Next
+   </a>
+   <svg xmlns="http://www.w3.org/2000/svg" width="10" height="16" viewBox="0 0 10 16" fill="none"><path
+   d="M8.87117 8.48836C9.26169 8.09783 9.26169 7.46467 8.87117 7.07414L2.50721 0.710183C2.11668 0.319658 1.48352 0.319658 1.09299 0.710183C0.70247 1.10071 0.70247 1.73387 1.09299 2.1244L6.74985 7.78125L1.093 13.4381C0.702471 13.8286 0.702471 14.4618 1.093 14.8523C1.48352 15.2428 2.11668 15.2428 2.50721 14.8523L8.87117 8.48836ZM6.78125 8.78125L8.16406 8.78125L8.16406 6.78125L6.78125 6.78125L6.78125 8.78125Z" fill="white" /></svg>
+   </div>
+   </div>
+</div>
+
+<div class="clearer"></div>
+<p>The memory layout of a C program refers to how the program's memory is organized during its execution. Understanding the memory layout helps developers manage memory more effectively, debug programs, and avoid common memory-related errors.</p>
+<p>The memory is typically divided into the following distinct <strong>memory segments</strong> −</p>
+<ul class="list">
+<li>Text segment</li>
+<li>Initialized data segment</li>
+<li>Uninitialized data segment</li>
+<li>Heap</li>
+<li>Stack</li>
+</ul>
+<p>Efficiently managing these memory segments in RAM, which is faster but limited in capacity as compared to the secondary storage, is crucial for preventing segmentation faults and optimizing C program execution.</p>
+<p>The following illustration shows how the memory layout is organized, and also depicts how the RAM loads a C program into its different memory segments −</p>
+<img src="/cprogramming/images/c_memory_layout.jpg" alt="Memory Layout in C">
+<p>Let us discuss each of these memory segments in detail.</p>
+<h2>Text Segment</h2>
+<p>The <strong>text</strong> <strong>segment</strong> is also known as the <strong>code</strong> <strong>segment</strong>, which generates a <strong>binary file</strong> after compiling the program. This binary file is then used to execute the program by loading it into the RAM. This binary file contains <strong>instructions</strong> that get stored in the text segment of the memory.</p>
+<ul class="list">
+<li>The <strong>text</strong> <strong>segment</strong> is usually read-only and stored in the lower part of the memory to prevent accidental modification of the code while the program is running.</li>
+<li>The size of the <strong>text</strong> <strong>segment</strong> determines the number of instructions and the complexity of the program.</li>
+</ul>
+<div class="inserted-div"><script async="true" id="PS_67ebd889ca6f1325b65a5242" type="text/javascript" src="https://ads.playstream.media/api/adserver/scripts?PS_TAGID=67ebd889ca6f1325b65a5242&amp;PS_PUB_ID=67ebd5e3ca6f1325b65a46fe"></script></div><h2>Initialized Data Segment</h2>
+<p>The <strong>initialized data segment</strong> is a type of data segment that stores the <strong>global</strong> and <strong>static</strong> <strong>variables</strong> created by the programmer. This segment is placed just above the text segment of the program.</p>
+<p>The <strong>initialized</strong> <strong>data</strong> <strong>segment</strong> contains global and static variables that have been explicitly initialized by the programmer. For <strong>example</strong>,</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+// Global variable
+int a = 10;
+
+// Static variable
+static int b = 20;
+</pre>
+<p>This memory segment has read-write permission because the value of a variable can change during program execution.</p>
+<h3>Example: Initialized Data Segment</h3>
+<p>The following C program shows how the <b>initialized data segment</b> works −</p>
+<pre class="demo-code notranslate language-c" data-lang="c">
+#include&lt;stdio.h&gt;
+
+int globalVar1 = 50;
+char* greet = "Hello World";
+const int globalVar2 = 30;
+
+int main() {
+	// static variable stored in initialized data segment
+	static int n = 10; 
+	// ...
+	printf("Global variables are stored in Initialize Data Segment");
+	return 0;
+}
+</pre>
+<p>In this code, the variables <strong>globalVar1</strong> and the pointer <strong>greet</strong> are declared outside the scope of the <strong>main</strong>() function, and therefore they are stored in the <strong>read-write</strong> section of the <strong>initialized</strong> <strong>data</strong> <strong>segment</strong>. However, the global variable <strong>globalVar2</strong> is declared with the keyword <strong>const</strong>, and hence it is stored in the <strong>read</strong>-<strong>only</strong> section of the <strong>initialized</strong> <strong>data</strong> <strong>segment</strong>. Static variables like <strong>a</strong> are also stored in this part of the memory.</p>
+<p>When you run this code, it will produce the following <strong>output</strong> −</p>
+<pre class="result notranslate">
+Global variables are stored in Initialize Data Segment
+</pre>
+<h3>Uninitialized Data Segment</h3>
+<p>The <b>uninitialized data segment</b>, also known as the <b>BSS (Block Started by Symbol)</b> segment, is a part of a C program's memory layout. When a program is loaded into the memory, space for the BSS segment is allocated by the operating system. Before the execution of the C program begins, the kernel automatically initializes all variables in the BSS segment: arithmetic data types are set to 0, and pointers are set to a null pointer.</p>
+<p>The BSS segment contains all the <b>global</b> and <b>static variables</b> that are not explicitly initialized by the programmer (or initialized with 0). Since the values of these variables can be modified during program execution, the BSS segment has <b>read-write permission</b>.</p>
+<h3>Example: Uninitialized Data Segment</h3>
+<p>Let's understand the role of uninitialized data segment through the following C program −</p>
+<pre class="demo-code notranslate language-c" data-lang="c">
+#include &lt;stdio.h&gt;
+// Uninitialized global variable stored in the bss segment
+int globalVaraible; 
+
+int main(){
+
+   // Uninitialized static variable stored in bss
+   static int staticVariable;
+   
+   printf("Global Variable = %d\n", globalVaraible);
+   printf("Static Variable = %d\n", staticVariable);
+   return 0;
+}
+</pre>
+<p>When you run this code, it will produce the following <b>output</b> −</p>
+<pre class="result notranslate">
+Global Variable = 0
+Static Variable = 0
+</pre>
+<p>In this C program, both the <strong>static</strong> and <strong>global</strong> variables are <strong>uninitialized</strong>, so they are stored in the BSS segment of the memory layout. Before the program execution begins, the kernel initializes these variables with the value 0.</p>
+<h2>Heap Segment</h2>
+<p>The <strong>heap</strong> area begins at the end of the <strong>BSS</strong> <strong>segment</strong> and grows upward toward higher memory addresses. It is the memory segment used for <strong>dynamic</strong> <strong>memory</strong> allocation during program execution. Whenever additional memory is required, functions like <strong>malloc</strong>() and <strong>calloc</strong>() allocate space from the heap, causing it to grow upward.</p>
+<ul class="list">
+<li>The heap is managed by functions such as <strong>malloc</strong>(), <strong>calloc</strong>(), and <strong>free</strong>(), which internally may use system calls like <strong>brk</strong> and <strong>sbrk</strong> to adjust its size.</li>
+<li>Since the heap is a shared region, it is also used by all shared libraries and dynamically loaded modules within a process.</li>
+</ul>
+<h3>Example: Heap Segment</h3>
+<p>In this C program, we have created a variable of data type <strong>char</strong>, which allocates 1 byte of memory (the size of a <strong>char</strong> in C) at the time of program execution. Since this variable is created dynamically, it is allocated in the heap segment of the memory.</p>
+<pre class="demo-code notranslate language-c" data-lang="c">
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+
+int main() {
+    // Allocate memory for a single char
+    char *var = (char *)malloc(sizeof(char));
+
+    *var = 'A';
+
+    // Print the value and the size of the allocated memory
+    printf("Value of dynamically allocated char: %c\n", *var);
+    printf("Size of dynamically allocated char: %zu bytes\n", sizeof(*var));
+
+    // Free the dynamically allocated memory
+    free(var);
+    
+    return 0;
+}
+</pre>
+<p>Run the code and check its <b>output</b> −</p> 
+<pre class="result notranslate">
+Value of dynamically allocated char: A
+Size of dynamically allocated char: 1 bytes
+</pre>
+<h2>Stack Segment</h2>
+<p>The stack segment follows a <strong>LIFO</strong> (Last In, First Out) structure and usually grows <strong>downward</strong> toward lower memory addresses (though the exact behavior depends on the computer architecture). It grows in the direction <strong>opposite</strong> to the <strong>heap</strong>.</p>
+<p>The stack is used to manage <strong>function</strong> <strong>calls</strong> and <strong>local</strong> <strong>variables</strong>. Each time a function is called, a stack frame is created, which stores the function’s <strong>local</strong> <strong>variables</strong>, parameters, and return address. When the function finishes, its stack frame is removed, following the <strong>LIFO</strong> principle.</p>
+<h3>Example: Stack Segment</h3>
+<p>The following example shows how the variables are stored in the stack memory segment −</p>
+<pre class="demo-code notranslate language-c" data-lang="c">
+#include &lt;stdio.h&gt;
+
+void display(int x) {
+    int y = 20;
+    printf("Parameter x = %d\n", x);
+    printf("Local variable y = %d\n", y);
+}
+
+int main() {
+    int mainVar = 10;
+    
+    // function call creates new stack frame
+    display(mainVar);  
+ 
+    return 0;
+}
+</pre>
+<p>Run the code and check its <b>output</b> −</p>
+<pre class="result notranslate">
+Parameter x = 10
+Local variable y = 20
+</pre>
+<p>When the <strong>main</strong> function starts, its <strong>stack frame</strong> is created storing <strong>mainVar</strong> and the return address.<br> When the <strong>display</strong> function is called, a <strong>new stack frame</strong> is pushed storing <strong>x</strong> and <strong>y</strong>, and removed once the function ends (LIFO order).</p>
+<h2>Command-line Arguments</h2>
+<p>When a C program is executed, any command-line arguments passed to it are also stored in the memory. These arguments are placed in the special memory segment, typically above the stack in the process memory layout.</p>
+<p>The command-line arguments are passed to the <b>main()</b> function in the form of −</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+int main(int argc, char *argv[])
+</pre>
+<p>Here,</p>
+<ul class="list">
+<li><strong>argc</strong> (argument count): Stores the total number of argument passed, includes the program name.</li>
+<li><strong>argv</strong> (argument vector): It is an array of character pointer (strings), where each element point to a command-line arguments.</li>
+</ul>
+<h3>Example: argc and argv</h3>
+<p>Let's understand both arguments (<strong>argc</strong> and <strong>argv</strong>) through a C program:</p>
+<pre class="demo-code notranslate language-c" data-lang="c">
+#include &lt;stdio.h&gt;
+
+int main(int argc, char *argv[]) {
+   printf("Total arguments: %d\n", argc);
+
+   for (int i = 0; i &lt; argc; i++) {
+      printf("Argument %d: %s\n", i, argv[i]);
+   }
+
+   return 0;
+}
+
+</pre>
+<p>Following is the <b>output</b> of the above code −</p>
+<pre class="result notranslate">
+Total arguments: 1
+Argument 0: /tmp/HqDVg7xJye/main.o
+</pre>
+<h3>Example: Program to get the Size of Memory Segment</h3>
+<p>In this example, we create a simple C program layout and use the command below to get the size of each memory segment. To run this, you need a Linux environment. On Windows, you can download and install <strong>MinGW</strong> to use <strong>GCC</strong> and related commands.</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+#include&lt;stdio.h&gt;
+int main() {
+   return 0;
+}
+</pre>
+<p>Use the following command to get the size −</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+gcc file_name.c -o file_name
+size file_name
+</pre>
+<p><b>Output</b>: Following is the size −</p>
+<pre class="result notranslate">
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     544      8    1970     7b0 program
+</pre>
+<h3>Example: Inserting an Uninitialized Global Variable</h3>
+<p>Inserting an uninitialized global variable increases the size of the Data segment −</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+ #include &lt;stdio.h&gt;
+int global;
+int main() {
+   return 0;
+}
+</pre>
+<p>Run the code and check its <b>output</b> −</p>
+<pre class="result notranslate">
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     548      8    1970     7b0 program
+</pre>
+<h3>Example: Inserting an Uninitialized Static Variable</h3>
+<p>If you insert an uninitialized static variable, it increases the occupied space in the <b>BSS</b> segment.</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+#include &lt;stdio.h&gt;
+int globalVar = 10;
+int main() {
+   static int staticVar;
+   return 0;
+}
+</pre>
+<p>Run the code and check its <b>output</b> −</p>
+<pre class="result notranslate">
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     548      12    1970     7b0 program
+</pre>
+<h3>Example: Inserting a Static Variable with Initialized Value</h3>
+<p>If you insert a static variable with an initialized value, it will be stored in the data segment.</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+#include &lt;stdio.h&gt;
+int globalVar = 10;
+int main() {
+   static int staticVar;
+   static int a = 5;
+   return 0;
+}
+</pre>
+<p>Run the code and check its <b>output</b> −</p>
+<pre class="result notranslate">
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     552      8    1970     7b0 program
+</pre>
+<h3>Example: Inserting an Uninitialized Global Variable</h3>
+<p>As we saw in the above programs, if we insert a global variable without initialization, it will be stored in the <b>BSS</b> segment.</p>
+<pre class="just-code notranslate language-c" data-lang="c">
+#include &lt;stdio.h&gt;
+int globalVar = 10;
+int x;
+int main() {
+   static int staticVar;
+   static int a = 5;
+   return 0;
+}
+</pre>
+<p>Run the code and check its <b>output</b> −</p>
+<pre class="result notranslate">
+~$ gcc program.c -o program
+~$ size program
+   text    data     bss     dec     hex filename
+   1418     552      16    1970     7b0 program
+</pre>
+<h2>Conclusion</h2>
+<p>The memory layout of a C program is divided into distinct segments: text segment, data segment, BSS, heap, and stack. Each segment has a specific role in program execution. The text segment stores code, while the data and BSS segments handle global and static variables. The heap manages dynamic memory, and the stack is used for function calls and local variables.</p>        </div>
+        <div class="clear"></div>
+
+        <!-- Bottom Navigation -->
+    <div class="al-bottom-nav">
+        <button class="al-btn al-btn-print" id="print-page">
+            <i class="fa-sharp fa-light fa-print"></i> Print Page
+        </button>
+        <div style="display:flex;gap:8px;">
+            <a href="/cprogramming/c_structures_vs_unions.htm" class="al-btn al-btn-prev"><i class="fa-sharp fa-light fa-chevron-left"></i> Previous</a>
+                        <a href="/cprogramming/quiz_on_c_memory_layout.htm" target="_blank" title="Practice Quiz on Memory Layout in C" class="al-btn al-btn-prev">Quiz</a>
+                        <a href="/cprogramming/c_memory_management.htm" class="al-btn al-btn-next">Next <i class="fa-sharp fa-light fa-chevron-right"></i></a>
+        </div>
+    </div>
+    
+    <!-- Bottom Ads -->
+    <div class="bottom-library-ads" style="margin:16px auto 5px;text-align:center;">
+        <div class="google-bottom-ads" id="google-bottom-ads">
+            <div>Advertisements</div>
+            <div style="width:750px;height:300px;margin:0 auto;max-width:100%;"><div id='tutorialspointcom47468'></div></div>
+        </div>
+    </div>
+
+    </div><!-- /.al-detail-card -->
+</div>
+
+<!-- RIGHT PANEL: ADS -->
+<div class="al-right-panel">
+    <div class="data-sticky" id="google-right-ads">
+        <div class="google-right-ad" style="margin:0px auto!important;margin-top:5px;min-height:280px!important"><div id='tutorialspointcom47465'></div></div>
+        <div class="google-right-ad" style="margin-top:16px;min-height:280px!important"><div id='tutorialspointcom47466'></div></div>
+        <div class="google-right-ad" style="margin-top:16px;min-height:280px!important"><div id='tutorialspointcom47467'></div></div>
+    </div>
+</div>
+
+</div>
+</div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+    <ul class="footer__list container">
+        <li><a href="/about/index.htm">ABOUT US</a></li><li><a href="/about/about_team.htm">OUR TEAM</a></li><li><a href="/about/about_careers.htm">CAREERS</a></li><li><a href="/job_search.php">JOBS</a></li><li><a href="/about/contact_us.htm">CONTACT US</a></li><li><a href="/about/about_terms_of_use.htm">TERMS OF USE</a></li><li><a href="/about/about_privacy.htm">PRIVACY POLICY</a></li><li><a href="/about/return_refund_policy.htm">REFUND POLICY</a></li><li><a href="/about/about_cookies.htm">COOKIES POLICY</a></li><li><a href="/about/faq.htm">FAQ'S</a></li>
+    </ul>
+    <div class="footer__socials container">
+        <img class="footer__logo" src="https://www.tutorialspoint.com/static/images/logo-footer.svg" alt="tutorials point logo">
+        <div class="footer__social-icons">
+            <a rel="nofollow" target="_blank" href="https://www.facebook.com/tutorialspointindia"><i class="fa-brands fa-facebook-f"></i></a>
+            <a target="_blank" href="https://x.com/tutorialspoint" rel="nofollow"><i class="fa-brands fa-x-twitter"></i></a>
+            <a target="_blank" href="https://www.youtube.com/channel/UCVLbzhxVTiTLiVKeGV7WEBg" rel="nofollow"><i class="fa-brands fa-youtube"></i></a>
+            <a target="_blank" href="https://www.linkedin.com/company/tutorialspoint/" rel="nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
+            <a target="_blank" href="https://www.instagram.com/tutorialspoint_/" rel="nofollow"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+        <div class="footer__apps">
+            <a href="https://play.google.com/store/apps/details?id=com.tutorialspoint.onlineviewer" target="_blank" rel="nofollow"><img src="https://www.tutorialspoint.com/static/images/googleplay.svg" alt="Download Android App"></a>
+            <a href="https://itunes.apple.com/us/app/tutorials-point/id914891263?ls=1&mt=8" target="_blank" rel="nofollow"><img src="https://www.tutorialspoint.com/static/images/appstore.svg" alt="Download IOS App"></a>
+        </div>
+    </div>
+    <div class="footer__legal-wrapper">
+        <div class="footer__legal container">
+            <p>Tutorials Point is a leading Ed Tech company striving to provide the best learning material on technical and non-technical subjects.</p>
+            <p class="footer__copyright">Copyright 2026. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+/* Print page */
+var printBtn = document.getElementById('print-page');
+if (printBtn) { printBtn.addEventListener('click', function() { window.print(); }); }
+
+/* Toggle FAQ chevron rotation */
+document.querySelectorAll('.toggle label, .toggle button, .toggle__toggle').forEach(function(el) {
+    el.addEventListener('click', function() {
+        this.classList.toggle('open');
+    });
+});
+</script>
+<script src="/static/js/new-lib-script.js?v-11"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EX9ZP4VY84"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-EX9ZP4VY84');</script>
+<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','854536859149047');fbq('track','PageView');</script>
+</body>
+</html>

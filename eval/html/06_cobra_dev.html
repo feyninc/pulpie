@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en-us" data-theme="winter">
+<head>
+	<meta name="generator" content="Hugo 0.148.1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The CLI Framework Developers Love | Cobra: A Commander for Modern CLI Apps</title>
+
+
+
+
+
+  
+    
+      <link rel="stylesheet" href="/css/main.a036e6954f0228dce8c3380d73f8019b39ec8d9a181d731d8da966f04fb0ff3c.css" integrity="sha256-oDbmlU8CKNzowzgNc/gBmznsjZoYHXMdjalm8E&#43;w/zw=" crossorigin="anonymous">
+    
+  
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+  const themeController = document.querySelector('.theme-controller');
+  const htmlElement = document.documentElement;
+  
+  if (themeController) {
+    
+    const savedTheme = localStorage.getItem('theme') || 'winter';
+    htmlElement.setAttribute('data-theme', savedTheme);
+    
+    
+    themeController.checked = savedTheme === 'night';
+    
+    
+    themeController.addEventListener('change', function() {
+      const newTheme = this.checked ? 'night' : 'winter';
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  }
+});
+</script>
+    
+<meta name="description" content="Build Modern CLIs That Users Love. AI-Ready, Beautiful by Default, Observable from Day One. Used by 173,000&#43; projects worldwide including Kubernetes, Docker, …">
+
+<meta property="og:title" content="The CLI Framework Developers Love">
+<meta property="og:description" content="Build Modern CLIs That Users Love. AI-Ready, Beautiful by Default, Observable from Day One. Used by 173,000&#43; projects worldwide including Kubernetes, Docker, …">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://cobra.dev/">
+
+</head>
+<body class="min-h-screen flex flex-col">
+  <header>
+    <div class="navbar fixed top-0 left-0 right-0 z-50 w-full bg-base-100 border-b border-base-300">
+  <div class="navbar-start">
+    <div class="dropdown">
+      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+      </div>
+      <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z- p-2 shadow bg-base-100 rounded-box w-52">
+        
+          <li><a href="/docs/">Documentation</a></li>
+        
+          <li><a href="https://pkg.go.dev/github.com/spf13/cobra" target="_blank" rel="noopener noreferrer">Reference</a></li>
+        
+          <li><a href="/blog/">Blog</a></li>
+        
+          <li><a href="https://github.com/spf13/cobra" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        
+          <li><a href="https://github.com/sponsors/spf13" target="_blank" rel="noopener noreferrer">Sponsor</a></li>
+        
+      </ul>
+    </div>
+    <a href="/" class="btn btn-ghost text-xl">
+      <img src="/images/logos/cobra-mascot.png" 
+           alt="Cobra Mascot" 
+           class="h-8 w-auto" />
+      <span class="ml-2">Cobra</span>
+    </a>
+  </div>
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      
+        
+        <li><a href="/docs/">Documentation</a></li>
+        
+      
+        
+        <li><a href="https://pkg.go.dev/github.com/spf13/cobra" target="_blank" rel="noopener noreferrer">Reference</a></li>
+        
+      
+        
+        <li><a href="/blog/">Blog</a></li>
+        
+      
+        
+      
+        
+      
+    </ul>
+  </div>
+  <div class="navbar-end hidden lg:flex">
+    <ul class="menu menu-horizontal px-1">
+      
+        
+      
+        
+      
+        
+      
+        
+        <li><a href="https://github.com/spf13/cobra" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+        
+      
+        
+        <li><a href="https://github.com/sponsors/spf13" target="_blank" rel="noopener noreferrer">Sponsor</a></li>
+        
+      
+    </ul>
+    <div class="ml-4">
+      <label class="swap swap-rotate">
+  <input type="checkbox" class="theme-controller" value="night" aria-label="Toggle theme">
+  
+  
+  <svg class="swap-off h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/>
+  </svg>
+  
+  
+  <svg class="swap-on h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/>
+  </svg>
+</label>
+    </div>
+  </div>
+</div>
+  </header>
+  <main class="flex-grow pt-16">
+    
+    
+    <div class="hero min-h-[70vh] bg-gradient-to-r from-primary to-secondary">
+    <div class="hero-overlay bg-opacity-20"></div>
+    <div class="hero-content text-center text-neutral-content">
+        <div class="max-w-5xl">
+            <img src="/images/logos/cobra-logo.png" 
+                 alt="Cobra CLI Library Logo" 
+                 class="mx-auto mb-6 max-w-xs sm:max-w-sm opacity-90" />
+            
+            
+            <h1 class="text-6xl font-bold mb-4">Build Modern CLIs That Users Love</h1>
+            
+            
+            <div class="text-2xl font-semibold mb-6 text-accent"></div>
+            
+            
+            <p class="text-xl mb-6 opacity-90">Using the CLI Framework Developers Love</p>
+            
+            
+            <div class="flex flex-wrap gap-6 justify-center mb-8">
+                
+                    <div class="badge badge-success badge-lg font-semibold px-6 py-3">AI-Ready</div>
+                
+                    <div class="badge badge-success badge-lg font-semibold px-6 py-3">Beautiful by Default</div>
+                
+                    <div class="badge badge-success badge-lg font-semibold px-6 py-3">Observable</div>
+                
+                    <div class="badge badge-success badge-lg font-semibold px-6 py-3">Enterprise-Ready</div>
+                
+            </div>
+            
+            
+            <p class="py-6 text-lg max-w-4xl mx-auto leading-relaxed opacity-95">
+                Cobra is the powerful, battle-tested CLI framework that transforms complex command-line development into simple, elegant Go code. Used by Kubernetes, Docker, Hugo, GitHub CLI, and 173,000&#43; projects worldwide.
+            </p>
+            
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/docs/tutorials/first-cli/" class="btn btn-accent btn-lg px-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Get Started Now
+                </a>
+                <a href="https://github.com/spf13/cobra" target="_blank" rel="noopener" class="btn btn-outline btn-lg px-8 border-neutral-content text-neutral-content hover:bg-neutral-content hover:text-neutral hover:border-neutral-content">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    View on GitHub
+                </a>
+            </div>
+            
+            
+            <div class="mt-12 mb-8">
+                <div class="stats stats-vertical lg:stats-horizontal shadow w-full bg-base-100/10 backdrop-blur">
+                    
+                    <div class="stat place-items-center text-neutral-content">
+                        <div class="stat-value text-2xl lg:text-3xl font-bold mb-2">173,000&#43;</div>
+                        <div class="stat-title text-neutral-content/80 font-semibold">Projects Using Cobra</div>
+                        
+                    </div>
+                    
+                    <div class="stat place-items-center text-neutral-content">
+                        <div class="stat-value text-2xl lg:text-3xl font-bold mb-2">88%</div>
+                        <div class="stat-title text-neutral-content/80 font-semibold">Less Boilerplate Code</div>
+                        
+                        <div class="stat-desc text-neutral-content/60 text-sm">Compared to traditional approaches</div>
+                        
+                    </div>
+                    
+                    <div class="stat place-items-center text-neutral-content">
+                        <div class="stat-value text-2xl lg:text-3xl font-bold mb-2">4x</div>
+                        <div class="stat-title text-neutral-content/80 font-semibold">Faster Development</div>
+                        
+                        <div class="stat-desc text-neutral-content/60 text-sm">From concept to production</div>
+                        
+                    </div>
+                    
+                    <div class="stat place-items-center text-neutral-content">
+                        <div class="stat-value text-2xl lg:text-3xl font-bold mb-2">Zero</div>
+                        <div class="stat-title text-neutral-content/80 font-semibold">Config Complexity</div>
+                        
+                        <div class="stat-desc text-neutral-content/60 text-sm">Enterprise features built-in</div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+            
+            <div class="mt-8 text-sm opacity-80">
+                <p>Created by <strong><a href="https://spf13.com" target="_blank">Steve Francia</a></strong>, Former Go Team Member at Google</p>
+                <div class="mt-6">
+                    <p class="mb-4 font-semibold">Trusted by the world's leading companies:</p>
+                    <div class="flex flex-wrap justify-center items-center gap-6 mt-4">
+                        
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">Google</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">Microsoft</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">Docker</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">GitHub</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">AWS</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">Red Hat</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">DigitalOcean</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">MongoDB</span>
+                            </div>
+                            
+                            
+                        
+                            
+                            <div class="flex items-center gap-2 bg-base-100/10 backdrop-blur rounded-lg px-3 py-2">
+                                <span class="font-semibold text-sm">VMware</span>
+                            </div>
+                            
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                            
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+    <div class="bg-base-200 py-48">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-bold mb-6">Enterprise features that just work</h2>
+            <p class="text-xl text-base-content/70 max-w-3xl mx-auto">
+                Production-grade capabilities that scale from simple utilities to complex multi-command applications without architectural rewrites.
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            
+            <div class="card card-compact bg-base-100 shadow-xl indicator hover:shadow-2xl transition-shadow duration-300 w-full max-w-md mx-auto">
+                
+                <span class="indicator-item indicator-top indicator-center badge badge-secondary font-semibold">AI-Ready</span>
+                
+                <div class="card-body">
+                    <div class="flex items-start gap-4">
+                        
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                            
+                                <svg class="w-8 h-8 text-primary-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            
+                        </div>
+                        
+                        
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">Intelligent Command Orchestration</h3>
+                            <p class="text-base-content/80 leading-relaxed">Sophisticated command tree architecture handles unlimited nesting depth with persistent flag inheritance, pre/post-run hooks, and automatic command lifecycle management.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card card-compact bg-base-100 shadow-xl indicator hover:shadow-2xl transition-shadow duration-300 w-full max-w-md mx-auto">
+                
+                <span class="indicator-item indicator-top indicator-center badge badge-secondary font-semibold">Beautiful</span>
+                
+                <div class="card-body">
+                    <div class="flex items-start gap-4">
+                        
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                            
+                                <svg class="w-8 h-8 text-primary-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                                </svg>
+                            
+                        </div>
+                        
+                        
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">Developer Experience Excellence</h3>
+                            <p class="text-base-content/80 leading-relaxed">The cobra-cli generator scaffolds complete applications instantly, while intelligent command suggestions catch user typos automatically.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card card-compact bg-base-100 shadow-xl indicator hover:shadow-2xl transition-shadow duration-300 w-full max-w-md mx-auto">
+                
+                <span class="indicator-item indicator-top indicator-center badge badge-secondary font-semibold">Battle-Tested</span>
+                
+                <div class="card-body">
+                    <div class="flex items-start gap-4">
+                        
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                            
+                                <svg class="w-8 h-8 text-primary-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            
+                        </div>
+                        
+                        
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">Production-Grade Reliability</h3>
+                            <p class="text-base-content/80 leading-relaxed">POSIX-compliant flag parsing ensures universal compatibility, while extensive validation systems prevent runtime errors.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card card-compact bg-base-100 shadow-xl indicator hover:shadow-2xl transition-shadow duration-300 w-full max-w-md mx-auto">
+                
+                <span class="indicator-item indicator-top indicator-center badge badge-secondary font-semibold">Enterprise</span>
+                
+                <div class="card-body">
+                    <div class="flex items-start gap-4">
+                        
+                        <div class="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg">
+                            
+                                <svg class="w-8 h-8 text-primary-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 001 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path>
+                                </svg>
+                            
+                        </div>
+                        
+                        
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-3">Complete Ecosystem Integration</h3>
+                            <p class="text-base-content/80 leading-relaxed">Seamless Viper configuration management transforms your CLI into a 12-factor application with environment variable binding.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        
+        <div class="mt-16 max-w-4xl mx-auto">
+            <h3 class="text-2xl font-bold text-center mb-8">Dive deeper into Cobra's capabilities</h3>
+            
+            
+            <div class="space-y-4">
+                
+                
+                <div class="collapse collapse-arrow bg-base-200">
+                    <input type="checkbox" />
+                    <div class="collapse-title text-lg font-medium flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+                        </svg>
+                        <span>Advanced Command Architecture</span>
+                    </div>
+                    <div class="collapse-content">
+                        <div class="prose prose-sm max-w-none">
+                            <p>Cobra's sophisticated command tree architecture supports unlimited nesting depth with automatic parent-child relationships. Features include:</p>
+                            <ul>
+                                <li><strong>Persistent Flags</strong>: Flags inherited by all child commands</li>
+                                <li><strong>Pre/Post Run Hooks</strong>: Execute custom logic before and after commands</li>
+                                <li><strong>Command Aliases</strong>: Multiple ways to invoke the same command</li>
+                                <li><strong>Hidden Commands</strong>: Administrative commands not shown in help</li>
+                                <li><strong>Deprecated Commands</strong>: Graceful migration paths with warnings</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="collapse collapse-arrow bg-base-200">
+                    <input type="checkbox" />
+                    <div class="collapse-title text-lg font-medium flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1Z"/>
+                        </svg>
+                        <span>Enterprise-Grade Flag System</span>
+                    </div>
+                    <div class="collapse-content">
+                        <div class="prose prose-sm max-w-none">
+                            <p>POSIX-compliant flag parsing with advanced validation and type safety:</p>
+                            <ul>
+                                <li><strong>Automatic Type Conversion</strong>: String, int, bool, duration, IP addresses, and more</li>
+                                <li><strong>Required Flags</strong>: Enforce mandatory parameters with clear error messages</li>
+                                <li><strong>Flag Groups</strong>: Mutually exclusive or required flag combinations</li>
+                                <li><strong>Persistent Flags</strong>: Global flags available to all subcommands</li>
+                                <li><strong>Custom Validators</strong>: Business logic validation with helpful error messages</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="collapse collapse-arrow bg-base-200">
+                    <input type="checkbox" />
+                    <div class="collapse-title text-lg font-medium flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M14.6,16.6L19.2,12L14.6,7.4L16,6L22,12L16,18L14.6,16.6M9.4,16.6L4.8,12L9.4,7.4L8,6L2,12L8,18L9.4,16.6Z"/>
+                        </svg>
+                        <span>Developer Experience Tools</span>
+                    </div>
+                    <div class="collapse-content">
+                        <div class="prose prose-sm max-w-none">
+                            <p>Built-in tools that make CLI development a joy instead of a chore:</p>
+                            <ul>
+                                <li><strong>Cobra CLI Generator</strong>: Scaffold complete applications in seconds</li>
+                                <li><strong>Automatic Help Generation</strong>: Beautiful, consistent help text for every command</li>
+                                <li><strong>Shell Completion</strong>: Bash, Zsh, Fish, and PowerShell completion out of the box</li>
+                                <li><strong>Man Page Generation</strong>: Professional documentation for system administrators</li>
+                                <li><strong>Markdown Documentation</strong>: Perfect for GitHub wikis and documentation sites</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="collapse collapse-arrow bg-base-200">
+                    <input type="checkbox" />
+                    <div class="collapse-title text-lg font-medium flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M11,4H13V16L18,11H15V3H9V11H6L11,16V4Z"/>
+                        </svg>
+                        <span>Modern Integration Capabilities</span>
+                    </div>
+                    <div class="collapse-content">
+                        <div class="prose prose-sm max-w-none">
+                            <p>Cobra integrates seamlessly with modern Go tooling and practices:</p>
+                            <ul>
+                                <li><strong>Context Support</strong>: Cancellation, timeouts, and request tracing built-in</li>
+                                <li><strong>Viper Integration</strong>: Advanced configuration management with environment variables</li>
+                                <li><strong>OpenTelemetry Ready</strong>: Distributed tracing and observability from day one</li>
+                                <li><strong>Structured Logging</strong>: Works perfectly with logrus, zap, and other logging frameworks</li>
+                                <li><strong>Graceful Shutdown</strong>: Proper signal handling for long-running operations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="mt-16 text-center">
+            <div class="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 max-w-4xl mx-auto">
+                <h3 class="text-2xl font-bold mb-4">Trusted by the world's most demanding applications</h3>
+                <div class="flex flex-wrap justify-center items-center gap-6 text-base-content/70">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-success rounded-full"></div>
+                        <span class="font-semibold">Battle-tested by Kubernetes</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-success rounded-full"></div>
+                        <span class="font-semibold">Powers Docker CLI</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-success rounded-full"></div>
+                        <span class="font-semibold">Drives GitHub CLI</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-success rounded-full"></div>
+                        <span class="font-semibold">173,000+ projects worldwide</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+    <div class="bg-base-100 py-48">
+    <div class="container mx-auto px-4">
+        
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-bold mb-6">Real developers, real results</h2>
+            <p class="text-xl text-base-content/70 max-w-3xl mx-auto">
+                Hear from developers who've transformed their CLI development experience with Cobra
+            </p>
+        </div>
+        
+        
+        <div class="max-w-4xl mx-auto">
+            <div class="relative" data-testimonial-carousel="true">
+                <div class="testimonial-slides">
+                    
+                    <div class="testimonial-slide active" data-slide="0">
+                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                            <div class="card-body p-8 text-center">
+                                <div class="mb-4">
+                                    <svg class="w-8 h-8 mx-auto text-primary opacity-60" fill="currentColor" viewBox="0 0 32 32">
+                                        <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zM22 8c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
+                                    </svg>
+                                </div>
+                                <blockquote class="text-lg lg:text-xl text-base-content leading-relaxed mb-6 italic">
+                                    "I was tasked with building our enterprise CLI tool and found Cobra to be incredibly powerful and flexible. Together with Viper, it helped us build a sophisticated tool that handles complex configurations effortlessly."
+                                </blockquote>
+                                <div class="flex items-center justify-center gap-4">
+                                    
+                                    <div class="avatar">
+                                        <div class="w-12 h-12 rounded-full">
+                                            <img src="/images/testimonials/steve-domino.png" alt="Steve Domino" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-left">
+                                        <div class="font-semibold text-base-content">Steve Domino</div>
+                                        <div class="text-sm text-base-content/70">
+                                            Head of Engineering
+                                            <span class="text-primary">@ Crew</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-slide " data-slide="1">
+                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                            <div class="card-body p-8 text-center">
+                                <div class="mb-4">
+                                    <svg class="w-8 h-8 mx-auto text-primary opacity-60" fill="currentColor" viewBox="0 0 32 32">
+                                        <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zM22 8c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
+                                    </svg>
+                                </div>
+                                <blockquote class="text-lg lg:text-xl text-base-content leading-relaxed mb-6 italic">
+                                    "Cobra makes documenting each command really simple while providing the enterprise features we need for production deployment."
+                                </blockquote>
+                                <div class="flex items-center justify-center gap-4">
+                                    
+                                    <div class="avatar">
+                                        <div class="w-12 h-12 rounded-full">
+                                            <img src="/images/testimonials/alex-ellis.jpeg" alt="Alex Ellis" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-left">
+                                        <div class="font-semibold text-base-content">Alex Ellis</div>
+                                        <div class="text-sm text-base-content/70">
+                                            Founder of OpenFaaS
+                                            <span class="text-primary">@ OpenFaaS</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-slide " data-slide="2">
+                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                            <div class="card-body p-8 text-center">
+                                <div class="mb-4">
+                                    <svg class="w-8 h-8 mx-auto text-primary opacity-60" fill="currentColor" viewBox="0 0 32 32">
+                                        <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zM22 8c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
+                                    </svg>
+                                </div>
+                                <blockquote class="text-lg lg:text-xl text-base-content leading-relaxed mb-6 italic">
+                                    "Using Cobra for kubectl was a game-changer. The framework&#39;s ability to handle complex nested commands with automatic help generation saved us months of development time."
+                                </blockquote>
+                                <div class="flex items-center justify-center gap-4">
+                                    
+                                    <div class="avatar">
+                                        <div class="w-12 h-12 rounded-full">
+                                            <img src="/images/testimonials/jordan-liggitt.jpeg" alt="Jordan Liggitt" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-left">
+                                        <div class="font-semibold text-base-content">Jordan Liggitt</div>
+                                        <div class="text-sm text-base-content/70">
+                                            Staff Software Engineer
+                                            <span class="text-primary">@ Google (Kubernetes)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-slide " data-slide="3">
+                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                            <div class="card-body p-8 text-center">
+                                <div class="mb-4">
+                                    <svg class="w-8 h-8 mx-auto text-primary opacity-60" fill="currentColor" viewBox="0 0 32 32">
+                                        <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zM22 8c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
+                                    </svg>
+                                </div>
+                                <blockquote class="text-lg lg:text-xl text-base-content leading-relaxed mb-6 italic">
+                                    "Cobra&#39;s elegant design allowed us to build GitHub CLI with confidence. The auto-completion and help system work flawlessly across all platforms."
+                                </blockquote>
+                                <div class="flex items-center justify-center gap-4">
+                                    
+                                    <div class="avatar">
+                                        <div class="w-12 h-12 rounded-full">
+                                            <img src="/images/testimonials/mislav-marohnic.jpeg" alt="Mislav Marohnić" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-left">
+                                        <div class="font-semibold text-base-content">Mislav Marohnić</div>
+                                        <div class="text-sm text-base-content/70">
+                                            Staff Software Engineer
+                                            <span class="text-primary">@ GitHub</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="testimonial-slide " data-slide="4">
+                        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                            <div class="card-body p-8 text-center">
+                                <div class="mb-4">
+                                    <svg class="w-8 h-8 mx-auto text-primary opacity-60" fill="currentColor" viewBox="0 0 32 32">
+                                        <path d="M10 8c-3.3 0-6 2.7-6 6v10h10V14H8c0-1.1.9-2 2-2V8zM22 8c-3.3 0-6 2.7-6 6v10h10V14h-6c0-1.1.9-2 2-2V8z"/>
+                                    </svg>
+                                </div>
+                                <blockquote class="text-lg lg:text-xl text-base-content leading-relaxed mb-6 italic">
+                                    "The combination of Cobra and Viper has been instrumental in Docker&#39;s CLI evolution. The framework handles our complex configuration requirements beautifully."
+                                </blockquote>
+                                <div class="flex items-center justify-center gap-4">
+                                    
+                                    <div class="avatar">
+                                        <div class="w-12 h-12 rounded-full">
+                                            <img src="/images/testimonials/vincent-demeester.jpeg" alt="Vincent Demeester" loading="lazy" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-left">
+                                        <div class="font-semibold text-base-content">Vincent Demeester</div>
+                                        <div class="text-sm text-base-content/70">
+                                            Senior Software Engineer
+                                            <span class="text-primary">@ Docker</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+                <div class="flex justify-center w-full py-4 gap-2 mt-4">
+                    
+                    <button class="w-3 h-3 rounded-full transition-all duration-300 dot-indicator bg-primary" 
+                            data-slide="0" aria-label="Go to testimonial 1">
+                    </button>
+                    
+                    <button class="w-3 h-3 rounded-full transition-all duration-300 dot-indicator bg-base-300 hover:bg-base-content/30" 
+                            data-slide="1" aria-label="Go to testimonial 2">
+                    </button>
+                    
+                    <button class="w-3 h-3 rounded-full transition-all duration-300 dot-indicator bg-base-300 hover:bg-base-content/30" 
+                            data-slide="2" aria-label="Go to testimonial 3">
+                    </button>
+                    
+                    <button class="w-3 h-3 rounded-full transition-all duration-300 dot-indicator bg-base-300 hover:bg-base-content/30" 
+                            data-slide="3" aria-label="Go to testimonial 4">
+                    </button>
+                    
+                    <button class="w-3 h-3 rounded-full transition-all duration-300 dot-indicator bg-base-300 hover:bg-base-content/30" 
+                            data-slide="4" aria-label="Go to testimonial 5">
+                    </button>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        <style>
+        .testimonial-slides { position: relative; min-height: 280px; }
+        .testimonial-slide { position: absolute; top: 0; left: 0; right: 0; opacity: 0; transform: translateX(30px); transition: all 0.5s ease-in-out; pointer-events: none; }
+        .testimonial-slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+        .dot-indicator { cursor: pointer; }
+        </style>
+        
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.querySelector('[data-testimonial-carousel="true"]');
+            if (!carousel) return;
+            
+            const slides = carousel.querySelectorAll('.testimonial-slide');
+            const dots = carousel.querySelectorAll('.dot-indicator');
+            let currentSlide = 0;
+            let autoplayInterval;
+            
+            function goToSlide(slideIndex) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = slideIndex;
+                slides[currentSlide].classList.add('active');
+                
+                dots.forEach((dot, index) => {
+                    if (index === slideIndex) {
+                        dot.classList.remove('bg-base-300', 'hover:bg-base-content/30');
+                        dot.classList.add('bg-primary');
+                    } else {
+                        dot.classList.remove('bg-primary');
+                        dot.classList.add('bg-base-300', 'hover:bg-base-content/30');
+                    }
+                });
+            }
+            
+            function nextSlide() {
+                goToSlide((currentSlide + 1) % slides.length);
+            }
+            
+            function startAutoplay() {
+                if (slides.length > 1) {
+                    autoplayInterval = setInterval(nextSlide, 7000);
+                }
+            }
+            
+            function stopAutoplay() {
+                if (autoplayInterval) clearInterval(autoplayInterval);
+            }
+            
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    stopAutoplay();
+                    goToSlide(index);
+                    startAutoplay();
+                });
+            });
+            
+            carousel.addEventListener('mouseenter', stopAutoplay);
+            carousel.addEventListener('mouseleave', startAutoplay);
+            
+            startAutoplay();
+        });
+        </script>
+        
+        
+        
+        <div class="text-center mt-12">
+            <p class="text-lg text-base-content/70 mb-6">
+                Join thousands of developers building better CLIs with Cobra
+            </p>
+            <div class="flex flex-wrap justify-center items-center gap-8 opacity-60">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-sm font-semibold">Production-Ready</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-sm font-semibold">Battle-Tested</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-sm font-semibold">Enterprise-Grade</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    <span class="text-sm font-semibold">Open Source</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+    <div class="bg-gradient-to-b from-base-200 to-base-300 py-48">
+    <div class="container mx-auto px-4">
+        
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-bold mb-8">Cobra Superpowers</h2>
+            <p class="text-xl text-base-content/70 max-w-4xl mx-auto">
+                Advanced capabilities that transform Cobra from a simple CLI library into a comprehensive platform for modern application development
+            </p>
+        </div>
+        
+        
+        <div class="space-y-16 max-w-7xl mx-auto">
+            
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                
+                <div class="flex-1">
+                    <div class="card bg-base-100 shadow-2xl border-l-4 border-l-accent">
+                        <div class="card-body p-8">
+                            
+                            <div class="flex items-start gap-4 mb-6">
+                                <div class="w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                                    
+                                        <svg class="w-8 h-8 text-accent-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                        </svg>
+                                    
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-3xl font-bold mb-2">LLM-Ready Documentation Generation</h3>
+                                    <p class="text-xl text-accent font-semibold">Your CLI becomes AI-trainable instantly</p>
+                                </div>
+                            </div>
+                            
+                            
+                            <p class="text-lg text-base-content/80 leading-relaxed mb-6">
+                                Every Cobra CLI is automatically AI assistant compatible - your users can chat with an LLM about your tool!
+                            </p>
+                            
+                            
+                            <div class="card-actions">
+                                
+                                
+                                    
+                                
+                                <a href="/docs/how-to-guides/clis-for-llms/" class="btn btn-accent btn-outline" >
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Learn More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="flex-1">
+                    <div class="mockup-code shadow-2xl">
+                        <pre data-prefix="$" class="text-success"><code>doc.GenMarkdownTree(rootCmd, &#34;./docs&#34;)</code></pre>
+                        <pre data-prefix=">" class="text-warning"><code>Generating markdown documentation...
+   ✅ Documentation created in ./docs/
+   🤖 Ready for LLM training!</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row-reverse gap-12 items-center">
+                
+                <div class="flex-1">
+                    <div class="card bg-base-100 shadow-2xl border-l-4 border-l-accent">
+                        <div class="card-body p-8">
+                            
+                            <div class="flex items-start gap-4 mb-6">
+                                <div class="w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                                    
+                                        <svg class="w-8 h-8 text-accent-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z"></path>
+                                        </svg>
+                                    
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-3xl font-bold mb-2">Beautiful TUIs with Charm/Fang</h3>
+                                    <p class="text-xl text-accent font-semibold">From CLI to TUI in one line</p>
+                                </div>
+                            </div>
+                            
+                            
+                            <p class="text-lg text-base-content/80 leading-relaxed mb-6">
+                                Automatic forms from your flags, interactive command selection, beautiful styling with Lip Gloss.
+                            </p>
+                            
+                            
+                            <div class="card-actions">
+                                
+                                
+                                    
+                                
+                                <a href="https://github.com/charmbracelet/fang" class="btn btn-accent btn-outline" target="_blank" rel="noopener noreferrer">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Learn More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="flex-1">
+                    <div class="mockup-code shadow-2xl">
+                        <pre data-prefix="$" class="text-success"><code>fang.Run(rootCmd)</code></pre>
+                        <pre data-prefix=">" class="text-warning"><code>🎨 Converting CLI to interactive TUI...
+   ✅ Beautiful interface ready!
+   🚀 Users love the experience!</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                
+                <div class="flex-1">
+                    <div class="card bg-base-100 shadow-2xl border-l-4 border-l-accent">
+                        <div class="card-body p-8">
+                            
+                            <div class="flex items-start gap-4 mb-6">
+                                <div class="w-16 h-16 bg-gradient-to-br from-accent to-primary rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                                    
+                                        <svg class="w-8 h-8 text-accent-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-3xl font-bold mb-2">Context &amp; Tracing Support</h3>
+                                    <p class="text-xl text-accent font-semibold">Observability built-in</p>
+                                </div>
+                            </div>
+                            
+                            
+                            <p class="text-lg text-base-content/80 leading-relaxed mb-6">
+                                OpenTelemetry and context propagation make your CLI observable from day one.
+                            </p>
+                            
+                            
+                            <div class="card-actions">
+                                
+                                
+                                    
+                                
+                                <a href="/docs/how-to-guides/context-and-tracing/" class="btn btn-accent btn-outline" >
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Learn More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="flex-1">
+                    <div class="mockup-code shadow-2xl">
+                        <pre data-prefix="$" class="text-success"><code>ctx := cmd.Context()
+span, ctx := tracer.Start(ctx, &#34;deploy-command&#34;)</code></pre>
+                        <pre data-prefix=">" class="text-warning"><code>📊 Tracing enabled for observability
+   ✅ Context propagation active
+   🔍 Full request lifecycle tracked</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        
+        
+        <div class="text-center mt-20">
+            <div class="bg-gradient-to-r from-accent/10 to-primary/10 rounded-3xl p-12 max-w-4xl mx-auto">
+                <h3 class="text-3xl font-bold mb-6">Ready to unlock these superpowers?</h3>
+                <p class="text-lg text-base-content/80 mb-8 max-w-2xl mx-auto">
+                    These advanced features are available today in Cobra. Start building CLIs that compete with the best tools in the industry.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/docs/tutorials/first-cli/" class="btn btn-accent btn-lg px-8">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Start Building Now
+                    </a>
+                    <a href="/docs/" class="btn btn-outline btn-lg px-8">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        View Complete Docs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+    <div class="bg-base-200 py-48">
+    <div class="container mx-auto px-4">
+        
+        <div class="text-center mb-16">
+            <div class="badge badge-primary badge-lg mb-8 px-6 py-3 font-bold">Battle-Tested & Trusted</div>
+            <h2 class="text-4xl font-bold mb-8">Battle-Tested by the World&#39;s Most Critical Infrastructure</h2>
+            <p class="text-xl text-base-content/70 max-w-3xl mx-auto mb-8">
+                When mission-critical infrastructure needs CLI reliability, they choose Cobra.
+                From container orchestration to developer tooling, Cobra powers the tools that power the world.
+            </p>
+        </div>
+        
+        
+        <div class="mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Kubernetes</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>110000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">kubectl powers container orchestration worldwide</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    <span class="badge badge-primary badge-xs">Featured</span>
+                                </div>
+                                
+                                <a href="https://kubernetes.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Docker</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>68000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">Container runtime trusted by millions</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    <span class="badge badge-primary badge-xs">Featured</span>
+                                </div>
+                                
+                                <a href="https://docker.com" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">GitHub CLI</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>37000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">Official GitHub command-line tool</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">developer-tools</span>
+                                    <span class="badge badge-primary badge-xs">Featured</span>
+                                </div>
+                                
+                                <a href="https://cli.github.com" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Hugo</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>75000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">World&#39;s fastest static site generator</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">developer-tools</span>
+                                    <span class="badge badge-primary badge-xs">Featured</span>
+                                </div>
+                                
+                                <a href="https://gohugo.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Helm</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>27000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">The package manager for Kubernetes</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    
+                                </div>
+                                
+                                <a href="https://helm.sh" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Istio</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>35000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">Connect, secure, control, and observe services</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    
+                                </div>
+                                
+                                <a href="https://istio.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Prometheus</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>55000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">Monitoring system and time series database</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    
+                                </div>
+                                
+                                <a href="https://prometheus.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Jaeger</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>20000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">End-to-end distributed tracing</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    
+                                </div>
+                                
+                                <a href="https://jaegertracing.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Linkerd</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>10500</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">Ultralight service mesh for Kubernetes</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    
+                                </div>
+                                
+                                <a href="https://linkerd.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Flux</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>9000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">GitOps toolkit for Kubernetes</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">infrastructure</span>
+                                    
+                                </div>
+                                
+                                <a href="https://fluxcd.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Buffalo</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>8000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">Rapid web development framework</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">developer-tools</span>
+                                    
+                                </div>
+                                
+                                <a href="https://gobuffalo.io" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                    <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div class="card-body p-4">
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="card-title text-base font-bold truncate">Viper</h3>
+                                    
+                                    <div class="flex items-center gap-1 text-xs opacity-70">
+                                        <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24">
+                                            <path d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"/>
+                                        </svg>
+                                        <span>27000</span>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                            <p class="text-base-content/80 text-sm leading-relaxed line-clamp-2 mb-4 flex-grow">Go configuration with fangs</p>
+                            <div class="card-actions justify-between items-center mt-auto">
+                                <div class="flex gap-2">
+                                    <span class="badge badge-outline badge-xs">developer-tools</span>
+                                    
+                                </div>
+                                
+                                <a href="https://github.com/spf13/viper" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-xs">Visit</a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+                    
+                
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+
+    
+    <div class="bg-gradient-to-r from-primary to-secondary py-48">
+    <div class="container mx-auto px-4">
+        
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-bold text-primary-content mb-6">
+                Ready to Build CLIs That Users Love?
+            </h2>
+            <p class="text-xl text-primary-content/90 max-w-3xl mx-auto mb-8">
+                Join 173,000+ developers building better CLIs with the framework trusted by Kubernetes, Docker, and GitHub CLI.
+                Your next enterprise-grade CLI is just minutes away.
+            </p>
+        </div>
+        
+        
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12">
+            
+            <div class="card bg-base-100 shadow-2xl hover:shadow-3xl transition-shadow duration-300">
+                <div class="card-body text-center p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-accent to-secondary rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <svg class="w-8 h-8 text-accent-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">For Developers</h3>
+                    <p class="text-base-content/70 mb-6">
+                        Start building your first CLI in under 5 minutes with our step-by-step tutorial.
+                    </p>
+                    <div class="card-actions justify-center">
+                        <a href="/docs/tutorials/first-cli/" class="btn btn-accent btn-lg w-full">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Start Tutorial
+                        </a>
+                    </div>
+                    <p class="text-xs text-base-content/60 mt-3">5-minute quickstart</p>
+                </div>
+            </div>
+            
+            
+            <div class="card bg-base-100 shadow-2xl hover:shadow-3xl transition-shadow duration-300 ring-2 ring-accent">
+                <div class="card-body text-center p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-success to-info rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <svg class="w-8 h-8 text-success-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H9m0 0H5m5 0v-4a1 1 0 011-1h2a1 1 0 011 1v4M7 7h10M7 11h4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">For Enterprises</h3>
+                    <p class="text-base-content/70 mb-6">
+                        Explore production patterns, advanced features, and enterprise deployment strategies.
+                    </p>
+                    <div class="card-actions justify-center">
+                        <a href="/docs/explanations/enterprise-guide/" class="btn btn-success btn-lg w-full">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            Enterprise Guide
+                        </a>
+                    </div>
+                    <p class="text-xs text-base-content/60 mt-3">Battle-tested patterns</p>
+                </div>
+            </div>
+            
+            
+            <div class="card bg-base-100 shadow-2xl hover:shadow-3xl transition-shadow duration-300">
+                <div class="card-body text-center p-8">
+                    <div class="w-16 h-16 bg-gradient-to-br from-warning to-error rounded-xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                        <svg class="w-8 h-8 text-warning-content" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">AI Integration</h3>
+                    <p class="text-base-content/70 mb-6">
+                        Discover LLM documentation generation, TUI conversion, and AI-ready patterns.
+                    </p>
+                    <div class="card-actions justify-center">
+                        <a href="/docs/how-to-guides/clis-for-llms/" class="btn btn-warning btn-lg w-full">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            Explore AI Features
+                        </a>
+                    </div>
+                    <p class="text-xs text-base-content/60 mt-3">LLM-ready CLIs</p>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="text-center">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                <a href="https://github.com/spf13/cobra" target="_blank" rel="noopener" class="btn btn-outline btn-lg border-primary-content text-primary-content hover:bg-primary-content hover:text-primary px-8">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    View on GitHub
+                </a>
+                <a href="/docs/examples/" class="btn btn-ghost btn-lg text-primary-content hover:bg-primary-content/10 px-8">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    View Examples
+                </a>
+            </div>
+            
+            
+            <div class="text-primary-content/70 text-sm">
+                <p class="mb-2">
+                    <strong>✓ Open Source</strong> • <strong>✓ Apache License</strong> • <strong>✓ Active Community</strong>
+                </p>
+                <p>
+                    Created by <strong>Steve Francia</strong> (Former Google Go Team) • 
+                    Maintained by the community since 2013
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+  </main>
+  <footer class="footer p-10 bg-base-200 text-base-content items-start grid grid-cols-1 md:grid-cols-3 gap-8">
+    <nav>
+  <h6 class="footer-title">Docs</h6> 
+  <a href="/docs/tutorials/getting-started/" class="link link-hover">Getting Started</a>
+  <a href="/docs/how-to-guides/" class="link link-hover">How-To Guides</a>
+  <a href="https://pkg.go.dev/github.com/spf13/cobra" class="link link-hover" target="_blank">Reference</a>
+  <a href="/docs/explanations/" class="link link-hover">Explanations</a>
+</nav> 
+<nav>
+  <h6 class="footer-title">Community</h6> 
+  <a href="https://github.com/spf13/cobra" class="link link-hover" target="_blank" rel="noopener">GitHub</a>
+  <a href="https://github.com/spf13/cobra/discussions" class="link link-hover" target="_blank" rel="noopener">Discussions</a>
+  <a href="https://github.com/spf13/cobra/issues" class="link link-hover" target="_blank" rel="noopener">Issue Tracker</a>
+</nav> 
+<aside>
+  <p>Copyright © 2025 The Cobra Authors.</p>
+  <p>Released under the <a href="https://www.apache.org/licenses/LICENSE-2.0" class="link link-hover" target="_blank" rel="noopener">Apache 2.0 License</a>.</p>
+  <p>Enterprise-ready • Production-tested</p>
+</aside>
+
+  </footer>
+</body>
+</html>

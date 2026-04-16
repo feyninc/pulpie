@@ -1,0 +1,369 @@
+How to Use Chrome DevTools for Performance | how2 - Tech Guides & Tutorials
+
+Chrome DevTools includes powerful performance profiling tools that show exactly where your web app spends time. Here’s how to use them to identify and fix performance bottlenecks.
+
+## Open Performance Panel
+
+Press`Cmd+Opt+I`(Mac) or`F12`(Windows/Linux) to open DevTools, then click the “Performance” tab. Or open directly with`Cmd+Opt+P`.
+
+## Record a Performance Profile
+
+1. Click Stop after 5-10 seconds DevTools shows a detailed timeline of everything that happened: JavaScript execution, rendering, painting, and more.
+2. Interact with your app (scroll, click buttons, navigate)
+3. Click the Record button (circle icon)
+
+## Read the Timeline
+
+The timeline has several tracks: FPS (Frames Per Second): Green bars show frame rate. Aim for 60 FPS (16.7ms per frame). Red bars indicate dropped frames. CPU: Shows what consumed CPU time:
+
+- Gray: Other Network: Bars show when resources loaded. Main thread: Shows function calls as a flame graph. Wider bars = more time spent.
+- Green: Painting
+- Purple: Rendering/layout
+- Yellow: JavaScript execution
+
+## Find Slow Functions
+
+Click on a yellow block in the Main thread. The bottom panel shows:
+
+- Event Log: Chronological list of events Look for functions with high “Self Time”—that’s where optimization matters.
+- Call Tree: Hierarchical view of function calls
+- Bottom-Up: Functions sorted by time spent
+- Summary: Total time, self time, source file
+
+## Analyze Frame Rendering
+
+Click on a frame (the green bar in the FPS track). DevTools highlights:
+
+- Forced synchronous layout: JavaScript forcing layout recalculation
+- Expensive paint: Large areas being repainted
+- Layout thrashing: Reading and writing DOM in a loop
+- Painting: Drawing pixels Common issues:
+- Rendering: Layout calculation
+- Scripting: JavaScript execution
+- Green frames: Smooth 60 FPS Click the frame to see what caused slowness:
+- Red corner: Frames that took too long (16.7ms)
+
+## Find Layout Thrashing
+
+Layout thrashing happens when you read and write DOM properties in alternation:
+
+```
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+
+```
+
+```
+// Bad - causes layout thrashing
+for (const elem of elements) {
+ const height = elem.offsetHeight // Read - forces layout
+ elem.style.marginTop = height + 10 + 'px' // Write
+}
+// Good - batch reads and writes
+const heights = elements.map(e => e.offsetHeight) // Read all
+heights.forEach((h, i) => {
+ elements[i].style.marginTop = h + 10 + 'px' // Write all
+})
+
+```
+
+In the Performance panel, look for purple “Recalculate Style” blocks repeatedly followed by yellow script blocks. That’s thrashing.
+
+## Profile Memory Usage
+
+Switch to the Memory tab to find memory leaks:
+
+1. Click “Comparison” view DevTools shows objects that weren’t garbage collected between snapshots. Look for:
+2. Take another snapshot
+3. Interact with your app
+4. Click “Take snapshot”
+5. Select “Heap snapshot”
+
+- Closures holding references
+- Listeners not removed
+- Detached DOM nodes
+
+## Find Detached DOM Nodes
+
+Detached nodes are removed from the DOM but still in memory (memory leak): In Memory panel:
+
+1. Expand results Look for elements you expected to be garbage collected. Check if event listeners or closures are holding references.
+2. Search for “Detached”
+3. Take a snapshot
+
+```
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+
+```
+
+```
+// Bad - listener keeps node in memory
+const node = document.querySelector('.temp')
+node.addEventListener('click', () => {
+ console.log(node) // Closure holds reference
+})
+document.body.removeChild(node) // Removed but not GC'd
+// Good - remove listener
+const handleClick = () => console.log('clicked')
+node.addEventListener('click', handleClick)
+node.removeEventListener('click', handleClick)
+document.body.removeChild(node)
+
+```
+
+## Use Allocation Timeline
+
+For continuous memory profiling:
+
+1. Click “Stop” Blue bars show allocations. Gray bars show deallocations. If blue bars keep growing without corresponding gray bars, you have a leak.
+2. Interact with your app
+3. Click “Start”
+4. Memory panel → “Allocation instrumentation on timeline”
+
+## Run Lighthouse Audit
+
+Lighthouse provides automated performance recommendations:
+
+1. Click “Analyze page load” Lighthouse runs tests and shows:
+2. Select “Performance”
+3. Open Lighthouse tab
+
+- Reduce JavaScript execution time
+- Minimize main thread work
+- Enable text compression
+- Properly size images
+- Eliminate render-blocking resources
+- Diagnostics: Potential issues Common recommendations:
+- Opportunities: Specific improvements with estimated savings
+- Metrics: First Contentful Paint, Speed Index, Time to Interactive
+- Performance score (0-100)
+
+## Measure Core Web Vitals
+
+Chrome DevTools shows Core Web Vitals: LCP (Largest Contentful Paint): Time until largest element renders. Aim for <2.5s. FID (First Input Delay): Time from first user interaction to browser response. Aim for <100ms. CLS (Cumulative Layout Shift): Visual stability—how much content shifts during load. Aim for <0.1. These appear in the Performance panel and Lighthouse report.
+
+## Analyze Network Performance
+
+Switch to Network panel:
+
+1. Look for slow requests Waterfall view shows request timing:
+2. Sort by “Time” column
+3. Reload page with DevTools open
+
+- Content Download: Receiving response Long TTFB means slow server. Long Content Download means large file or slow connection.
+- Waiting (TTFB): Time to first byte
+- Request sent: Sending request
+- SSL: TLS negotiation
+- Initial Connection: TCP handshake
+- DNS Lookup: Domain resolution
+- Stalled: Browser stalled (connection limit, disk cache, etc.)
+- Queueing: Waiting for available connection
+
+## Throttle CPU and Network
+
+Simulate slower devices: CPU throttling: Performance panel → Gear icon → CPU: 4x slowdown Network throttling: Network panel → Throttling dropdown → Slow 3G Test your app under constrained conditions. If it’s smooth on a 4x slower CPU, it’ll be smooth on real devices.
+
+## Use Performance Marks
+
+Add markers to identify specific operations:
+
+```
+1
+2
+3
+4
+
+```
+
+```
+performance.mark('start-load-data')
+await fetchData()
+performance.mark('end-load-data')
+performance.measure('load-data', 'start-load-data', 'end-load-data')
+
+```
+
+These appear in the Performance timeline as vertical markers, making it easy to identify your code’s impact.
+
+## Find Long Tasks
+
+Long tasks block the main thread (50ms). They cause jank and poor responsiveness. In Performance panel, look for red triangles above yellow blocks—these are long tasks. Break them up with`setTimeout` or`requestIdleCallback`:
+
+```
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+
+```
+
+```
+// Bad - blocks main thread
+function processItems(items) {
+ items.forEach(item => expensiveOperation(item))
+}
+// Good - yields to browser
+async function processItems(items) {
+ for (const item of items) {
+ expensiveOperation(item)
+ await new Promise(resolve => setTimeout(resolve, 0))
+ }
+}
+
+```
+
+## Profile React Components
+
+Use React DevTools Profiler:
+
+1. Stop recording The Profiler shows:
+2. Interact with your app
+3. Click Record
+4. Open DevTools → Profiler tab
+5. Install React DevTools extension
+
+- Components rendering too frequently
+- Slow components (high render time)
+- Unnecessary re-renders (props didn’t change)
+- Why each component rendered Look for:
+- How long each render took
+- Which components rendered
+
+## Debug Rendering Performance
+
+Enable “Paint flashing” to see repaints:
+
+1. Check “Paint flashing” Green boxes show repainted areas. Ideally, only changed content should flash. If large areas flash on small changes, you’re over-painting.
+2. DevTools → More tools → Rendering
+
+## Use Coverage Tool
+
+Find unused JavaScript and CSS:
+
+1. Interact with app Red bars show unused code. This helps identify:
+2. Reload page
+3. DevTools → More tools → Coverage
+
+- Lazy-loadable chunks
+- Dead code
+- Bundle bloat
+
+## Profile Production Builds
+
+Always profile production builds, not development:
+
+```
+1
+2
+3
+4
+5
+
+```
+
+```
+# Development (unoptimized)
+npm run dev
+# Production (optimized)
+npm run build
+npm run preview
+
+```
+
+Development builds include debug code, warnings, and hot reload—dramatically slower than production.
+
+## Common Performance Issues
+
+Issue: Janky scrolling Profile while scrolling. Look for:
+
+- Synchronous layout reads (e.g.,`offsetHeight`) Use passive event listeners:
+- Style recalculations on every frame
+- Expensive scroll handlers
+
+```
+1
+
+```
+
+```
+element.addEventListener('scroll', handler, { passive: true })
+
+```
+
+Issue: Slow initial load Check Lighthouse → Opportunities:
+
+- Event listeners not removed Issue: High CPU usage Profile with CPU throttling. Identify hot functions with flame graph. Optimize or debounce expensive operations.
+- Growing arrays/objects
+- Detached DOM nodes
+- Large images → Optimize, lazy-load Issue: Memory leak Take heap snapshots before and after operations. Look for:
+- Render-blocking CSS → Inline critical CSS
+- Large JavaScript bundles → Code-split
+
+## Performance Budget
+
+Set budgets to prevent regressions:
+
+```
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+
+```
+
+```
+// lighthouse.config.js
+module.exports = {
+ ci: {
+ assert: {
+ preset: 'lighthouse:recommended',
+ assertions: {
+ 'first-contentful-paint': ['warn', { maxNumericValue: 2000 }],
+ 'interactive': ['error', { maxNumericValue: 5000 }],
+ 'total-byte-weight': ['warn', { maxNumericValue: 500000 }]
+ }
+ }
+ }
+}
+
+```
+
+Run Lighthouse in CI to enforce budgets.
+
+## Tips for Better Profiles
+
+Record short sessions: 5-10 seconds is enough. Longer recordings are harder to analyze. Focus on user journeys: Profile realistic interactions: “Search → View results → Click item”. Compare before/after: Profile before optimizations, make changes, profile again. Measure the difference. Use incognito mode: Avoid extensions interfering with measurements. Close other tabs: Reduce background CPU/memory noise. Chrome DevTools transforms performance optimization from guesswork to data-driven analysis. The Performance panel shows exactly where time goes, Memory panel reveals leaks, and Light

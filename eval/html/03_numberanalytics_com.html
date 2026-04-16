@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>
+          Actuarial Probability Models for Insurance 
+    </title>
+
+          <meta name="Location" content="New York, NY, USA" />
+      <meta name="Publisher" content="Number Analytics LLC" />
+    
+        <meta property="og:url" content="https://www.numberanalytics.com/blog/actuarial-probability-models-for-insurance" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Actuarial Probability Models for Insurance" />
+    <meta property="og:description" content="Discover how to apply actuarial probability models learned in STAT 610 to real-world insurance problems, enhancing your analytical and risk management skills." />
+        <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="627">
+    <meta property="og:image:alt" content="Actuarial Probability Models for Insurance">
+    
+    <meta property="fb:app_id" content="284966547034968" />
+    <meta property="og:locale" content="us_US" />
+    
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@numberanalytics" />
+    <meta name="twitter:title" content="Actuarial Probability Models for Insurance" />
+    <meta name="twitter:description" content="Discover how to apply actuarial probability models learned in STAT 610 to real-world insurance problems, enhancing your analytical and risk management skills." />
+    
+        <meta name="keywords" content="STAT 610 applications, actuarial science, insurance risk management, probability models" />
+
+        <meta name="author" content="Sarah Lee" />
+
+        <meta name="description" content="Discover how to apply actuarial probability models learned in STAT 610 to real-world insurance problems, enhancing your analytical and risk management skills." />
+
+          <link rel="canonical" href="https://www.numberanalytics.com/blog/actuarial-probability-models-for-insurance" />
+    
+    <!-- DNS prefetch and preconnect for performance optimization -->
+    <link rel="dns-prefetch" href="//ajax.googleapis.com">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="//www.googletagmanager.com">
+    <!-- Mediavine DNS prefetch -->
+    <link rel="dns-prefetch" href="//scripts.mediavine.com">
+    <link rel="dns-prefetch" href="//video.mediavine.com">
+
+    <!-- Preconnect to critical domains -->
+    <link rel="preconnect" href="https://ajax.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://s3.amazonaws.com" crossorigin>
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+    <!-- Mediavine preconnect -->
+    <link rel="preconnect" href="https://scripts.mediavine.com" crossorigin>
+
+    <!-- MEDIAVINE AD SCRIPT -->
+    <!-- Mediavine handles consent (GDPR/CCPA) automatically via built-in CMP -->
+    <!-- 
+    IMPORTANT: Verify the script filename matches your Mediavine dashboard:
+    - Check Mediavine dashboard → Settings → Installation
+    - The script URL should be: https://scripts.mediavine.com/tags/[YOUR-SITE-NAME].js
+    - Current script: number-analytics.js
+    - If different, update the src attribute below
+    -->
+    <!-- Initialize Mediavine before loading script -->
+    <script>
+    window._mvn = window._mvn || {};
+    window._mvn.site = window._mvn.site || {};
+    // Mediavine will auto-detect site from domain, but we can set defaults here
+    // If Mediavine provided a network code (mcmNetworkCode), add it here:
+    // window._mvn.site.networkCode = 'YOUR_NETWORK_CODE';
+    // window._mvn.site.mcmNetworkCode = 'YOUR_MCM_NETWORK_CODE';
+    </script>
+    <script type="text/javascript" async="async" data-noptimize="1" data-cfasync="false" src="//scripts.mediavine.com/tags/number-analytics.js"></script>
+
+    <!-- Mediavine Verification Script -->
+    <script>
+    (function() {
+        var mediavineCheckCount = 0;
+        var maxChecks = 10; // Check up to 10 times over 20 seconds
+        
+        // Monitor for Mediavine errors
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.indexOf('mcmNetworkCode') !== -1) {
+                console.error('[Mediavine] Configuration Error: mcmNetworkCode is required');
+                console.warn('[Mediavine] Action Required: Please verify your site is fully activated in Mediavine dashboard');
+                console.warn('[Mediavine] Contact Mediavine support if this error persists');
+            }
+        }, true);
+        
+        // Comprehensive Mediavine verification
+        function checkMediavine() {
+            mediavineCheckCount++;
+            var status = {
+                scriptElement: null,
+                scriptLoaded: false,
+                networkRequests: [],
+                mediavineObjects: {},
+                adContainers: [],
+                config: null,
+                errors: []
+            };
+            
+            // Check for script element
+            status.scriptElement = document.querySelector('script[src*="mediavine.com/tags/number-analytics.js"]');
+            if (status.scriptElement) {
+                status.scriptLoaded = status.scriptElement.hasAttribute('data-loaded') || 
+                                     (status.scriptElement.readyState === 'complete' || 
+                                      status.scriptElement.readyState === 'loaded');
+                
+                // Add load listener if not already added
+                if (!status.scriptElement.hasAttribute('data-listener-added')) {
+                    status.scriptElement.setAttribute('data-listener-added', 'true');
+                    status.scriptElement.addEventListener('load', function() {
+                        this.setAttribute('data-loaded', 'true');
+                        console.log('[Mediavine] ✅ Script loaded successfully');
+                        setTimeout(function() {
+                            performDetailedCheck();
+                        }, 2000);
+                    });
+                    status.scriptElement.addEventListener('error', function() {
+                        console.error('[Mediavine] ❌ Script failed to load - check network connection and script URL');
+                        status.errors.push('Script load error');
+                    });
+                }
+            } else {
+                status.errors.push('Script element not found in DOM');
+            }
+            
+            // Check for Mediavine network requests
+            if (window.performance && window.performance.getEntriesByType) {
+                var networkEntries = window.performance.getEntriesByType('resource');
+                status.networkRequests = networkEntries.filter(function(entry) {
+                    return entry.name && entry.name.indexOf('mediavine.com') !== -1;
+                });
+            }
+            
+            // Check for Mediavine global objects
+            status.mediavineObjects = {
+                __mv: typeof window.__mv !== 'undefined' ? window.__mv : null,
+                Mediavine: typeof window.Mediavine !== 'undefined' ? window.Mediavine : null,
+                _mvn: typeof window._mvn !== 'undefined' ? window._mvn : null,
+                __tcfapi: typeof window.__tcfapi !== 'undefined' ? window.__tcfapi : null
+            };
+            
+            // Check for ad containers (Mediavine auto-inserts ads)
+            status.adContainers = Array.from(document.querySelectorAll('[id*="mediavine"], [class*="mediavine"], [data-mediavine], [id*="mv-"], [class*="mv-"]));
+            
+            // Check configuration
+            if (window._mvn && window._mvn.site) {
+                status.config = {
+                    site: window._mvn.site,
+                    networkCode: window._mvn.site.networkCode || 'NOT SET',
+                    hasNetworkCode: !!window._mvn.site.networkCode
+                };
+            }
+            
+            // Log detailed status
+            if (mediavineCheckCount === 1 || mediavineCheckCount % 3 === 0) {
+                console.group('[Mediavine] Installation Check #' + mediavineCheckCount);
+                console.log('Script Element:', status.scriptElement ? '✅ Found' : '❌ Not found');
+                console.log('Script Loaded:', status.scriptLoaded ? '✅ Yes' : '⏳ Pending');
+                console.log('Network Requests:', status.networkRequests.length > 0 ? '✅ ' + status.networkRequests.length + ' requests' : '⏳ None yet');
+                if (status.networkRequests.length > 0) {
+                    status.networkRequests.forEach(function(req) {
+                        var statusText = req.responseStatus ? 'HTTP ' + req.responseStatus : 
+                                        (req.transferSize > 0 ? 'Loaded' : 'Pending');
+                        console.log('  -', req.name, '→', statusText);
+                    });
+                }
+                console.log('Mediavine Objects:');
+                Object.keys(status.mediavineObjects).forEach(function(key) {
+                    console.log('  -', key + ':', status.mediavineObjects[key] ? '✅ Present' : '❌ Missing');
+                });
+                console.log('Ad Containers:', status.adContainers.length > 0 ? '✅ ' + status.adContainers.length + ' found' : '⏳ None yet (Mediavine auto-inserts)');
+                if (status.config) {
+                    console.log('Configuration:', status.config);
+                    if (!status.config.hasNetworkCode) {
+                        console.warn('[Mediavine] ⚠️ Network code not set. If Mediavine provided one, add: window._mvn.site.networkCode = "YOUR_CODE"');
+                    }
+                }
+                if (status.errors.length > 0) {
+                    console.error('Errors:', status.errors);
+                }
+                console.groupEnd();
+            }
+            
+            // Final verification after multiple checks
+            if (mediavineCheckCount >= maxChecks) {
+                var isActive = status.scriptElement && 
+                              (status.scriptLoaded || status.networkRequests.length > 0 || 
+                               status.mediavineObjects.__mv || status.mediavineObjects.Mediavine);
+                
+                if (isActive) {
+                    console.log('[Mediavine] ✅ Installation verified - Script is active');
+                    console.log('[Mediavine] 📊 Analytics data should appear in Mediavine dashboard within 24-48 hours');
+                } else {
+                    console.warn('[Mediavine] ⚠️ Verification incomplete after ' + maxChecks + ' checks');
+                    console.warn('[Mediavine] Please verify:');
+                    console.warn('  1. Script URL matches Mediavine dashboard: https://scripts.mediavine.com/tags/number-analytics.js');
+                    console.warn('  2. Site is fully activated in Mediavine dashboard');
+                    console.warn('  3. Domain is verified in Mediavine dashboard');
+                    console.warn('  4. Check browser console for any errors');
+                }
+            }
+        }
+        
+        // Detailed check after script loads
+        function performDetailedCheck() {
+            console.group('[Mediavine] Detailed Status Check');
+            
+            // Check for ad rendering
+            var adElements = document.querySelectorAll('iframe[src*="mediavine"], div[id*="mediavine"], div[class*="mediavine"]');
+            console.log('Ad Elements Found:', adElements.length);
+            if (adElements.length > 0) {
+                console.log('✅ Ads are being rendered');
+            } else {
+                console.log('⏳ No ad elements yet (may appear after page scroll or content load)');
+            }
+            
+            // Check for TCF/consent
+            if (typeof window.__tcfapi !== 'undefined') {
+                console.log('✅ TCF/Consent API detected');
+            }
+            
+            // Check for Mediavine analytics
+            if (window.__mv && window.__mv.track) {
+                console.log('✅ Mediavine tracking object detected');
+            }
+            
+            console.groupEnd();
+        }
+        
+        // Run checks periodically
+        checkMediavine();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(checkMediavine, 500);
+            });
+        }
+        
+        // Check every 2 seconds for up to 20 seconds
+        var checkInterval = setInterval(function() {
+            if (mediavineCheckCount < maxChecks) {
+                checkMediavine();
+            } else {
+                clearInterval(checkInterval);
+            }
+        }, 2000);
+        
+        // Final check after page fully loads
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                checkMediavine();
+                performDetailedCheck();
+            }, 3000);
+        });
+    })();
+    </script>
+
+    <!-- Clear old Ezoic cookies to prevent header overflow errors -->
+    <script>
+    (function() {
+      // List of Ezoic cookie prefixes to clear
+      var ezoicPrefixes = ['__ezconsent', '__ezstat', '__ezuid', '__ezses', 'ezoab_', 'ezohw', 'ezoref_', 'ezds', 'ezux_'];
+      var hostname = window.location.hostname;
+      var domains = [hostname, '.' + hostname];
+      
+      // Get all cookies and clear Ezoic ones
+      document.cookie.split(';').forEach(function(c) {
+        var name = c.split('=')[0].trim();
+        var isEzoic = ezoicPrefixes.some(function(prefix) { return name.indexOf(prefix) === 0; }) || 
+                      name.toLowerCase().indexOf('ezoic') !== -1 ||
+                      name.toLowerCase().indexOf('ez_') === 0;
+        if (isEzoic) {
+          domains.forEach(function(domain) {
+            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=' + domain;
+          });
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+    }
+      });
+      
+      // Clear Ezoic localStorage items
+      try {
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && (key.indexOf('ezoic') !== -1 || key.indexOf('ez_') === 0)) {
+            keysToRemove.push(key);
+    }
+        }
+        keysToRemove.forEach(function(key) { localStorage.removeItem(key); });
+      } catch(e) {}
+    })();
+    </script>
+
+    <!-- jQuery (moved to head for proper loading order) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Google Consent Mode v2 - Mediavine handles consent, this syncs with Google -->
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    // Mediavine handles consent management via its built-in CMP
+    // Default to granted - Mediavine will update consent state as needed
+      gtag('consent', 'default', {
+        'ad_storage': 'granted',
+        'ad_user_data': 'granted',
+        'ad_personalization': 'granted',
+        'analytics_storage': 'granted'
+      });
+
+    // Listen for Mediavine/TCF consent changes
+    if (typeof __tcfapi !== 'undefined') {
+      __tcfapi('addEventListener', 2, function(tcData, success) {
+        if (success && (tcData.eventStatus === 'useractioncomplete' || tcData.eventStatus === 'tcloaded')) {
+          const hasConsent = tcData.purpose && tcData.purpose.consents && tcData.purpose.consents[1];
+            gtag('consent', 'update', {
+            'ad_storage': hasConsent ? 'granted' : 'denied',
+            'ad_user_data': hasConsent ? 'granted' : 'denied',
+            'ad_personalization': hasConsent ? 'granted' : 'denied',
+            'analytics_storage': hasConsent ? 'granted' : 'denied'
+            });
+          }
+    }
+    </script>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JSQE4H56V6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      let usrid=null;
+      gtag('config', 'G-JSQE4H56V6', {'user_id': usrid});
+    </script>
+    <!-- Global site tag -Google Analtyics End-->
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-54PV9C3M');</script>
+    <!-- End Google Tag Manager -->
+    
+    <!-- Pygments CSS for CodeHilite-->
+    <!-- <link rel="stylesheet" href="/css/pygments.css">-->
+
+    <!-- Move non-critical CSS to the bottom -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+    </noscript>
+
+    <!-- Defer non-critical Prism CSS -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css">
+    </noscript>
+
+         <!-- Tailwind CSS -->
+     <link rel="preload" as="style" href="https://www.numberanalytics.com/build/assets/app-COAwtWVL.css" /><link rel="modulepreload" href="https://www.numberanalytics.com/build/assets/app-l0sNRNKZ.js" /><link rel="stylesheet" href="https://www.numberanalytics.com/build/assets/app-COAwtWVL.css" /><script type="module" src="https://www.numberanalytics.com/build/assets/app-l0sNRNKZ.js"></script>      <!-- Custom CSS files (if needed) -->
+
+
+      <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/favicon/apple-touch-icon-144-precomposed.png" />
+      <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/favicon/apple-touch-icon-114-precomposed.png" />
+      <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/favicon/apple-touch-icon-72-precomposed.png" />
+      <link rel="apple-touch-icon-precomposed" href="/images/favicon/apple-touch-icon-57-precomposed.png" />
+      <link rel="icon" type="image/png" href="https://www.numberanalytics.com/images/favicon/favicon.png" />
+
+      <style>
+        /* Loading spinner styles */
+        .page-loader {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.2s ease;
+        }
+        
+        .page-loader.active {
+          opacity: 1;
+          pointer-events: all;
+        }
+        
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-radius: 50%;
+          border-top-color: #3b82f6;
+          animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        /* Critical CSS for LCP elements */
+        .blog-title {
+          font-size: 2.25rem;
+          line-height: 2.5rem;
+          font-weight: 700;
+          color: #1a202c;
+          margin-bottom: 1rem;
+        }
+        
+        .blog-content {
+          max-width: 48rem;
+          margin-left: auto;
+          margin-right: auto;
+          background-color: #ffffff;
+          padding: 1.5rem;
+          border-radius: 0.75rem;
+        }
+        
+        .featured-image {
+          width: 100%;
+          height: auto;
+          object-fit: cover;
+          border-radius: 0.75rem;
+        }
+        
+        /* Loading spinner styles */
+        .page-loader {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(255, 255, 255, 0.8);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.2s ease;
+        }
+        
+        .page-loader.active {
+          opacity: 1;
+          pointer-events: all;
+        }
+        
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 4px solid rgba(0, 0, 0, 0.1);
+          border-radius: 50%;
+          border-top-color: #3b82f6;
+          animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+        </style>
+    
+    <!-- Mermaid module preload -->
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs">
+
+          
+            </head>
+
+  <body class="mb-8 pt-12">
+    <!-- Body Start -->
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-54PV9C3M"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Page Loader -->
+    <div id="page-loader" class="page-loader">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Include Alpine.js for the mobile menu functionality -->
+ <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<nav class="bg-gray-800 fixed top-0 left-0 w-full z-50" x-data="{ open: false }">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="relative flex h-16 items-center justify-between">
+      <div class="flex items-center">
+        <div class="shrink-0">
+          <a href="/" class="flex items-center">
+            <img src="/images/logo/logo.png" loading="lazy" class="h-8 w-auto hidden lg:block" alt="Number Analytics logo">
+            <img src="https://s3.amazonaws.com/NumberAnal/image/logo_N.png" loading="lazy" class="h-8 w-auto lg:hidden" alt="Number Analytics logo">
+          </a>
+        </div>
+        <div class="hidden md:ml-6 md:block">
+          <div class="flex space-x-4">
+            <a href="/statistics" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white ">
+              Statistics
+            </a>
+            <a href="/blog" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white bg-gray-900 text-white">
+              Blog
+            </a>
+            <a href="/tutorials" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white ">
+              Tutorials
+            </a>
+            <!-- More dropdown -->
+            <div class="relative" x-data="{ moreOpen: false }">
+              <button @click="moreOpen = !moreOpen" class="rounded-md text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 text-sm font-medium flex items-center">
+                More
+                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              <div x-show="moreOpen" 
+                   @click.away="moreOpen = false" 
+                   x-transition:enter="transition ease-out duration-100"
+                   x-transition:enter-start="transform opacity-0 scale-95"
+                   x-transition:enter-end="transform opacity-100 scale-100"
+                   x-transition:leave="transition ease-in duration-75"
+                   x-transition:leave-start="transform opacity-100 scale-100"
+                   x-transition:leave-end="transform opacity-0 scale-95"
+                   class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                <a href="/contact-us" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About</a>
+                <a href="https://numberanalytics.zendesk.com/hc" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Support</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end">
+        <div class="w-full max-w-lg lg:max-w-xs">
+          <form action="https://www.numberanalytics.com/search" method="GET">
+            <div class="relative">
+              <input type="search" name="q" id="search-input" aria-label="Search" 
+                     class="block w-full rounded-md bg-gray-700 py-1.5 pr-3 pl-10 text-base text-white outline-hidden placeholder:text-gray-400 focus:bg-white focus:text-gray-900 focus:placeholder:text-gray-400 sm:text-sm/6" 
+                     placeholder="Search articles" value="">
+              <svg class="pointer-events-none absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            
+            <!-- Search suggestions dropdown -->
+            <div id="search-suggestions" class="absolute z-50 bg-white rounded-md shadow-lg mt-1 hidden">
+              <div class="p-3">
+                <div class="flex justify-between items-center mb-3">
+                <a href="https://www.numberanalytics.com/explore" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded">
+                    Explore more topics
+                </a>    
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                  <a href="https://www.numberanalytics.com/search?q=Statistics" class="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded">Statistics</a>
+                  <a href="https://www.numberanalytics.com/search?q=Economics" class="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded">Economics</a>
+                  <a href="https://www.numberanalytics.com/search?q=MBA" class="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded">MBA</a>
+                  <a href="https://www.numberanalytics.com/search?q=Business%20Forecasting" class="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded">Business Forecasting</a>
+                  <a href="https://www.numberanalytics.com/search?q=Data%20Analytics" class="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded">Data Analytics</a>
+                  <a href="https://www.numberanalytics.com/search?q=Mathmatics" class="text-sm text-gray-700 hover:bg-gray-100 p-2 rounded">Mathematics</a>
+                </div>
+                <div class="text-xs text-gray-500">
+                  Press Enter to search
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+        <!-- Mobile menu button -->
+      <div class="flex md:hidden">
+        <button @click="open = !open" type="button" class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-hidden focus:ring-inset" aria-controls="mobile-menu" aria-expanded="false">
+          <span class="absolute -inset-0.5"></span>
+          <span class="sr-only">Open main menu</span>
+          <svg x-show="!open" class="block size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+          <svg x-show="open" class="block size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Desktop right navigation -->
+      <div class="hidden md:ml-4 md:block">
+        <div class="flex items-center space-x-3">
+                      <a href="https://www.numberanalytics.com/user/login" class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white ">
+              Log in
+            </a>
+            <a href="https://www.numberanalytics.com/user/create" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              Sign up
+            </a>
+                  </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div x-show="open" class="md:hidden" id="mobile-menu">
+    <div class="space-y-1 px-2 pb-3 pt-2">
+      <a href="/statistics" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white ">
+        Statistics
+      </a>
+      <a href="/blog" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white bg-gray-900 text-white">
+        Blog
+      </a>
+      <a href="/tutorials" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white ">
+        Tutorials
+      </a>
+      <a href="/contact-us" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+        About
+      </a>
+      <a href="https://numberanalytics.zendesk.com/hc" target="_blank" class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">
+        Support
+      </a>
+    </div>
+   
+    <div class="border-t border-gray-700 pt-4 pb-3">
+              <div class="space-y-1 px-2">
+          <a href="https://www.numberanalytics.com/user/login" class="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white">
+            Log in
+          </a>
+          <a href="https://www.numberanalytics.com/user/create" class="block rounded-md px-3 py-2 text-base font-medium bg-blue-600 text-white hover:bg-blue-700 text-center">
+            Sign up
+          </a>
+        </div>
+          </div>
+  </div>
+</nav>
+
+<script>
+// Show notifications on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const notifications = ['error-notification', 'success-notification', 'session-error-notification', 'warning-notification', 'info-notification'];
+    
+    notifications.forEach(function(id) {
+        const notification = document.getElementById(id);
+        if (notification) {
+            // Trigger slide-in animation
+            setTimeout(function() {
+                notification.classList.remove('translate-x-full', 'opacity-0');
+                notification.classList.add('translate-x-0', 'opacity-100');
+            }, 100);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(function() {
+                closeNotification(id);
+            }, 5000);
+        }
+    });
+});
+
+function closeNotification(id) {
+    const notification = document.getElementById(id);
+    if (notification) {
+        notification.classList.remove('translate-x-0', 'opacity-100');
+        notification.classList.add('translate-x-full', 'opacity-0');
+        setTimeout(function() {
+            notification.remove();
+        }, 300);
+    }
+}
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const searchSuggestions = document.getElementById('search-suggestions');
+    
+    if (searchInput && searchSuggestions) {
+      searchInput.addEventListener('focus', function() {
+        searchSuggestions.classList.remove('hidden');
+      });
+      
+      document.addEventListener('click', function(event) {
+        if (!searchInput.contains(event.target) && !searchSuggestions.contains(event.target)) {
+          searchSuggestions.classList.add('hidden');
+        }
+      });
+      
+      searchSuggestions.addEventListener('click', function(event) {
+        event.stopPropagation();
+      });
+    }
+  });
+</script>
+    <!-- Main Blog Post Wrapper -->
+    <div id="blogpost" class="py-8">
+        
+        <div id="posts" class="container mx-auto px-0 md:px-4">
+            <!-- NumberMake Ad Widget - Outside prose wrapper to prevent DOM conflicts
+            <div class="mb-4 mt-2 mx-2 justify-center items-center">
+                <div class="numbermake-ad" data-ad-group-id="68dc7b33-9fcb-45ec-9cf2-7be1e0024789"></div>
+                <script async src="https://oyrlbphisrnyoyhgkvkc.supabase.co/functions/v1/ad-script?site_id=site_5jdkmj8lr2k"></script>
+            </div>
+            NumberMake Ad Widget End -->
+            
+            <div id="blogpost-wrapper" 
+                class="blog-content prose lg:prose-lg prose-neutral prose-headings:font-bold      
+                prose-a:text-blue-600 prose-img:rounded-xl prose-img:mx-auto prose-blockquote:border-l-4 
+                prose-blockquote:border-gray-300 prose-a:no-underline hover:prose-a:underline  
+                font-system prose-headings:font-system prose-pre:bg-gray-100 prose-pre:text-black">
+                <!-- Post Title -->
+                <h1 class="blog-title"> Actuarial Probability Models for Insurance</h1>
+                                    <div class="mt-2 mb-2 text-lg text-gray-600">Understanding and Applying STAT 610 Concepts in Real-World Scenarios</div>
+                                <!-- Author and Publication Date at the Top -->
+                <div class="flex items-center mb-6 ">
+                    <!-- Author Avatar (replace with your image path or conditionally render if available) -->
+                    <div class="shrink-0 mr-4">
+                                             <img class="w-full h-full rounded-full shadow-md object-cover" 
+                        src="https://s3.amazonaws.com/NumberAnal/image/Sarah_Lee_120.jpg" 
+                        style="width: 60px !important; height: 60px !important;" 
+                        alt="Sarah Lee" 
+                        loading="lazy">
+                                            <!-- Example user icon using an SVG -->
+                         <!--<svg class="w-5 h-5 mr-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 10a4 4 0 100-8 4 4 0 000 8zM2 18a8 8 0 0116 0H2z" />
+                        </svg>-->
+                        
+                    </div>
+                    <!-- Author Name and Date -->
+                    <div>
+                    <p class="text-sm text-gray-600">
+                        Sarah Lee 
+                      
+                                                    <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">AI generated</span>
+                            <span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">Llama-4-Maverick-17B-128E-Instruct-FP8 </span>
+                                             
+                      
+                        <!-- Minutes to read -->
+                        <span class="text-sm text-gray-600">6 min read</span>
+                        <!-- Date of publication -->
+                        <span class="mx-1 text-sm text-gray-600">&middot;</span> June 13, 2025
+                          
+                    </p>
+                    </div>
+                </div>
+                
+                <!-- Add near the post metadata -->
+                <div class="post-meta">
+                    <!-- Existing meta information -->
+                    <span class="post-views">47 views</span>
+                </div>
+		                                                                    <div class="featured-image">
+    <figure>
+        <a href="https://images.unsplash.com/photo-1705234384936-b75956114126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MDgyMDR8MHwxfHNlYXJjaHwxfHxTVEFUJTIwNjEwJTIwYXBwbGljYXRpb25zJTJDJTIwYWN0dWFyaWFsJTIwc2NpZW5jZSUyQyUyMGluc3VyYW5jZSUyMHJpc2slMjBtYW5hZ2VtZW50JTJDJTIwcHJvYmFiaWxpdHklMjBtb2RlbHN8ZW58MHwwfHx8MTc0OTg0NzQyOXww&ixlib=rb-4.1.0&q=80&w=500&?utm_source=numberanalytics&utm_medium=referral" target="_blank">
+            <img alt="scrabble tiles spelling out words on a wooden surface" width="700" 
+                 src="https://images.unsplash.com/photo-1705234384936-b75956114126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MDgyMDR8MHwxfHNlYXJjaHwxfHxTVEFUJTIwNjEwJTIwYXBwbGljYXRpb25zJTJDJTIwYWN0dWFyaWFsJTIwc2NpZW5jZSUyQyUyMGluc3VyYW5jZSUyMHJpc2slMjBtYW5hZ2VtZW50JTJDJTIwcHJvYmFiaWxpdHklMjBtb2RlbHN8ZW58MHwwfHx8MTc0OTg0NzQyOXww&ixlib=rb-4.1.0&q=80&w=500&?utm_source=numberanalytics&utm_medium=referral">
+        </a>
+        <figcaption style="font-size: 12px; color: gray; text-align: center; margin-top: 5px;">
+            <p>Photo by <a href="https://unsplash.com/@markuswinkler?utm_source=numberanalytics&utm_medium=referral" 
+               style="color: gray;" target="_blank">Markus Winkler</a> on 
+               <a href="https://unsplash.com?utm_source=numberanalytics&utm_medium=referral" 
+               style="color: gray;" target="_blank">Unsplash</a></p>
+        </figcaption>
+    </figure>
+    </div>
+                        <!--
+    <figure>
+        <a href="https://images.unsplash.com/photo-1705234384936-b75956114126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MDgyMDR8MHwxfHNlYXJjaHwxfHxTVEFUJTIwNjEwJTIwYXBwbGljYXRpb25zJTJDJTIwYWN0dWFyaWFsJTIwc2NpZW5jZSUyQyUyMGluc3VyYW5jZSUyMHJpc2slMjBtYW5hZ2VtZW50JTJDJTIwcHJvYmFiaWxpdHklMjBtb2RlbHN8ZW58MHwwfHx8MTc0OTg0NzQyOXww&ixlib=rb-4.1.0&q=80&w=1080?utm_source=numberanalytics&utm_medium=referral" target="_blank">
+            <img alt="scrabble tiles spelling out words on a wooden surface" width="700" 
+                 src="https://images.unsplash.com/photo-1705234384936-b75956114126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3MDgyMDR8MHwxfHNlYXJjaHwxfHxTVEFUJTIwNjEwJTIwYXBwbGljYXRpb25zJTJDJTIwYWN0dWFyaWFsJTIwc2NpZW5jZSUyQyUyMGluc3VyYW5jZSUyMHJpc2slMjBtYW5hZ2VtZW50JTJDJTIwcHJvYmFiaWxpdHklMjBtb2RlbHN8ZW58MHwwfHx8MTc0OTg0NzQyOXww&ixlib=rb-4.1.0&q=80&w=1080?utm_source=numberanalytics&utm_medium=referral">
+        </a>
+        <figcaption style="font-size: 12px; color: gray; text-align: center; margin-top: 5px;">
+            <p>Photo by <a href="https://unsplash.com/@markuswinkler?utm_source=numberanalytics&utm_medium=referral" 
+               style="color: gray;" target="_blank">Markus Winkler</a> on 
+               <a href="https://unsplash.com?utm_source=numberanalytics&utm_medium=referral" 
+               style="color: gray;" target="_blank">Unsplash</a></p>
+        </figcaption>
+    </figure>
+    -->   
+                                                    <div class="table-of-contents">
+                <!--[Table of Contents]-->
+                </div>
+                
+                
+                
+                <!-- Post Content -->
+                <div class="max-w-none">
+                        <h2>Foundations of Actuarial Probability</h2>
+<p>The field of actuarial science is deeply rooted in probability theory, which provides the mathematical framework for understanding and managing risk. Actuaries rely on probability models to assess and mitigate risks associated with insurance policies, pension plans, and other financial instruments. In this section, we'll review the basics of probability theory, introduce actuarial notation and terminology, and discuss the concept of risk and uncertainty.</p>
+<h3>Review of Probability Theory Basics</h3>
+<p>Probability theory is a branch of mathematics that deals with the study of chance events and their likelihood of occurrence. The basic concepts of probability theory include:</p>
+<ul>
+<li>Random experiments: Experiments whose outcomes are uncertain and can be influenced by various factors.</li>
+<li>Sample space: The set of all possible outcomes of a random experiment.</li>
+<li>Events: Subsets of the sample space that represent specific outcomes or combinations of outcomes.</li>
+<li>Probability measures: Functions that assign a numerical value to each event, representing its likelihood of occurrence.</li>
+</ul>
+<p>Some key probability distributions used in actuarial science include:</p>
+<ul>
+<li><strong>Binomial distribution</strong>: Models the number of successes in a fixed number of independent trials, each with a constant probability of success.</li>
+<li><strong>Poisson distribution</strong>: Models the number of events occurring in a fixed interval, assuming a constant average rate of occurrence.</li>
+<li><strong>Normal distribution</strong>: A continuous distribution that models a wide range of natural phenomena, often used to approximate other distributions.</li>
+</ul>
+<h3>Actuarial Notation and Terminology</h3>
+<p>Actuaries use a specialized notation and terminology to communicate complex ideas and calculations. Some essential concepts include:</p>
+<ul>
+<li><strong>Survival function</strong>: The probability that an individual survives beyond a certain age or time period, denoted as $S(x)$.</li>
+<li><strong>Hazard rate</strong>: The instantaneous rate of failure or death at a given age or time, denoted as $\mu(x)$.</li>
+<li><strong>Actuarial present value</strong>: The present value of a future cash flow, taking into account the probability of survival and interest rates.</li>
+</ul>
+<h3>Understanding Risk and Uncertainty</h3>
+<p>Risk and uncertainty are fundamental concepts in actuarial science. Actuaries must understand the sources and types of risk, as well:</p>
+<ul>
+<li><strong>Risk</strong>: The possibility of loss or adverse outcomes due to various factors, such as mortality, morbidity, or investment returns.</li>
+<li><strong>Uncertainty</strong>: The lack of knowledge or predictability about future events or outcomes.</li>
+</ul>
+<p>Actuaries use probability models to quantify and manage risk, enabling insurers to make informed decisions about policy pricing, reserving, and risk management.</p>
+<h2>Actuarial Models in Practice</h2>
+<p>Actuarial models are used extensively in the insurance industry to assess and manage risk. In this section, we'll examine case studies of actuarial model applications, discuss examples of model outputs and interpretations, and highlight challenges in model implementation.</p>
+<h3>Case Studies of Actuarial Model Applications</h3>
+<p>Actuarial models are applied in various contexts, including:</p>
+<ol>
+<li><strong>Life insurance</strong>: Actuaries use mortality models to estimate the probability of death and calculate policy premiums.</li>
+<li><strong>Health insurance</strong>: Actuaries model morbidity rates and healthcare costs to determine policy premiums and reserve requirements.</li>
+<li><strong>Pension plans</strong>: Actuaries use mortality and investment return models to assess the financial sustainability of pension plans.</li>
+</ol>
+<h3>Examples of Model Outputs and Interpretations</h3>
+<p>Actuarial models produce a range of outputs, including:</p>
+<ul>
+<li><strong>Expected losses</strong>: The average loss or cost expected to occur over a specified period.</li>
+<li><strong>Value-at-Risk (VaR)</strong>: A measure of the potential loss or cost at a given confidence level.</li>
+<li><strong>Sensitivity analysis</strong>: An examination of how model outputs change in response to variations in input parameters.</li>
+</ul>
+<h3>Challenges in Model Implementation</h3>
+<p>Actuarial model implementation can be challenging due to factors such as:</p>
+<ul>
+<li><strong>Data quality</strong>: The accuracy and completeness of data used to parameterize and validate models.</li>
+<li><strong>Model complexity</strong>: The level of complexity and sophistication of models, which can impact interpretability and computational efficiency.</li>
+<li><strong>Regulatory requirements</strong>: Compliance with regulatory standards and guidelines for actuarial modeling.</li>
+</ul>
+<h2>Enhancing Risk Management with Actuarial Models</h2>
+<p>Actuarial models play a crucial role in risk management, enabling insurers to assess and mitigate risks effectively. In this section, we'll discuss the role of actuarial models in risk assessment, strategies for effective risk management, and regulatory considerations.</p>
+<h3>Role of Actuarial Models in Risk Assessment</h3>
+<p>Actuarial models help insurers assess risk by:</p>
+<ul>
+<li><strong>Quantifying risk</strong>: Providing a numerical representation of risk, enabling comparison and prioritization.</li>
+<li><strong>Identifying risk drivers</strong>: Highlighting the key factors that contribute to risk.</li>
+<li><strong>Evaluating risk mitigation strategies</strong>: Assessing the effectiveness of risk management interventions.</li>
+</ul>
+<h3>Strategies for Effective Risk Management</h3>
+<p>Effective risk management involves:</p>
+<ul>
+<li><strong>Diversification</strong>: Spreading risk across different asset classes, geographies, or business lines.</li>
+<li><strong>Hedging</strong>: Mitigating risk through the use of financial instruments, such as derivatives.</li>
+<li><strong>Reinsurance</strong>: Transferring risk to other insurers or reinsurers.</li>
+</ul>
+<h3>Regulatory Considerations and Compliance</h3>
+<p>Actuaries must comply with regulatory requirements and guidelines, such as:</p>
+<ul>
+<li><strong>Solvency II</strong>: A European Union regulatory framework that sets capital requirements for insurers.</li>
+<li><strong>NAIC</strong>: The National Association of Insurance Commissioners, which provides guidance on actuarial practices in the United States.</li>
+</ul>
+<h2>Future of Actuarial Science</h2>
+<p>The field of actuarial science is evolving rapidly, driven by advances in technology, changes in regulatory requirements, and shifting societal needs. In this section, we'll explore emerging trends in actuarial modeling, the impact of technology on actuarial practices, and the importance of continuing education and professional development.</p>
+<h3>Emerging Trends in Actuarial Modeling</h3>
+<p>Some emerging trends in actuarial modeling include:</p>
+<ul>
+<li><strong>Machine learning</strong>: The application of machine learning techniques to improve model accuracy and efficiency.</li>
+<li><strong>Big data</strong>: The use of large datasets to inform actuarial models and improve risk assessment.</li>
+<li><strong>Climate change</strong>: The incorporation of climate-related risks into actuarial models.</li>
+</ul>
+<h3>Impact of Technology on Actuarial Practices</h3>
+<p>Technology is transforming actuarial practices, with advancements in:</p>
+<ul>
+<li><strong>Computational power</strong>: Enabling faster and more complex calculations.</li>
+<li><strong>Data analytics</strong>: Facilitating the analysis of large datasets and improving model accuracy.</li>
+<li><strong>Automation</strong>: Streamlining routine tasks and freeing up actuaries to focus on high-value activities.</li>
+</ul>
+<h3>Continuing Education and Professional Development</h3>
+<p>Actuaries must stay up-to-date with the latest developments in actuarial science, through:</p>
+<ul>
+<li><strong>Continuing education</strong>: Participating in courses, conferences, and workshops to enhance knowledge and skills.</li>
+<li><strong>Professional certifications</strong>: Maintaining certifications, such as the ASA or FSA, to demonstrate expertise and commitment to the profession.</li>
+<li><strong>Networking</strong>: Engaging with peers and industry experts to share knowledge and best practices.</li>
+</ul>
+<p>The following flowchart illustrates the key steps involved in developing and implementing an actuarial model:</p>
+<pre class="mermaid">graph LR;
+    A["Problem Definition"] --> B["Data Collection"];
+    B --> C["Model Selection"];
+    C --> D["Model Parameterization"];
+    D --> E["Model Validation"];
+    E --> F["Model Implementation"];
+    F --> G["Model Monitoring"];
+</pre><p>Actuarial probability models are essential tools for insurers, enabling them to assess and manage risk effectively. By understanding the foundations of actuarial probability, applying actuarial models in practice, and enhancing risk management with actuarial models, insurers can make informed decisions and maintain a competitive edge in the market.</p>
+<p>The future of actuarial science is exciting and rapidly evolving, with emerging trends and technological advancements presenting new opportunities and challenges. Actuaries must stay adaptable, committed to continuing education and professional development, to remain at the forefront of the field.</p>
+<h2>References</h2>
+<ol>
+<li><a href="https://www.wiley.com/en-us/Loss+Models%3A+From+Data+to+Decisions%2C+4th+Edition-p-9781118315323">Klugman, S. A., Panjer, H. H., &amp; Willmot, G. E. (2012). Loss Models: From Data to Decisions. John Wiley &amp; Sons.</a></li>
+<li><a href="https://www.actexmadriver.com/Actuarial-Models-Life-Insurance-Annuities-3rd-Edition">Werner, G., &amp; Modlin, C. (2016). Actuarial Model: Life Insurance and Annuities. ACTEX Publications.</a></li>
+<li><a href="https://www.actuaries.org/IAA/Documents/ASTIN/2018/ASTIN2018-Actuarial-Model-A-Guide-to-Actuarial-Modelling.pdf">International Actuarial Association. (2018). Actuarial Model: A Guide to Actuarial Modeling. </a></li>
+</ol>
+<h2>FAQ</h2>
+<h3>What are actuarial probability models?</h3>
+<p>Actuarial probability models are mathematical representations of risk and uncertainty, used to assess and manage risk in insurance and other financial contexts.</p>
+<h3>What is the role of actuaries in insurance companies?</h3>
+<p>Actuaries play a crucial role in insurance companies, using probability models to assess risk, determine policy premiums, and develop risk management strategies.</p>
+<h3>What are some common actuarial models used in insurance?</h3>
+<p>Some common actuarial models used in insurance include mortality models, morbidity models, and investment return models.</p>
+<h3>How do actuaries stay current with developments in actuarial science?</h3>
+<p>Actuaries stay current through continuing education, professional certifications, and networking with peers and industry experts.</p>
+<h3>What is the future of actuarial science?</h3>
+<p>The future of actuarial science is rapidly evolving, with emerging trends and technological advancements presenting new opportunities and challenges.</p>
+
+                                    </div>
+                
+                
+                
+                <!-- Post Author & Date -->
+                <div class="mt-6 text-gray-600 flex items-center">
+                    <span class="inline-flex items-center">
+                        <!-- Example user icon using an SVG -->
+                                                <img class="w-[60px] h-[60px] mr-1 rounded-full shadow-md object-cover" 
+                        src="https://s3.amazonaws.com/NumberAnal/image/Sarah_Lee_120.jpg" 
+                        style="width: 60px !important; height: 60px !important;" 
+                        alt="Sarah Lee" 
+                        loading="eager">
+                                                <!--
+                        <svg class="w-5 h-5 mr-1 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 10a4 4 0 100-8 4 4 0 000 8zM2 18a8 8 0 0116 0H2z" />
+                        </svg>-->
+                        <span>Sarah Lee</span>
+                    </span>
+                    <span class="ml-4">2025-06-13 13:43:49</span>
+                </div>
+                
+                <!-- Divider -->
+                <hr class="my-6 border-gray-200">
+                
+                <!-- Comments Section -->
+                <a id="comments"></a>
+                <h4 class="text-xl font-semibold mb-4">
+                    0 Comments
+                </h4>
+
+                
+                <!-- Divider -->
+                <hr class="my-6 border-gray-200">
+
+                <!-- Comment Form / Login Notice -->
+                                    <div class="text-gray-600 mb-4">
+                        You need to be logged in to add comments.<br /><br />
+                        Click <a href="/user/login" class="text-blue-500 hover:underline">here</a> to login.
+                    </div>
+                                
+                
+                
+                <!-- Related Posts with Thumbnails Section -->
+                <h2 class="text-2xl font-bold mt-12 mb-6 border-b border-gray-200 pb-4">
+                    Related Posts
+                </h2>
+                
+                <!-- First Row of Related Posts -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                                            <div class="flex flex-col">
+    <div class="mb-4">
+                
+                <a href="/blog/comprehensive-guide-mcfaddens-r-squared-logistic-regression" class="block relative">
+            <img 
+                src="https://s3.amazonaws.com/NumberAnal/image/NumberAnalyzerDemo.gif" 
+                alt="A Comprehensive Guide to McFadden&#039;s R-squared in Logistic Regression" 
+                class="w-full h-48 object-cover rounded-lg hover:opacity-90 transition"
+                loading="lazy"
+                onerror="this.parentElement.innerHTML='<div class=\'w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center\'><svg xmlns=\'http://www.w3.org/2000/svg\' class=\'h-12 w-12 text-gray-400\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg></div>'"
+            >
+        </a>
+            </div>
+    <div>
+        <h3 class="text-lg font-bold mb-2">
+            <a href="/blog/comprehensive-guide-mcfaddens-r-squared-logistic-regression" class="text-black not-prose hover:text-gray-700">
+                A Comprehensive Guide to McFadden&#039;s R-squared in Logistic Regression
+            </a>
+        </h3>
+        <p class="text-gray-600 text-sm line-clamp-2 mb-2">
+            Discover how McFadden's R-squared provides deeper insights for logistic regression, enhancing model...
+        </p>
+        <div class="flex items-center text-sm text-gray-500">
+            <span>
+                                By Sarah Lee
+                            </span>
+            <span class="mx-1">•</span>
+            <span>Mar 13, 2025</span>
+            <span class="mx-1">•</span>
+            <span>47890 views</span>
+        </div>
+    </div>
+</div>                                         
+                                            <div class="flex flex-col">
+    <div class="mb-4">
+                
+                <a href="/blog/ultimate-residual-plots-guide" class="block relative">
+            <img 
+                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;ixid=M3w3MDgyMDR8MHwxfHNlYXJjaHwxfHxyZXNpZHVhbCUyMHBsb3RzJTJDJTIwcmVncmVzc2lvbiUyMGFuYWx5c2lzJTJDJTIwbW9kZWwlMjBkaWFnbm9zdGljcyUyQyUyMGRhdGElMjB2aXN1YWxpemF0aW9uJTJDJTIwc3RhdGlzdGljYWwlMjBtb2RlbGluZ3xlbnwwfDB8fHwxNzQ3MjM2NTgwfDA&amp;ixlib=rb-4.1.0&amp;q=80&amp;w=320&amp;utm_source=numberanalytics&amp;utm_medium=referral" 
+                alt="The Ultimate Guide to Residual Plots" 
+                class="w-full h-48 object-cover rounded-lg hover:opacity-90 transition"
+                loading="lazy"
+                onerror="this.parentElement.innerHTML='<div class=\'w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center\'><svg xmlns=\'http://www.w3.org/2000/svg\' class=\'h-12 w-12 text-gray-400\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg></div>'"
+            >
+        </a>
+            </div>
+    <div>
+        <h3 class="text-lg font-bold mb-2">
+            <a href="/blog/ultimate-residual-plots-guide" class="text-black not-prose hover:text-gray-700">
+                The Ultimate Guide to Residual Plots
+            </a>
+        </h3>
+        <p class="text-gray-600 text-sm line-clamp-2 mb-2">
+            This comprehensive guide delves into residual plots, an indispensable tool for evaluating regression...
+        </p>
+        <div class="flex items-center text-sm text-gray-500">
+            <span>
+                                By Sarah Lee
+                            </span>
+            <span class="mx-1">•</span>
+            <span>May 14, 2025</span>
+            <span class="mx-1">•</span>
+            <span>45063 views</span>
+        </div>
+    </div>
+</div>                                     </div>
+                
+                <!-- Second Row of Related Posts -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                                            <div class="flex flex-col">
+    <div class="mb-4">
+                
+                <a href="/blog/segment-fundamentals-guide" class="block relative">
+            <img 
+                src="https://images.unsplash.com/photo-1454117096348-e4abbeba002c?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;ixid=M3w3MDgyMDR8MHwxfHNlYXJjaHwxfHxzZWdtZW50JTJDJTIwZ2VvbWV0cnklMkMlMjBtZWFzdXJlbWVudHMlMkMlMjBwcm9wZXJ0aWVzJTJDJTIwY2xhc3NpZmljYXRpb25zfGVufDB8MHx8fDE3NDc0MDg3MzV8MA&amp;ixlib=rb-4.1.0&amp;q=80&amp;w=320&amp;utm_source=numberanalytics&amp;utm_medium=referral" 
+                alt="Segment Fundamentals: Types &amp; Properties" 
+                class="w-full h-48 object-cover rounded-lg hover:opacity-90 transition"
+                loading="lazy"
+                onerror="this.parentElement.innerHTML='<div class=\'w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center\'><svg xmlns=\'http://www.w3.org/2000/svg\' class=\'h-12 w-12 text-gray-400\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg></div>'"
+            >
+        </a>
+            </div>
+    <div>
+        <h3 class="text-lg font-bold mb-2">
+            <a href="/blog/segment-fundamentals-guide" class="text-black not-prose hover:text-gray-700">
+                Segment Fundamentals: Types &amp; Properties
+            </a>
+        </h3>
+        <p class="text-gray-600 text-sm line-clamp-2 mb-2">
+            This comprehensive guide delves into the fundamental concept of line segments in geometry. Readers w...
+        </p>
+        <div class="flex items-center text-sm text-gray-500">
+            <span>
+                                By Sarah Lee
+                            </span>
+            <span class="mx-1">•</span>
+            <span>May 16, 2025</span>
+            <span class="mx-1">•</span>
+            <span>33997 views</span>
+        </div>
+    </div>
+</div>                                         
+                                            <div class="flex flex-col">
+    <div class="mb-4">
+                
+                <a href="/blog/mastering-exponents-algebra1" class="block relative">
+            <img 
+                src="https://images.unsplash.com/photo-1487088678257-3a541e6e3922?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;ixid=M3w3MDgyMDR8MHwxfHNlYXJjaHwxfHxleHBvbmVudHMlMkMlMjBhbGdlYnJhJTJDJTIwbWF0aCUyMHJ1bGVzJTJDJTIwcG93ZXIlMjBwcm9wZXJ0aWVzJTJDJTIwc2ltcGxpZnlpbmclMjBleHByZXNzaW9uc3xlbnwwfDB8fHwxNzQ3Mzg3MDY1fDA&amp;ixlib=rb-4.1.0&amp;q=80&amp;w=320&amp;utm_source=numberanalytics&amp;utm_medium=referral" 
+                alt="Mastering Exponents in Algebra I" 
+                class="w-full h-48 object-cover rounded-lg hover:opacity-90 transition"
+                loading="lazy"
+                onerror="this.parentElement.innerHTML='<div class=\'w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center\'><svg xmlns=\'http://www.w3.org/2000/svg\' class=\'h-12 w-12 text-gray-400\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'currentColor\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg></div>'"
+            >
+        </a>
+            </div>
+    <div>
+        <h3 class="text-lg font-bold mb-2">
+            <a href="/blog/mastering-exponents-algebra1" class="text-black not-prose hover:text-gray-700">
+                Mastering Exponents in Algebra I
+            </a>
+        </h3>
+        <p class="text-gray-600 text-sm line-clamp-2 mb-2">
+            Explore exponents from their foundational definition to advanced applications in this comprehensive...
+        </p>
+        <div class="flex items-center text-sm text-gray-500">
+            <span>
+                                By Sarah Lee
+                            </span>
+            <span class="mx-1">•</span>
+            <span>May 16, 2025</span>
+            <span class="mx-1">•</span>
+            <span>18012 views</span>
+        </div>
+    </div>
+</div>                                     </div>
+                
+    
+            </div>
+            <!--
+            <p class="font-sans text-4xl font-bold mb-8" style="text-align: center; font-size: 2rem; margin-top: 40px;">
+                  Easy statistical analysis tool
+            </p>
+                <a href="https://www.numberanalytics.com">
+                    <img loading="lazy" alt="Number Analytics Homepage" class="img-responsive auto-margin center-block w-full h-auto object-cover mx-auto" src="https://s3.amazonaws.com/NumberAnal/image/iOS_payment_img_small.jpg" style="max-width: 600px; display: block; margin-left: auto; margin-right: auto;">
+                </a>
+           
+            <br>
+            <div class="flex justify-center mb-4">
+                <a id="learn-more-btn" class="bg-blue-500 text-white py-2 px-4 rounded-sm text-sm mr-2" href="https://www.numberanalytics.com" style="color: white;">
+                    Learn more
+                </a>
+            </div>
+            -->
+            
+        
+        </div>
+    </div>
+
+    <footer class="mt-12 pt-8 border-t border-gray-200">
+        <div class="text-center text-sm text-gray-500">
+            Built with Llama, AI-generated content may contain hallucinations, including factual inaccuracies and incorrect citation references.
+        </div>
+    </footer>
+
+    <!-- Optional: Some JavaScript for handling images, iframes, and tables -->
+    <script type="text/javascript">
+         setTimeout(function() {
+            //$('#number-analytics-banner').fadeIn();
+            setTimeout(function() {
+            //$('#number-analytics-banner').fadeOut();
+            }, 10000);
+             // Show timer countdown
+            var timeLeft = 10;
+            var countdownTimer = setInterval(function() {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                } else {
+                    $('#close-banner-btn').text('Close (' + timeLeft + ')');
+                }
+            }, 1000);
+        }, 60000);
+        
+        $('#close-banner-btn').click(function() {
+            $('#number-analytics-banner').fadeOut();
+        });
+        
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all images in the content
+            const images = document.querySelectorAll('img');
+            let unsplashIndex = 0;  // Counter specifically for Unsplash images
+            
+            images.forEach((img) => {
+                // Common styles for all images
+                img.classList.add("w-full", "h-auto", "object-cover");
+                
+                if (img.src && img.src.includes('unsplash')) {
+                    if (unsplashIndex === 0) {
+                        // First Unsplash image loads eagerly
+                        img.setAttribute('loading', 'eager');
+                    } else {
+                        // Subsequent Unsplash images use lazy loading
+                        img.setAttribute('loading', 'lazy');
+                    }
+                    unsplashIndex++;  // Increment counter only for Unsplash images
+                } else {
+                    // Non-Unsplash images use lazy loading
+                    img.setAttribute('loading', 'lazy');
+                }
+            });
+
+            // Wrap iframes in a responsive container
+            document.querySelectorAll("iframe").forEach(function(iframe) {
+                var wrapper = document.createElement('div');
+                // This gives a 16:9 aspect ratio
+                wrapper.classList.add("relative", "overflow-hidden", "pb-[56.25%]", "mb-4");
+                iframe.classList.add("absolute", "top-0", "left-0", "w-full", "h-full");
+                iframe.parentNode.insertBefore(wrapper, iframe);
+                wrapper.appendChild(iframe);
+            });
+
+            // Ensure tables are full width
+            document.querySelectorAll("table").forEach(function(table) {
+                table.classList.add("w-full");
+            });
+            
+            // Mediavine handles ad initialization automatically
+        });
+    </script>
+
+    
+
+    <!-- Amplitude Code start-->
+    <script defer type="text/javascript">
+      (function(e,t){var n=e.amplitude||{_q:[],_iq:{}};var r=t.createElement("script")
+      ;r.type="text/javascript"
+      ;r.integrity="sha384-+EO59vL/X7v6VE2s6/F4HxfHlK0nDUVWKVg8K9oUlvffAeeaShVBmbORTC2D3UF+"
+      ;r.crossOrigin="anonymous";r.async=true
+      ;r.src="https://cdn.amplitude.com/libs/amplitude-8.17.0-min.gz.js"
+      ;r.onload=function(){if(!e.amplitude.runQueuedFunctions){
+      console.log("[Amplitude] Error: could not load SDK")}}
+      ;var i=t.getElementsByTagName("script")[0];i.parentNode.insertBefore(r,i)
+      ;function s(e,t){e.prototype[t]=function(){
+      this._q.push([t].concat(Array.prototype.slice.call(arguments,0)));return this}}
+      var o=function(){this._q=[];return this}
+      ;var a=["add","append","clearAll","prepend","set","setOnce","unset","preInsert","postInsert","remove"]
+      ;for(var c=0;c<a.length;c++){s(o,a[c])}n.Identify=o;var u=function(){this._q=[]
+      ;return this}
+      ;var l=["setProductId","setQuantity","setPrice","setRevenueType","setEventProperties"]
+      ;for(var p=0;p<l.length;p++){s(u,l[p])}n.Revenue=u
+      ;var d=["init","logEvent","logRevenue","setUserId","setUserProperties","setOptOut","setVersionName","setDomain","setDeviceId","enableTracking","setGlobalUserProperties","identify","clearUserProperties","setGroup","logRevenueV2","regenerateDeviceId","groupIdentify","onInit","logEventWithTimestamp","logEventWithGroups","setSessionId","resetSessionId"]
+      ;function v(e){function t(t){e[t]=function(){
+      e._q.push([t].concat(Array.prototype.slice.call(arguments,0)))}}
+      for(var n=0;n<d.length;n++){t(d[n])}}v(n);n.getInstance=function(e){
+      e=(!e||e.length===0?"$default_instance":e).toLowerCase()
+      ;if(!Object.prototype.hasOwnProperty.call(n._iq,e)){n._iq[e]={_q:[]};v(n._iq[e])
+      }return n._iq[e]};e.amplitude=n})(window,document);
+      amplitude.getInstance().init("ac4292caf725c7beefe45c03a5acf39a");
+    </script>
+<!-- Amplitude code end-->
+
+    <script defer type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        const pageLoader = document.getElementById('page-loader');
+        
+        // Function to show the loading spinner
+        function showLoader() {
+          pageLoader.classList.add('active');
+        }
+        
+        // Function to hide the loading spinner
+        function hideLoader() {
+          pageLoader.classList.remove('active');
+        }
+        
+        // Add click event listeners to all navigation links
+        document.querySelectorAll('a:not([target="_blank"])').forEach(link => {
+          link.addEventListener('click', function(e) {
+            // Don't show loader for hash links (same page navigation)
+            if (this.getAttribute('href').startsWith('#')) {
+              return;
+            }
+            
+            // Don't show loader if ctrl/cmd key is pressed (opening in new tab)
+            if (e.ctrlKey || e.metaKey) {
+              return;
+            }
+            
+            showLoader();
+          });
+        });
+        
+        // Add submit event listeners to all forms
+        document.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', function() {
+            showLoader();
+          });
+        });
+        
+        // Hide the loader when page has finished loading
+        window.addEventListener('load', hideLoader);
+        
+        // Hide the loader if user navigates back
+        window.addEventListener('pageshow', function(event) {
+          if (event.persisted) {
+            hideLoader();
+          }
+        });
+      });
+      
+      // Previous cookie code
+      $(document).ready(function(){
+        $('.premium_plan').on('click',function(){
+          alert('You need to upgrade your plan');
+          return false;
+        });
+      });
+    </script>
+
+<!--Mouseflow start-->
+    <script defer type="text/javascript">
+      window._mfq = window._mfq || [];
+      (function() {
+        var mf = document.createElement("script");
+        mf.type = "text/javascript"; mf.async = true;
+        mf.src = "//cdn.mouseflow.com/projects/7b4e0da3-fe6a-4933-8c12-73b1e69c16f4.js";
+        document.getElementsByTagName("head")[0].appendChild(mf);
+      })();
+    </script>
+<!--Mouseflow end here-->
+
+<!--Font Awesome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script>
+      // Helper functions
+      function setCookie(name, value, days) {
+          var date = new Date();
+          date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+          var expires = "expires=" + date.toUTCString();
+          document.cookie = name + "=" + value + "; " + expires + "; path=/";
+      }
+
+      function getCookie(name) {
+          var nameEQ = name + "=";
+          var ca = document.cookie.split(';');
+          for (var i = 0; i < ca.length; i++) {
+              var c = ca[i];
+              while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+              if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+          }
+          return null;
+      }
+    </script>
+
+    <!-- Katex JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js" integrity="sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"  onload="renderMathInElement(document.body,{
+          // customised options
+          delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+          ],
+          ignoredClasses: ['no-katex'],
+          throwOnError : false
+        });">
+    </script>
+
+    
+    <!-- Mermaid load Mermaid from a CDN -->
+    <script defer type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true });
+    </script>
+    <!-- Mermaid End -->
+
+    <!-- Purify -->
+    <!--<script defer src="https://cdn.jsdelivr.net/npm/dompurify@2.3.10/dist/purify.min.js"></script>-->
+
+    <!-- Markdown-->
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer>
+      // Only run the script if the content element exists
+      document.addEventListener('DOMContentLoaded', function() {
+        const contentElement = document.getElementById('content');
+        if (contentElement) {
+          // Get the content from the element and sanitize it before rendering
+          const content = contentElement.innerHTML;
+          // Use DOMPurify to sanitize the HTML after Markdown parsing
+          contentElement.innerHTML = DOMPurify.sanitize(marked.parse(content));
+        }
+      });
+    </script>
+    <!-- Markdown End -->
+    
+
+    <script defer>
+      document.addEventListener('DOMContentLoaded', function() {
+        const contentElement = document.getElementById('blogpost-wrapper');
+        if (contentElement) {
+          const content = contentElement.innerHTML;
+          // Convert placeholder back to dollar signs after KaTeX processing
+          contentElement.innerHTML = content.replace(/_USD_/g, '$');
+        }
+      });
+    </script>
+
+
+
+    <!-- Move cookie-related script near the cookie banner -->
+    <script>
+      // Helper functions
+      function setCookie(name, value, days) {
+          var date = new Date();
+          date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+          var expires = "expires=" + date.toUTCString();
+          document.cookie = name + "=" + value + "; " + expires + "; path=/";
+      }
+
+      function getCookie(name) {
+          var nameEQ = name + "=";
+          var ca = document.cookie.split(';');
+          for (var i = 0; i < ca.length; i++) {
+              var c = ca[i];
+              while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+              if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+          }
+          return null;
+      }
+
+      // Consent handled by Mediavine CMP - no additional handlers needed
+    </script>
+
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                })
+                .catch(function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+        });
+    }
+    </script>
+
+    <!-- Add this to your blog_layout.blade.php to debug LCP element -->
+    <script>
+    new PerformanceObserver((entryList) => {
+      const entries = entryList.getEntries();
+      entries.forEach((entry) => {
+        console.log('LCP element:', entry.element);
+        console.log('LCP timing:', entry.startTime);
+      });
+    }).observe({entryTypes: ['largest-contentful-paint']});
+    </script>
+
+  </body>
+  
+</html>

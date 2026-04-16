@@ -1,0 +1,751 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Time series forecasting is the process of making future predictions based on historical data. Here&#x27;s how to build a time series forecasting model through languages like Python. "/>
+    <title>A Guide to Time Series Forecasting in Python | Built In</title>
+    <link rel="icon" type="image/x-icon" href="https://static.builtin.com/dist/images/favicon.png">
+        <meta name="robots" content="index, follow, max-image-preview:large">
+
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:url" content="https://builtin.com/data-science/time-series-forecasting-python">
+    <meta property="og:title" content="A Guide to Time Series Forecasting in Python | Built In">
+    <meta property="og:description" content="Time series forecasting is the process of making future predictions based on historical data. Here&#x27;s how to build a time series forecasting model through languages like Python. ">
+        <meta property="og:image" content="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png">
+        <meta property="og:image:url" content="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png">
+        <meta property="og:image:secure_url" content="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Built In">
+    <meta property="og:locale" content="">
+
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://builtin.com/data-science/time-series-forecasting-python">
+    <meta name="twitter:title" content="A Guide to Time Series Forecasting in Python | Built In">
+    <meta name="twitter:description" content="Time series forecasting is the process of making future predictions based on historical data. Here&#x27;s how to build a time series forecasting model through languages like Python. ">
+        <meta name="twitter:image" content="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png">
+        <link rel="canonical" href="https://builtin.com/data-science/time-series-forecasting-python"/>
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com/">
+    <link rel="preload" href="https://static.builtin.com/dist/fonts/barlow-condensed-v12-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://static.builtin.com/dist/fonts/barlow-condensed-v12-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://static.builtin.com/dist/fonts/montserrat-v25-latin-600.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://static.builtin.com/dist/fonts/montserrat-v25-latin-700.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://static.builtin.com/dist/fonts/montserrat-v25-latin-800.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="https://static.builtin.com/dist/fonts/montserrat-v25-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="https://static.builtin.com/articles/css/main.bundle.7be7ced3f180a0c61285.css" preload/>
+    <link rel="preload" href="https://static.builtin.com/dist/js/common.bundle.js" as="script"/>
+    <link rel="preload" href="https://static.builtin.com/articles/js/main.bundle.7695cb936353c2982c71.js" as="script"/>
+    <script>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-M7NGJ28');
+    </script>
+    
+    
+            <link rel="preload" as="image" href="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=320,h=200,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png" imagesrcset="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=320,h=200,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 320w, https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=480,h=300,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 480w, https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=800,h=500,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 800w, https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 1200w" imagesizes="50vw">
+        <link rel="stylesheet" href="/articles/css/article.bundle.ba77ae2c7fe391ec1a33.css" preload/>
+            <link rel="stylesheet" href="/articles/css/codeHighlight.bundle.d0b16d592d18744d50fb.css" preload/>
+            <script type="application/ld&#x2B;json">
+            {
+              "@context": "https://schema.org",
+              "@graph": [{"@context":"https://schema.org","@type":"Article","headline":"A Guide to Time Series Forecasting in Python","name":"A Guide to Time Series Forecasting in Python","description":"Time series forecasting is the task of predicting future values based on historical data. Examples across industries include forecasting of weather, sales numbers and stock prices. It has also been applied to predicting price trends for cryptocurrencies such as Bitcoin and Ethereum. Given the prevalence of time series forecasting applications in many different fields, every data scientist should have some knowledge of the available methods for carrying it out.","image":{"@type":"ImageObject","url":"https://builtin.com/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png","representativeOfPage":true},"mainEntityOfPage":{"@type":"WebPage","@id":"https://builtin.com/data-science/time-series-forecasting-python","name":"A Guide to Time Series Forecasting in Python","lastReviewed":"2024-06-24T05:00:00+00:00","reviewedBy":{"@type":"Person","@id":"https://builtin.com/authors/jye-sawtell-rickson","name":"Jye Sawtell-Rickson","description":"Jye Sawtell-Rickson is a senior data scientist at Meta in London. Sawtell-Rickson has worked on a wide variety of data science and analytics applications ranging from recommendation engines, delivery time prediction algorithms, logistic optimization problems, sales forecasting and customer segmentation models.\r\n\r\nHe has held positions at corporate firms including Meta, Rakuten and KPMG as well as in the startup industry in Asia. This work has spanned many sectors including e-commerce, finance, cybersecurity and now, the metaverse. During his career, he has also held roles as a product manager and marketing manager which gives him a wide set of viewpoints to bring to his analytics work.\r\n","jobTitle":"Senior Data Scientist","sameAs":"https://www.linkedin.com/in/jyesawtellrickson/","url":"https://builtin.com/authors/jye-sawtell-rickson","alumniOf":{"@type":"Organization","name":"Imperial College London, The University of Queensl"},"knowsAbout":"Data science, artificial intelligence, algorithms"}},"url":"https://builtin.com/data-science/time-series-forecasting-python","about":[{"@type":"Thing","name":"Data Science"},{"@type":"Thing","name":"Expert Contributors"}],"author":{"@type":"Person","@id":"https://builtin.com/authors/sadrach-pierre","name":"Sadrach Pierre","description":"Sadrach Pierre is a senior data scientist at a hedge fund based in New York City. His experience includes building out machine learning pipelines for solving a wide variety of business problems. In 2021, he published a research paper on using machine learning to identify small molecule drug targets to treat SARS-CoV-2. Pierre has built out end-to-end churn prediction systems and customer segmentation engines, and has also worked on building demand prediction and promotion optimization engines for clients in the retail space.\r\n\r\nHe has a wide range of experience applying data analysis, supervised machine learning and unsupervised machine learning to solve problems across disparate industries including finance, drug design, retail and social media. He has experience working for startups in the cryptocurrency regulation space where he built market manipulation detection engines powered by machine learning models.\r\n\r\nPierre has a doctorate in chemical physics from Cornell ","jobTitle":"Senior Data Scientist","sameAs":"https://www.linkedin.com/in/sadrachpierre/","url":"https://builtin.com/authors/sadrach-pierre","alumniOf":{"@type":"Organization","name":"Cornell University"},"knowsAbout":"Data science, machine learning"},"dateModified":"2024-06-24T05:00:00+00:00","datePublished":"2021-10-06T01:35:00+00:00","publisher":{"@type":"Organization","@id":"https://builtin.com","name":"Built In","url":"https://builtin.com","sameAs":["https://www.facebook.com/BuiltInHQ/","https://twitter.com/builtin","https://www.instagram.com/builtin/","https://www.linkedin.com/company/built-in"],"brand":{"@type":"Brand","name":"Built In"},"logo":{"@type":"ImageObject","url":"https://static.builtin.com/dist/images/built-logo.png","representativeOfPage":true}}},{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the time series method of forecasting?","acceptedAnswer":{"@type":"Answer","text":"Time series forecasting involves analyzing data collected at specific intervals over time to identify historical trends and make future predictions, such as forecasting weather or stock prices."}},{"@type":"Question","name":"What are the steps involved in time series forecasting?","acceptedAnswer":{"@type":"Answer","text":"The steps to perform time series forecasting generally include:\n\n\n\tGather, preprocess and visualize time series data&nbsp;\n\tSplit the data into training, validation and testing datasets\n\tBuild, define and fit a time series model&nbsp;\n\tGenerate and plot model predictions&nbsp;\n\tEvaluate model performance and tune hyperparameters accordingly&nbsp;"}}]}]
+            }
+        </script>
+    
+
+</head>
+<body>
+<noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M7NGJ28" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+</noscript>
+    <div id="g_id_onload" data-client_id="941473408521-r82mlse6rh2ar9loff8bgnbqtbp6inrs.apps.googleusercontent.com" data-login_uri="https://accounts.builtin.com/External/OneTap" data-new_user_return_url="https://builtin.com/auth/login?destination=%2Fdata-science%2Ftime-series-forecasting-python" data-existing_user_return_url="https://builtin.com/auth/login?destination=%2Fdata-science%2Ftime-series-forecasting-python" data-auto_select="true" data-prompt_parent_id="g_id_onload" style="position: absolute; top: 150px; right: 410px; width: 0; height: 0; z-index: 1001"><div><script src="https://accounts.google.com/gsi/client" async defer></script></div></div>
+<header class="header sticky-top">
+    <div id="international-header" class="bg-app-primary text-white nav-height d-flex align-items-center" data-site-id="9" data-external-api="https://api.builtin.com"><div class="container d-flex justify-content-between"><div class="d-flex align-items-center"><a href="/"><img class="d-block d-lg-none" src="https://static.builtin.com/dist/images/bi-header-logo.svg" height="32" width="71" alt="Built In Logo" />
+                <img class="d-none d-lg-block" src="https://static.builtin.com/dist/images/bi-header-logo.svg" height="48" width="108" alt="Built In Logo" /></a></div>
+        <div class="d-flex"><div class="search me-sm" x-data="headerSearch()"><button id="header-search-dropdown" type="button" class="btn h-100 p-xs p-md-sm" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,0" data-bs-auto-close="outside" aria-label="search button"><i class="fa-solid fa-magnifying-glass fs-md fs-lg-2xl text-white"></i></button>
+    <div class="dropdown-menu"><div class="input-group mb-md px-md"><span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass fs-xl text-midnight"></i></span>
+            <input autofocus type="text" id="header-search-input" name="search jobs input" class="form-control border-start-0" x-model="searchTerm" x-on:input.debounce.100ms="updateCompanies()" x-on:keydown.enter="goToJobSearch" placeholder="Search"></div>
+        <div class="bg-gray-01-highlight px-md mb-md"><a :href="jobSearchUrl" x-text="searchTerm + ' In Jobs'"></a></div>
+        <template x-for="company in companies"><a :href="company.alias" class="text-decoration-none"><div class="mb-md"><div class="d-flex align-items-center bg-gray-01 mx-md rounded-1 px-md py-sm"><div class="rounded-circle bg-white h-4xl w-4xl d-flex align-items-center justify-content-center" style="flex-basis: auto"><img class="object-fit-contain" loading="lazy" width="42" height="42" alt="Company Photo" :src="company.logo"></div>
+                        <div class="ms-lg fill-even"><div x-text="company.title" class="text-midnight fw-semibold"></div>
+                            <div x-text="company.industries" class="font-montserrat-button text-uppercase fs-xs"></div></div></div></div></a></template>
+        <template x-if="searchTerm.length &gt; 0 &amp;&amp; companies.length === 0"><a class="text-decoration-none" href="/node/add/company"><div class="border border-gray-02 d-flex gap-lg p-md m-md rounded-1 align-items-center"><div class="bg-gray-01 rounded-circle h-4xl w-4xl d-flex align-items-center justify-content-center"><i class="fa-thin fa-rocket-launch fs-2xl"></i></div>
+                    <div><div class="fs-xl mb-sm text-midnight fw-semibold">Can't find your company?</div>
+                        <div class="fs-sm">Create a company profile.</div></div></div></a></template>
+        <div class="d-flex justify-content-center"><a class="d-flex align-items-center" href="/jobs">View All Jobs</a></div></div></div>
+            <div class="my-auto me-md d-none d-lg-inline"><a id="for-employers-button" href="https://employers.builtin.com?utm_medium=BIReferral&amp;utm_source=foremployers" target="_blank" class="btn btn-secondary text-white btn-lg me-md fw-bold fs-sm text-uppercase" role="button" aria-disabled="true">
+                For Employers
+            </a></div><div class="d-flex"><div class="my-auto d-block"><a href="/auth/signup?destination=%2fdata-science%2ftime-series-forecasting-python" type="button" id="join" class="btn border-0 p-0 text-white fw-bold text-uppercase fs-sm special-link">
+                                Join
+                            </a></div>
+                        <span class="my-auto h-md mx-sm border border-cyan d-block"></span>
+                        <div class="my-auto"><a href="/auth/login?destination=%2fdata-science%2ftime-series-forecasting-python" type="button" id="login" class="btn border-0 p-0 text-white fw-bold text-uppercase fs-sm special-link">
+                                Log In
+                            </a></div></div></div></div></div>
+<nav class="navbar navbar-expand-lg d-none d-lg-block bg-white p-0 border-bottom border-gray-02"><div class="container-fluid"><div class="navbar-collapse" id="main_nav"><nav class="container" role="navigation"><ul class="navbar-nav d-flex gap-lg" role="menu"><li class="nav-item fs-lg" role="menuitem"><a class="nav-link top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl font-montserrat-button" href="/jobs" builtin-toggle="dropdown">Jobs</a></li><li class="nav-item fs-lg" role="menuitem"><a class="nav-link top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl font-montserrat-button" href="/companies" builtin-toggle="dropdown">Companies</a></li><li class="nav-item fs-lg" role="menuitem"><a class="nav-link top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl font-montserrat-button" href="/jobs/remote" builtin-toggle="dropdown">Remote</a></li><li class="nav-item fs-lg" role="menuitem"><a class="nav-link top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl font-montserrat-button" href="/tech-topics" builtin-toggle="dropdown">Articles</a></li><li class="nav-item fs-lg" role="menuitem"><a class="nav-link top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl font-montserrat-button" href="/salaries" builtin-toggle="dropdown">Salaries</a></li><li class="nav-item fs-lg" role="menuitem"><a class="nav-link top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl font-montserrat-button" href="https://builtin.com/awards/us/2026/best-places-to-work" builtin-toggle="dropdown">Best Places To Work</a></li><li class="nav-item fs-lg ms-auto h-3xl underline-title" role="menuitem"><div class="nav-link d-flex align-items-center top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl fw-bold"><a class="nav-link top-nav-item text-nowrap text-app-primary text-uppercase py-md h-3xl fw-bold fs-sm" onclick="bix.eventTracking.logBuiltinTrackEvent(&#x27;click_nav_apptracker&#x27;, {});" href="/auth/login?destination=%2fhome%23application-tracker-section"><i class="fa-solid fa-chart-kanban fs-md text-pink me-sm chart-kanban-icon"></i>
+                                    Job Application Tracker
+                                </a></div></li></ul></nav></div></div></nav>
+</header>
+<div>
+    <main role="main">
+        
+<header class="bg-midnight my-4 pt-md pt-md-xl pb-md-6xl">
+    <div class="blog-container">
+            <nav>
+                <ul class="nav">
+                        <li>
+                            <a target="_self" href="/tag/data-science" title="Data Science"><div class="tag-hover py-xs px-sm d-inline-block rounded-3 fs-sm tag text-white border-white border mb-sm me-sm">Data Science</div></a>
+                        </li>
+                        <li>
+                            <a target="_self" href="/tag/expert-contributors" title="Expert Contributors"><div class="tag-hover py-xs px-sm d-inline-block rounded-3 fs-sm tag text-white border-white border mb-sm me-sm d-sm-none d-md-block">Expert Contributors</div></a>
+                        </li>
+                        <li>
+                            <div class="tag-hover py-xs px-sm d-inline-block rounded-3 fs-sm more text-white border-white border cursor-pointer mb-sm me-sm d-inline-block d-md-none">&#x2B;1</div>
+                        </li>
+                </ul>
+            </nav>
+
+        <!-- Article Header -->
+        <div class="mb-4 pt-xl pb-md-xl pb-lg">
+            <h1 class="fw-bold fs-xl fs-md-4xl text-white mb-sm">A Guide to Time Series Forecasting in Python</h1>
+                <p class="font-barlow fw-medium fs-md-2xl fs-md text-white mb-md mb-md-xl">
+                    Time series forecasting is a useful data science technique with applications in a wide range of industries and fields. Here’s a guide to getting started with the basic concepts behind it.
+                </p>
+            <div class="d-flex"><picture class="user-avatar me-md rounded-circle article-author-photo"><img class="rounded-circle" src="https://cdn.builtin.com/cdn-cgi/image/f=auto,w=96,h=96,q=100/sites/www.builtin.com/files/2022-10/Pierre_Sadrach.png" width="48" height="48" alt="Sadrach Pierre" title="Sadrach Pierre" /></picture><div class="font-barlow text-gray-02 my-auto fw-medium"><div class="fs-xl">
+            Written by
+<a href="https://builtin.com/authors/sadrach-pierre" data-testid="article-author-link" class="text-white d-inline-block border-bottom border-pretty-blue">Sadrach Pierre</a></div></div></div>
+        </div>
+    </div>
+</header>
+
+<article class="blog-container">
+    <div class="d-block d-lg-flex">
+        <aside class="d-none d-lg-block pt-2xl bix-article-buttons-aside">
+            <div class="position-sticky d-flex flex-column" style="top: 150px">
+                    <my-item class="w-2xl h-2xl article-save-item"
+                             entity-id="41777"
+                             entity-type="article"
+                             variant="circle-button"
+                             data-bs-toggle="tooltip"
+                             data-bs-placement="right"
+                             data-bs-offset="0,10"
+                             title="Save Article">
+                        <button
+                            data-testid="article-save-button"
+                            class="text-center p-sm w-2xl h-2xl btn rounded-circle bix-share-button text-midnight border-midnight border fs-lg flex-shrink-0 flex-grow-0">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </my-item>
+                <button
+                    data-testid="article-copy-link-button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="right"
+                    title="Copy Link"
+                    onclick="navigator.clipboard.writeText('https://builtin.com/data-science/time-series-forecasting-python')"
+                    data-bs-offset="0,10"
+                    class="text-center mt-sm p-sm w-2xl h-2xl btn rounded-circle bix-share-button text-midnight border-midnight border fs-lg flex-shrink-0 flex-grow-0">
+                    <i class="fa-regular fa-link"></i>
+                </button>
+
+                <a class="text-center mt-sm p-sm w-2xl h-2xl button_linkedin text-midnight bix-share-button btn rounded-circle border-midnight border fs-lg"
+                   data-testid="article-share-linkedin-link"
+                   data-bs-toggle="tooltip"
+                   data-bs-placement="right"
+                   title="Share on LinkedIn"
+                   data-type="linkedin"
+                   target="_blank"
+                   data-bs-offset="0,10"
+                   rel="nofollow"
+                   href="https://www.linkedin.com/shareArticle?url=https%3A%2F%2Fbuiltin.com%2Fdata-science%2Ftime-series-forecasting-python&amp;mini=true">
+                    <i class="fa-brands fa-linkedin fs-lg"></i>
+                </a>
+            </div>
+        </aside>
+        <div class="content w-100">
+                <div class="wider-div mt-md-n6xl position-relative">
+                    <img class="w-100 rounded rounded-md-0 h-auto"
+                         src="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=320,h=200,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png"
+                         srcset="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=320,h=200,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 320w, https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=480,h=300,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 480w, https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=800,h=500,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 800w, https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=cover,w=1200,h=635,q=80/sites/www.builtin.com/files/2021-10/time-series-forecasting-python.png 1200w"
+                         sizes="(max-width: 320px) 280px, (max-width: 480px) 440px, (max-width: 800px) 760px, 1200px"
+                         alt="a green swirl of data representing time series forecasting"
+                         title="A Guide to Time Series Forecasting in Python"
+                         loading="lazy"
+                         width="752"
+                         height="435">
+                    <div class="text-end text-gray-03 fs-xs mt-xs">Image: Shutterstock / Built In</div>
+                        <img src="https://static.builtin.com/dist/images/expert-badge.svg" loading="lazy" class="brand-studio-banner position-absolute end-0 top-0 fs-sm" alt="Brand Studio Logo">
+                </div>
+                <div class="d-md-flex text-gray-04 fs-sm mt-md mb-2xl"><div class="border-start border-gray-02 border-2 ps-md me-2xl"><span class="font-barlow fw-medium">UPDATED BY</span>
+            <div class="fw-regular"><span class="name-value"><a href="https://builtin.com/authors/brennan-whitfield" data-testid="article-updated-by-link" class="d-inline-block border-bottom border-1 border-pretty-blue">Brennan Whitfield</a></span><span class="date"> | Jun 24, 2024</span></div></div><div class="border-start border-gray-02 border-2 ps-md pt-sm pt-md-0"><span class="font-barlow fw-medium">REVIEWED BY</span>
+            <div class="fw-regular"><span class="name-value"><a href="https://builtin.com/authors/jye-sawtell-rickson" data-testid="article-reviewed-by-link" class="d-inline-block border-bottom border-1 border-pretty-blue">Jye Sawtell-Rickson</a></span></div></div></div>
+            <div class="article-content ">
+                <p><a href="https://builtin.com/data-science/time-series-model" target="_blank">Time series</a> forecasting is the task of predicting future values based on historical data. Examples across industries include forecasting of weather, sales numbers and stock prices. It has also been applied to predicting price trends for <a href="https://builtin.com/blockchain/list-of-cryptocurrencies" target="_blank">cryptocurrencies</a> such as Bitcoin and Ethereum. Given the prevalence of time series forecasting applications in many different fields, every <a href="https://builtin.com/data-science/data-analyst-vs-data-scientist" target="_blank">data scientist</a> should have some knowledge of the available methods for carrying it out.</p>
+
+<div class="snippet-box snippet-box-html"><div><h2 class="title">What Is Time Series Forecasting?</h2><div class="description"><p><span><span><span><span><span><span>Time series forecasting involves analyzing time series data to make future predictions. Examples of time series forecasting include using models to predict weather, sales numbers and stock prices. </span></span></span></span></span></span></p>
+</div></div>
+</div>
+
+<p>A wide array of methods are available for time series forecasting. One of the most commonly used is Autoregressive Moving Average (ARMA), which is a <a href="https://builtin.com/data-science/statistical-analysis" target="_blank">statistical</a> model that predicts future values using past values. This method for making time series predictions is flawed, however, because it doesn’t capture seasonal trends. It also assumes that the time series data is stationary, meaning that its statistical properties wouldn’t change over time. This type of behavior is an idealized assumption that doesn’t hold in practice, however, which means ARMA may provide skewed results.&nbsp;</p>
+
+<p>An extension of ARMA is the Autoregressive Integrated Moving Average (ARIMA) model, which doesn’t assume stationarity but does still assume that the data exhibits little to no seasonality. Fortunately, the seasonal ARIMA (SARIMA) variant is a statistical model that can work with non-stationary data and capture some seasonality. Additional popular time series forecasting packages are Prophet and DeepAR. <a href="https://pypi.org/project/fbprophet/" target="_blank">Prophet</a> is an additive model developed by Facebook where non-linear trends are fit to seasonality effects such as daily, weekly, yearly and holiday trends. <a href="https://pypi.org/project/gluonts/" target="_blank">DeepAR</a> is a package developed by Amazon that enables time series forecasting with <a href="https://builtin.com/data-science/recurrent-neural-networks-and-lstm" target="_blank">recurrent neural networks</a>.&nbsp;</p>
+
+<div class="video-embed-field-provider-youtube video-embed-field-responsive-video"><iframe width="854" height="480" frameborder="0" allowfullscreen="allowfullscreen" class="b-lazy" src="https://www.youtube.com/embed/_ZQ-lQrK9Rg?autoplay=0&amp;start=0&amp;rel=0"></iframe>
+
+</div>
+<figcaption class="video-caption">Time series forecasting with machine learning. | Video: CodeEmporium</figcaption>
+
+<p><a href="https://builtin.com/software-engineering-perspectives/python" target="_blank">Python</a> provides many easy-to-use <a href="https://builtin.com/data-science/python-libraries-data-science" target="_blank">libraries</a> and tools for performing <a href="https://builtin.com/data-science/time-series-python" target="_blank">time series forecasting in Python</a>. Specifically, the <a href="https://www.statsmodels.org/stable/index.html" target="_blank">stats</a> library in Python has tools for building ARMA models, ARIMA models and SARIMA models with just a few lines of code. Since all of these models are available in a single library, you can easily run many Python forecasting experiments using different models in the same script or notebook when conducting time series forecasting in Python.&nbsp;</p>
+
+<p>Here, we will look at examples of time series forecasting and how to build ARMA, ARIMA and SARIMA models to make a time series prediction on the future prices of Bitcoin (BTC).</p>
+
+<p>&nbsp;</p>
+
+<h2 class="font-Montserrat article-title fw-bold mb-md border-bottom border-cyan mt-lg mt-md-xl text-midnight pb-sm border-2">Reading and Displaying BTC Time Series Data</h2>
+
+<p>We will start by reading in the historical prices for BTC using the <a href="https://builtin.com/data-science/pandas" target="_blank">Pandas</a> data reader. Let’s install it using a simple <a href="https://builtin.com/software-engineering-perspectives/pip-command-not-found" target="_blank">pip command</a> in terminal:</p>
+
+<pre><code class="language-python">pip install pandas-datareader</code></pre>
+
+<p>Let’s open up a <a href="https://builtin.com/data-science/python-automate-data-analysis" target="_blank">Python script</a> and import the data-reader from the Pandas library:</p>
+
+<pre><code class="language-python">import pandas_datareader.data as web
+import datetime</code></pre>
+
+<p dir="ltr">Let’s also import the Pandas library itself and relax the display limits on columns and rows:</p>
+
+<pre><code class="language-python">import pandas as pd 
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)</code></pre>
+
+<p>We can now import the date-time library, which will allow us to define start and end dates for our data pull:</p>
+
+<pre><code class="language-python">import datetime</code></pre>
+
+<p>Now we have everything we need to pull Bitcoin price time series data, let’s collect data.</p>
+
+<pre><code class="language-python">import pandas_datareader as web 
+
+btc = web.get_data_yahoo(['BTC-USD'], start=datetime.datetime(2018, 1, 1), end=datetime.datetime(2020, 12, 2))['Close']
+
+print(btc.head())</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="512" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image1_3.png" loading="lazy"></p>
+
+<p dir="ltr">We see that our data frame contains many <a href="https://builtin.com/data-science/pandas-show-all-columns" target="_blank">columns</a>. Let’s walk through what each of these columns means.</p>
+
+<ol>
+	<li><strong>Date:</strong> This is the index in our time series that specifies the date associated with the price.</li>
+	<li><strong>Close:</strong> The last price at which BTC was purchased on that day.</li>
+	<li><strong>Open:</strong> The first price at which BTC was purchased on that day.</li>
+	<li><strong>High:</strong> The highest price at which BTC was purchased that day.</li>
+	<li><strong>Low:</strong> The lowest price at which BTC was purchased that day.</li>
+	<li><strong>Volume:</strong> The number of total trades that day.</li>
+	<li><strong>Adj Close:</strong> The closing price adjusted for dividends and stock splits.</li>
+</ol>
+
+<p>We’ll use the close price for our forecasting models. Specifically, we will use historical closing BTC prices in order to predict future BTC ones.&nbsp;</p>
+
+<p>Let’s write our closing price BTC data to a csv file. This way, we can avoid having to repeatedly pull data using the Pandas data reader.</p>
+
+<pre><code class="language-python">btc.to_csv("btc.csv")</code></pre>
+
+<p dir="ltr">Now, let’s read in our csv file and display the first five rows:</p>
+
+<pre><code class="language-python">btc = pd.read_csv("btc.csv")
+print(btc.head())</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="420" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image2_4.png" loading="lazy"></p>
+
+<p dir="ltr">In order to use the models provided by the stats library, we need to set the date column to be a data frame index. We also should format that date using the to_datetime method:</p>
+
+<pre><code class="language-python">btc.index = pd.to_datetime(btc['Date'], format='%Y-%m-%d')</code></pre>
+
+<p>Let’s display our data frame:</p>
+
+<pre><code class="language-python">del btc['Date']</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="529" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image3_5.png" loading="lazy"></p>
+
+<p dir="ltr">Let’s plot our time series data. To do this, let’s import the <a href="https://builtin.com/data-science/data-visualization" target="_blank">data visualization</a> libraries <a href="https://builtin.com/data-science/data-visualization-tutorial" target="_blank">Seaborn and Matplotlib</a>:</p>
+
+<pre><code class="language-python">import matplotlib.pyplot as plt
+import seaborn as sns</code></pre>
+
+<p>Let’s format our visualization using Seaborn:</p>
+
+<pre><code class="language-python">sns.set()</code></pre>
+
+<p>And label the y-axis and x-axis using Matplotlib. We will also rotate the dates on the x-axis so that they’re easier to read:</p>
+
+<pre><code class="language-python">plt.ylabel('BTC Price')
+plt.xlabel('Date')
+plt.xticks(rotation=45)</code></pre>
+
+<p>And finally, generate our plot with Matplotlib:</p>
+
+<pre><code class="language-python">plt.plot(btc.index, btc['BTC-USD'], )</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="625" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image4_4.png" loading="lazy"></p>
+
+<p>Now we can proceed to building our first time series model, the Autoregressive Moving Average.</p>
+
+<p>&nbsp;</p>
+
+<h2 dir="ltr" class="font-Montserrat article-title fw-bold mb-md border-bottom border-cyan mt-lg mt-md-xl text-midnight pb-sm border-2">Splitting Data for Training and Testing</h2>
+
+<p>An important part of model building is <a href="https://builtin.com/data-science/train-test-split" target="_blank">splitting our data</a> for training and testing, which ensures that you build a model that can generalize outside of the training data and that the performance and outputs are statistically meaningful.&nbsp;</p>
+
+<p>We will split our data such that everything before November 2020 will serve as training data, with everything after 2020 becoming the testing data:</p>
+
+<pre><code class="language-python">train = btc[btc.index &lt; pd.to_datetime("2020-11-01", format='%Y-%m-%d')]
+test = btc[btc.index &gt; pd.to_datetime("2020-11-01", format='%Y-%m-%d')]
+
+plt.plot(train, color = "black")
+plt.plot(test, color = "red")
+plt.ylabel('BTC Price')
+plt.xlabel('Date')
+plt.xticks(rotation=45)
+plt.title("Train/Test split for BTC Data")
+plt.show()</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="669" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image5_4.png" loading="lazy"></p>
+
+<p dir="ltr">&nbsp;</p>
+
+<h2 dir="ltr" class="font-Montserrat article-title fw-bold mb-md border-bottom border-cyan mt-lg mt-md-xl text-midnight pb-sm border-2">Autoregressive Moving Average (ARMA) Model&nbsp;</h2>
+
+<p>The term “autoregressive” in ARMA means that the model uses past values to predict future ones. Specifically, predicted values are a weighted linear combination of past values. This type of regression method is similar to <a href="https://builtin.com/data-science/linear-regression" target="_blank">linear regression</a>, with the difference being that the feature inputs here are historical values.&nbsp;</p>
+
+<p>Moving average refers to the predictions being represented by a weighted, linear combination of white noise terms, where white noise is a random signal. The idea here is that ARMA uses a combination of past values and white noise in order to predict future values. Autoregression models market participant behavior like buying and selling BTC. The white noise models shock events like wars, recessions and political events.&nbsp;</p>
+
+<p>We can define an ARMA model using the SARIMAX package:</p>
+
+<pre><code class="language-python">from statsmodels.tsa.statespace.sarimax import SARIMAX</code></pre>
+
+<p>Let’s define our input:</p>
+
+<pre><code class="language-python">y = train['BTC-USD']</code></pre>
+
+<p>And then let’s define our model. To define an ARMA model with the SARIMAX class, we pass in the order parameters of (1, 0 ,1). Alpha corresponds to the significance level of our predictions. Typically, we choose an alpha = 0.05. Here, the ARIMA algorithm calculates upper and lower bounds around the prediction such that there is a five percent chance that the real value will be outside of the upper and lower bounds. This means that there is a 95 percent confidence that the real value will be between the upper and lower bounds of our predictions.</p>
+
+<pre><code class="language-python">ARMAmodel = SARIMAX(y, order = (1, 0, 1))</code></pre>
+
+<p>We can then <a href="https://builtin.com/data-science/model-fit" target="_blank">fit our model</a>:</p>
+
+<pre><code class="language-python">ARMAmodel = ARMAmodel.fit()</code></pre>
+
+<p>Generate our predictions:</p>
+
+<pre><code class="language-python">y_pred = ARMAmodel.get_forecast(len(test.index))
+y_pred_df = y_pred.conf_int(alpha = 0.05) 
+y_pred_df["Predictions"] = ARMAmodel.predict(start = y_pred_df.index[0], end = y_pred_df.index[-1])
+y_pred_df.index = test.index
+y_pred_out = y_pred_df["Predictions"] </code></pre>
+
+<p>And plot the results:</p>
+
+<pre><code class="language-python">plt.plot(y_pred_out, color='green', label = 'Predictions')
+plt.legend()</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="633" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image6_4.png" loading="lazy"></p>
+
+<p dir="ltr">We can also evaluate the performance using the root <a href="https://builtin.com/data-science/msle-vs-mse" target="_blank">mean-squared error</a>:</p>
+
+<pre><code class="language-python">import numpy as np
+from sklearn.metrics import mean_squared_error
+
+arma_rmse = np.sqrt(mean_squared_error(test["BTC-USD"].values, y_pred_df["Predictions"]))
+print("RMSE: ",arma_rmse)</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="81" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image7_4.png" loading="lazy"></p>
+
+<p dir="ltr">The RMSE is pretty high, which we could have guessed upon inspecting the plot. Unfortunately, the model predicts a decrease in price when the price actually increases. Again, ARMA is limited in that it fails for non-stationary time series and does not capture seasonality. Let’s see if we can improve performance with an ARIMA model.</p>
+
+<p>&nbsp;</p>
+
+<h2 dir="ltr" class="font-Montserrat article-title fw-bold mb-md border-bottom border-cyan mt-lg mt-md-xl text-midnight pb-sm border-2">Autoregressive Integrated Moving Average (ARIMA) Model</h2>
+
+<p dir="ltr">Let’s import the ARIMA package from the stats library:</p>
+
+<pre><code class="language-python">from statsmodels.tsa.arima.model import ARIMA</code></pre>
+
+<p>An ARIMA task has three parameters. The first parameter corresponds to the lagging (past values), the second corresponds to differencing (this is what makes non-stationary data stationary), and the last parameter corresponds to the white noise (for modeling shock events).&nbsp;</p>
+
+<p>Let’s define an ARIMA model with order parameters (2,2,2):</p>
+
+<pre><code class="language-python">ARIMAmodel = ARIMA(y, order = (2, 2, 2))
+ARIMAmodel = ARIMAmodel.fit()
+
+y_pred = ARIMAmodel.get_forecast(len(test.index))
+y_pred_df = y_pred.conf_int(alpha = 0.05) 
+y_pred_df["Predictions"] = ARIMAmodel.predict(start = y_pred_df.index[0], end = y_pred_df.index[-1])
+y_pred_df.index = test.index
+y_pred_out = y_pred_df["Predictions"] 
+plt.plot(y_pred_out, color='Yellow', label = 'ARIMA Predictions')
+plt.legend()
+
+
+import numpy as np
+from sklearn.metrics import mean_squared_error
+
+arma_rmse = np.sqrt(mean_squared_error(test["BTC-USD"].values, y_pred_df["Predictions"]))
+print("RMSE: ",arma_rmse)</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="645" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image8_2.png" loading="lazy"></p>
+
+<p dir="ltr">We see that the ARIMA predictions (in yellow) fall on top of the ARMA predictions. Let’s try increasing the differencing parameter to ARIMA (2,3,2):</p>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="680" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image9_1.png" loading="lazy"></p>
+
+<p dir="ltr">We see this helps capture the increasing price direction. Let’s try playing with the parameters even further with ARIMA(5,4,2):</p>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="692" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image10_1.png" loading="lazy"></p>
+
+<p>And we have an RMSE of 793, which is better than ARMA. Another approach is to train a linear regression model on temporal features such as week, month, and year. This approach is limited since it does not capture autoregressive and moving average features like the ARIMA method. Further, ARIMA trains regressors on detrended lagged target values as opposed to independent variables like linear regression. With this being said ARIMA would likely outperform a linear regression model trained on independent temporal variables.&nbsp;</p>
+
+<p>Finally, let’s see if SARIMA, which incorporates seasonality, will further improve performance.</p>
+
+<p>&nbsp;</p>
+
+<h2 dir="ltr" class="font-Montserrat article-title fw-bold mb-md border-bottom border-cyan mt-lg mt-md-xl text-midnight pb-sm border-2">Seasonal ARIMA (SARIMA) Model</h2>
+
+<p dir="ltr">Seasonal ARIMA captures historical values, shock events and seasonality. We can define a SARIMA model using the SARIMAX class:</p>
+
+<pre><code class="language-python">SARIMAXmodel = SARIMAX(y, order = (5, 4, 2), seasonal_order=(2,2,2,12))
+SARIMAXmodel = SARIMAXmodel.fit()
+
+y_pred = SARIMAXmodel.get_forecast(len(test.index))
+y_pred_df = y_pred.conf_int(alpha = 0.05) 
+y_pred_df["Predictions"] = SARIMAXmodel.predict(start = y_pred_df.index[0], end = y_pred_df.index[-1])
+y_pred_df.index = test.index
+y_pred_out = y_pred_df["Predictions"] 
+plt.plot(y_pred_out, color='Blue', label = 'SARIMA Predictions')
+plt.legend()</code></pre>
+
+<p><img alt="time-series-forecasting-python" width="1000" height="669" class=" b-lazy" src="https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/image11_1.png" loading="lazy"></p>
+
+<p>Here we have an RMSE of 966, which is slightly worse than ARIMA. This may be due to lack of hyperparameter tuning. If we play around with the parameters for our SARIMA model we should be able to improve performance even further.&nbsp;</p>
+
+<p>I encourage you to experiment with the hyperparameters to see if you can build a SARIMA model that outperforms ARIMA. Further, you can employ methods like grid search to algorithmically find the best parameters for each model.&nbsp;</p>
+
+<p>The code from this post is available on <a href="https://github.com/spierre91/builtiin/blob/main/time_series_forecasting.py" target="_blank">GitHub</a>.</p>
+
+<p class="bix-embed-read-more"><span><span>More in Data Science</span><a href="https://builtin.com/data-science/become-data-scientist" target="_blank">10 Steps to Become a Data Scientist</a></span></p>
+
+<p>&nbsp;</p>
+
+<h2 dir="ltr" class="font-Montserrat article-title fw-bold mb-md border-bottom border-cyan mt-lg mt-md-xl text-midnight pb-sm border-2">Incorporate Time Series Forecasting&nbsp;</h2>
+
+<p>Time series forecasting is a common task that many <a href="https://builtin.com/data-science" target="_blank">data science</a> teams face across industries. Having sound knowledge of common tools, methods and use cases of time series forecasting will enable data scientists to quickly run new experiments and generate results. Understanding the significance of the parameters in each of these models, such as the lag parameter, differencing, white noise and seasonality, can lay the foundation for building simple time series models. This also provides a good foundation for understanding some of the more advanced techniques available like Python forecasting and building an ARIMA model in Python.&nbsp;</p>
+
+<p>Being able to forecast future events accurately and reliably is a valuable skill that has applications outside of cryptocurrency and traditional financial markets. With that said, any data scientist, regardless of the industry they work in, should be familiar with the basics. Python provides libraries that make it easy for data scientist beginners to get started learning how to implement time series forecasting models when carrying out time series forecasting in Python.</p>
+
+<h2 class='fs-md-2xl border-top border-2 mt-2xl mt-md-4xl mb-0 border-cyan fw-bold fs-xl text-midnight py-md py-md-lg frequently-asked-questions-header'>Frequently Asked Questions</h2><div class="faq-box"><div><div class="accordion" data-bs-toggle="collapse" data-bs-target="#collapseContent1" aria-expanded="false" aria-controls="collapseContent1"><h3 class="title">What is the time series method of forecasting?</h3><i class="arrow down fa-solid fa-chevron-down"></i></div><div class="panel collapse" id="collapseContent1"><div class="description"><p><span><span><span><span><span><span>Time series forecasting involves analyzing data collected at specific intervals over time to identify historical trends and make future predictions, such as forecasting weather or stock prices.</span></span></span></span></span></span></p>
+</div></div></div>
+</div>
+
+<div class="faq-box"><div><div class="accordion" data-bs-toggle="collapse" data-bs-target="#collapseContent2" aria-expanded="false" aria-controls="collapseContent2"><h3 class="title">What are the steps involved in time series forecasting?</h3><i class="arrow down fa-solid fa-chevron-down"></i></div><div class="panel collapse" id="collapseContent2"><div class="description"><p>The steps to perform time series forecasting generally include:</p>
+
+<ol>
+	<li>Gather, preprocess and visualize time series data&nbsp;</li>
+	<li>Split the data into training, validation and testing datasets</li>
+	<li>Build, define and fit a time series model&nbsp;</li>
+	<li>Generate and plot model predictions&nbsp;</li>
+	<li>Evaluate model performance and tune hyperparameters accordingly&nbsp;</li>
+</ol>
+</div></div></div>
+</div>
+            </div>
+        </div>
+    </div>
+</article>
+    
+        <div class="my-2xl">
+            <div class="blog-container border-top border-gray-02 border-bottom p-lg pt-md">
+                <h3 class="font-Montserrat fw-bold fs-2xl text-midnight mb-md">Recent Data Science Articles</h3>
+                    <a class="d-block d-md-flex w-100 " href="https://builtin.com/articles/anthropic-ai-study-impact-tech-jobs">
+
+                        <div style="min-width: 7.125rem;">
+                                <img src="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=contain,w=120,h=70,q=80/sites/www.builtin.com/files/2026-04/Anthropic%20job%20study.jpeg"
+                                     loading="lazy"
+                                     alt="Which Jobs Are Most at Risk From AI? New Anthropic Data Offers Clues."
+                                     class="rounded" style="height: 4rem; max-width: 7.125rem" width="114" height="64"/>
+                        </div>
+                        <div class="ps-md-lg mt-sm mt-md-0 fs-md fw-semibold text-decoration-underline align-self-center text-medium-blue">
+                            Which Jobs Are Most at Risk From AI? New Anthropic Data Offers Clues.
+                        </div>
+                    </a>
+                    <a class="d-block d-md-flex w-100 mt-lg" href="https://builtin.com/articles/big-data-platform">
+
+                        <div style="min-width: 7.125rem;">
+                                <img src="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=contain,w=120,h=70,q=80/sites/www.builtin.com/files/2021-11/big-data-data-cloud.png"
+                                     loading="lazy"
+                                     alt="What Is a Data Platform? 31 Examples of Big Data Platforms to Know."
+                                     class="rounded" style="height: 4rem; max-width: 7.125rem" width="114" height="64"/>
+                        </div>
+                        <div class="ps-md-lg mt-sm mt-md-0 fs-md fw-semibold text-decoration-underline align-self-center text-medium-blue">
+                            What Is a Data Platform? 31 Examples of Big Data Platforms to Know.
+                        </div>
+                    </a>
+                    <a class="d-block d-md-flex w-100 mt-lg" href="https://builtin.com/articles/anthropic-pentagon-claude-dispute">
+
+                        <div style="min-width: 7.125rem;">
+                                <img src="https://cdn.builtin.com/cdn-cgi/image/f=auto,fit=contain,w=120,h=70,q=80/sites/www.builtin.com/files/2026-02/anthropic-pentagon-dispute.jpg"
+                                     loading="lazy"
+                                     alt="Inside the Anthropic-Pentagon Clash Over AI Guardrails and National Security"
+                                     class="rounded" style="height: 4rem; max-width: 7.125rem" width="114" height="64"/>
+                        </div>
+                        <div class="ps-md-lg mt-sm mt-md-0 fs-md fw-semibold text-decoration-underline align-self-center text-medium-blue">
+                            Inside the Anthropic-Pentagon Clash Over AI Guardrails and National Security
+                        </div>
+                    </a>
+            </div>
+        </div>
+    
+    <div id="job-search-widget" x-data="exploreJobWidget" x-ref="exploreJobWidgetRef" class="d-none">
+        <div class="position-fixed w-100 z-1">
+            <div class="job-search-widget py-md pb-lg-lg pt-lg-md pt-xl-lg bg-midnight border-bottom border-top border-white-02 position-relative">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <button @click="closeWidget" type="button" data-testid="job-widget-close-button" class="btn position-absolute z-2 top-0 end-0" aria-label="Close">
+                    <i class="fa-regular fa-times fs-xl text-white"></i>
+                </button>
+                <div class="container position-relative z-1">
+                    <div class="row align-items-center gx-sm-1">
+                        <div class="col-12 col-xl-3">
+                            <div class="font-Montserrat fw-bold fs-xl fs-lg-2xl fw-black text-white mb-sm mb-xl-0">
+                                Explore Job Matches<span class="text-mint">.</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-9 ps-xl-4xl">
+                            <div class="bg-white col-12 rounded-3 pt-xs pb-xs px-sm px-lg-xs pt-lg-0 pb-lg-0 d-flex align-items-center flex-row see-jobs">
+                                <div class="dropdown fill-even position-relative job-search-dropdown w-auto px-0" x-ref="jobSearchDropdownContainer"><div class="w-100 align-items-center bg-white position-relative form-floating fill-even search-input-container rounded-2" x-ref="jobSearchTrigger"><input autofocus data-testid="job-search-input" x-model="jobSearchTerm" x-on:input.debounce="getJobTitles" x-on:keyup.enter="selectJobTitle(selectedJobTitleIndex >= 0 ? availableJobTitleOptions[selectedJobTitleIndex] : jobSearchTerm)" x-on:keydown.arrow-down.prevent="nextJobTitle()" x-on:keydown.arrow-up.prevent="previousJobTitle()" @blur="onJobSearchBlur()" @focus="getJobTitles()" id="searchJobsInput" x-ref="searchJobsInput" type="text" class="flex-grow-1 border-0 pe-2xl form-control" aria-describedby="search" autocomplete="off" placeholder="Job Title or Keyword">
+        <label for="searchJobsInput">Job Title or Keyword</label>
+        <button @click="clearSearch()" data-testid="job-search-clear-button" aria-label="Clear search" x-show.important="jobSearchTerm.length > 0" type="button" class="btn btn-sm job-search-clear"><i class="fa-solid fa-xmark fs-lg"></i>
+            <span class="visually-hidden">Clear search</span></button></div>
+    <ul class="dropdown-menu p-0 w-100"><div class="list-group"><template x-if="availableJobTitleOptions.length > 0"><template x-for="(jobTitle,index) in availableJobTitleOptions" :key="jobTitle"><label :class="{'active' : index === selectedJobTitleIndex}" :id="'jobSearchTitle-' + jobTitle" x-on:click.stop="selectJobTitle(jobTitle)" class="list-group-item list-group-item-action"><div class="text-truncate" x-text="jobTitle"></div></label></template></template></div></ul></div>
+                                    <span class="mx-auto my-sm my-lg-auto h-0 h-lg-2xl w-100 w-lg-auto border border-gray-02 d-none d-lg-block"></span>
+                                    <div class="fill-even anon-home-location w-auto px-xs px-lg-0 d-none d-lg-block">
+                                        <div class="dropdown w-100 " x-data="locationDropdownArticleSinglePage" x-ref="locationDropdownContainer-ArticleSinglePage"><div class="form-floating" x-ref="locationDropdownTrigger-ArticleSinglePage"><input x-model="locationSearchTerm" x-on:input.debounce="searchLocations(); resetOnEmpty();" x-on:keyup.enter="selectLocation(selectedLocationIndex &gt;= 0 ? searchedLocationResults[selectedLocationIndex] : null)" x-on:keydown.arrow-down.prevent="nextLocation()" x-on:keydown.arrow-up.prevent="previousLocation()" @blur="onLocationSearchBlur()" @focus="searchLocations()" :disabled="gettingLocation" :class="{&#x27;is-invalid&#x27;: isLocationValid === undefined ? false : !isLocationValid}" style="background-image: none !important;" type="text" name="location" autocomplete="off" class="form-control pe-2xl" id="locationDropdownInput" x-ref="locationDropdownInput-ArticleSinglePage" placeholder="Select Location" />
+        <label for="locationDropdownInput">Location</label><button class="btn fs-xs text-primary position-absolute p-0 current-location-button-icon-only " aria-label="Use Current Location" type="button" @click="setToCurrentLocation()"><i class="fa-solid fs-xl fa-location-crosshairs"></i></button></div>
+    <ul class="dropdown-menu p-0 w-100" x-ref="locationDropdownMenu" aria-labelledby="profileLocation"><div class="list-group"><template x-if="searchedLocationResults.length > 0"><template x-for="(location,index) in searchedLocationResults" :key="location.placeId"><label :class="{'active' : index === selectedLocationIndex}" @click="selectLocation(location)" class="list-group-item list-group-item-action border-0 text-truncate"><div :id="'location-' + location.placeId" type="button" x-text="location.text"></div></label></template></template>
+            <template x-if="searchedLocationResults.length === 0 && locationSearchTerm.length > 0"><div class="list-group-item text-nowrap">No Results Found</div></template></div></ul></div>
+                                    </div>
+                                    <span class="mx-auto my-sm my-lg-auto h-0 h-lg-2xl w-auto border border-gray-02 d-none d-lg-block"></span>
+                                    <div class="fill-even ms-0 me-0 w-100 w-lg-auto px-xs mb-md mb-lg-0 d-none d-lg-block ejp-remote-preference">
+                                        <div class="anon-home-remote-dropdown dropdown fill-even form-floating"><button type="button" data-testid="remote-preference-dropdown" x-ref="remotePreferenceDropdownButton" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" class="d-flex form-control dropdown-toggle h-100 align-items-center justify-content-between border-0 remote-dropdown-button py-md"><div class="text-truncate text-gray-03"><i class="fa-regular fa-signal-stream me-sm text-gray-03"></i>
+            <span x-text="remotePreferenceDisplayText">Job Type</span></div></button>
+    <div class="dropdown-menu p-0 w-100" aria-labelledby="remotePreferenceDropdownMenu"><div class="list-group"><template x-for="remotePreferenceFilter in remotePreferenceFilterOptions" :key="remotePreferenceFilter.id"><label class="list-group-item list-group-item-action text-nowrap"><input :id="'remotePreference-' + remotePreferenceFilter.id" class="form-check-input" type="checkbox" :value="remotePreferenceFilter.id" x-model.number="selectedRemotePreferenceIds">
+                    <span class="form-check-label text-nowrap" x-text="remotePreferenceFilter.name"></span></label></template></div>
+        <div class="d-flex justify-content-between sticky-bottom border-top py-sm px-xs bg-white"><button class="btn btn-lg font-montserrat-button text-uppercase text-gray-03 d-inline-block" data-testid="remote-preference-clear-button" type="button" @click="selectedRemotePreferenceIds = []">Clear</button>
+            <button class="btn btn-primary btn-lg font-montserrat-button text-uppercase text-white d-inline-block" data-testid="remote-preference-apply-button" type="button" @click="$refs.remotePreferenceDropdownButton.click()">Apply</button></div></div></div>
+                                    </div>
+                                <div class="px-lg-0 w-auto">
+                                        <button class="btn btn-lg btn-app-primary w-auto" data-testid="job-widget-see-jobs-button" @click="goToJobs()" type="button">
+                                            <span class="d-inline">See Jobs</span>
+                                        </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </main>
+</div>
+<div>
+    <nav class="mobile-nav d-lg-none"><ul class="position-relative d-flex h-100 p-0 list-unstyled" style="z-index: 1"><li class="fs-xs fw-bold flex-grow-1 text-center h-100"><a href="/jobs" class="d-flex align-items-center justify-content-center flex-column h-100 w-100 text-black"><div class="text-center"><i class="fa-light fa-briefcase fs-lg text-midnight" aria-hidden="true"></i></div>
+                <div class="text-midnight">Jobs</div></a></li>
+        <li class="fs-xs fw-bold flex-grow-1 text-center h-100"><a href="/companies" class="d-flex align-items-center justify-content-center flex-column h-100 w-100 text-black"><div class="text-center"><i class="fa-light fa-rocket-launch fs-lg text-midnight" aria-hidden="true"></i></div>
+                <div class="text-midnight">Companies</div></a></li>
+        <li class="fs-xs fw-bold flex-grow-1 text-center h-100"><a href="/tech-topics" class="d-flex align-items-center justify-content-center flex-column h-100 w-100 text-black"><div class="text-center"><i class="fa-light fa-newspaper fs-lg text-midnight" aria-hidden="true"></i></div>
+                <div class="text-midnight">Articles</div></a></li>
+        <li class="fs-xs fw-bold flex-grow-1 text-center h-100"><a href="/auth/login?destination=%2fhome%23application-tracker-section" onclick="bix.eventTracking.logBuiltinTrackEvent(&#x27;click_nav_apptracker&#x27;, {}); bootstrap.Modal.getInstance(document.getElementById(&#x27;moreModal&#x27;)).hide();" class="d-flex align-items-center justify-content-center flex-column h-100 w-100 text-black"><div class="text-center"><i class="fa-solid fa-chart-kanban fs-lg text-midnight" aria-hidden="true"></i></div>
+                <div class="text-midnight">Tracker</div></a></li>
+        <li class="fs-xs fw-bold flex-grow-1 text-center h-100"><div class="d-flex flex-column h-100 w-100 align-items-center justify-content-center" data-bs-toggle="modal" data-bs-target="#moreModal"><div class="text-center"><i class="fa-light fa-bars-staggered fs-lg text-midnight" aria-hidden="true"></i></div>
+                <div class="text-midnight">More</div></div></li></ul></nav>
+<div class="modal fade mobile-nav-dialog" id="moreModal" tabindex="-1" aria-labelledby="moreModal" aria-hidden="true"><div class="modal-dialog modal-fullscreen-lg-down"><div class="modal-content"><div class="p-md border-bottom border-black"><img src="https://static.builtin.com/dist/images/midnight_9.svg" width="72" height="32" loading="lazy" alt="Built In" class="visible" /></div>
+            <div class="p-md bg-white"><div class="d-flex border-bottom border-black pb-md gap-sm"><div class="w-100"><a href="/auth/signup?destination=%2fdata-science%2ftime-series-forecasting-python" type="button" id="join" class="btn btn-lg btn-primary w-100">
+                                    Join
+                                </a></div>
+                            <div class="w-100"><a href="/auth/login?destination=%2fdata-science%2ftime-series-forecasting-python" type="button" id="login" class="btn btn-lg btn-outline-primary w-100">
+                                    Log In
+                                </a></div></div><ul class="more-links position-relative list-unstyled d-flex flex-column p-0"><li><a href="/jobs" class="d-flex align-items-center text-midnight border-bottom border-black fw-bold"><div class="me-md w-lg text-center py-md px-0 fs-lg"><i class="fa-light fa-briefcase fs-lg text-midnight" aria-hidden="true"></i></div>
+                            <div class="text-center fw-bold fs-lg">Tech Jobs</div></a></li>
+                    <li><a href="/companies" class="d-flex align-items-center text-midnight border-bottom border-black fw-bold"><div class="me-md w-lg text-center py-md px-0 fs-lg"><i class="fa-light fa-rocket-launch fs-lg text-midnight" aria-hidden="true"></i></div>
+                            <div class="text-center fw-bold fs-lg">Companies</div></a></li>
+                    <li><a href="/tech-topics" class="d-flex align-items-center text-midnight border-bottom border-black fw-bold"><div class="me-md w-lg text-center py-md px-0 fs-lg"><i class="fa-light fa-newspaper fs-lg text-midnight" aria-hidden="true"></i></div>
+                            <div class="text-center fw-bold fs-lg">Articles</div></a></li>
+                    <li><a href="/jobs/remote" class="d-flex align-items-center text-midnight border-bottom border-black fw-bold"><div class="me-md w-lg text-center py-md px-0 fs-lg"><i class="fa-light fa-signal-stream fs-lg text-midnight" aria-hidden="true"></i></div>
+                            <div class="text-center fw-bold fs-lg">Remote</div></a></li><li><a href="/salaries" class="d-flex align-items-center text-midnight border-bottom border-black fw-bold"><div class="me-md w-lg text-center py-md px-0 fs-lg"><i class="fa-light fa-sack-dollar" aria-hidden="true"></i></div>
+                                <div class="text-center fw-bold fs-lg">Salaries</div></a></li><li><a href="https://builtin.com/awards/us/2026/best-places-to-work" class="d-flex align-items-center text-midnight border-bottom border-black fw-bold"><div class="me-md w-lg text-center py-md px-0 fs-lg"><i class="fa-light fa-award" aria-hidden="true"></i></div>
+                                    <div class="text-center fw-bold fs-lg">Best Places To Work</div></a></li><li><a href="/tech-hubs" class="d-flex align-items-center text-midnight border-bottom border-black fw-bold"><div class="me-md w-lg text-center py-md px-0 fs-lg"><i class="fa-light fa-location-dot" aria-hidden="true"></i></div>
+                                <div class="text-center fw-bold fs-lg">Tech Hubs</div></a></li></ul>
+                <div><a href="https://employers.builtin.com/membership?utm_medium=BIReferral&amp;utm_source=foremployers" class="btn bg-medium-blue text-white btn-lg fw-bold fs-sm text-uppercase w-100" role="button" aria-disabled="true">
+                        Post Job
+                    </a></div></div></div></div></div>
+</div>
+<footer class="footer">
+    <div class="bg-app-primary text-white"><div class="container"><div class="row footer-content gap-lg gap-md-sm pt-3xl mb-0 mb-md-3xl"><div class="col-md"><div class="mb-3xl"><a href="/"><img width="105px" height="47px" loading="lazy" src="https://static.builtin.com/dist/images/builtin-logo.svg" alt="BuiltIn" /></a></div>
+        <div class="mb-md pb-md border-bottom"><img width="177px" height="19px" loading="lazy" src="https://static.builtin.com/dist/images/united-we-tech.svg" alt="United We Tech" /></div>
+        <div class="text-white fs-sm mb-lg">
+            Built In is the online community for startups and tech companies. Find
+            startup jobs, tech news and events.
+        </div>
+        <div class="social-links d-flex gap-md"><a href="https://facebook.com/builtinhq" aria-label="facebook" target="_blank" class="nav-link"><i class="fa-brands fa-facebook fs-2xl"></i></a>
+            <a href="https://twitter.com/builtin" aria-label="twitter" target="_blank" class="nav-link"><i class="fa-brands fa-twitter fs-2xl"></i></a>
+            <a href="https://www.instagram.com/builtin" aria-label="instagram" target="_blank" class="nav-link"><i class="fa-brands fa-instagram fs-2xl"></i></a>
+            <a href="https://www.linkedin.com/company/3763094" aria-label="LinkedIn" target="_blank" class="nav-link"><i class="fa-brands fa-linkedin fs-2xl"></i></a></div></div>
+
+    <div class="col-md"><div id="block-about-menu" class="text-white mb-md font-barlow fw-medium fs-xl">About</div>
+        <nav role="navigation" aria-labelledby="block-about-menu" class="flex-column small d-flex gap-md"><div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/our-story" target="_blank">
+                    Our Story
+                </a></div>
+            <div><a class="nav-link text-white fs-sm fw-regular" href="https://employers.builtin.com/careers/" target="_blank">
+                    Careers
+                </a></div>
+            <div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/our-staff" target="_blank">
+                    Our Staff Writers
+                </a></div>
+            <div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/content-descriptions" target="_blank">
+                    Content Descriptions
+                </a></div></nav></div>
+    <hr class="footer-hr px-lg">
+    <div class="col-md"><div id="block-getinvolved-menu" class="text-white mb-md font-barlow fw-medium fs-xl">Get Involved</div>
+        <nav role="navigation" aria-labelledby="block-getinvolved-menu" class="flex-column small d-flex gap-md"><div><a class="nav-link text-white fs-sm fw-regular border-2 border-bottom border-mint special-footer-link" href="https://employers.builtin.com/membership?utm_medium=BIReferral&amp;utm_source=foremployers" target="_blank">
+                    Recruit With Built In
+                </a></div>
+            <div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/expert-contributors" target="_blank">
+                    Become an Expert Contributor
+                </a></div></nav></div>
+    <hr class="footer-hr">
+    <div class="col-md"><div id="block-resources-menu" class="text-white mb-md font-barlow fw-medium fs-xl">Resources</div>
+        <nav role="navigation" aria-labelledby="block-resources-menu" class="flex-column small d-flex gap-md"><div><a class="nav-link text-white fs-sm fw-regular" href="https://knowledgebase.builtin.com/s/">
+                    Customer Support
+                </a></div>
+            <div><a class="nav-link text-white fs-sm fw-regular" href="https://form.jotform.com/223044927257054">
+                    Share Feedback
+                </a></div>
+            <div><a class="nav-link text-white fs-sm fw-regular" href="https://knowledgebase.builtin.com/s/contactsupport">
+                    Report a Bug
+                </a></div><div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/articles/grow-your-career">
+                        Tech Job Tools + Career Resources
+                    </a></div>
+                <div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/browse-jobs">
+                        Browse Jobs
+                    </a></div>
+                <div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/tech-dictionary" data-drupal-link-system-path="tech-dictionary">
+                        Tech A-Z
+                    </a></div></nav></div>
+    <hr class="footer-hr"><div class="col-md"><div id="block-poweredbybuiltin-menu" class="text-white mb-md font-barlow fw-medium fs-xl">Tech Hubs</div>
+            <nav role="navigation" aria-labelledby="block-poweredbybuiltin-menu" class="flex-column small d-flex gap-md"><div><a class="nav-link text-white fs-sm fw-regular" href="https://builtin.com/our-sites" target="_blank" rel="noopener noreferrer">Our Sites</a></div></nav></div>
+        <hr class="footer-hr"></div>
+<div class="footer-bottom-nav-container fs-xs py-lg mb-3xl mb-lg-0"><nav role="navigation" aria-label="Footer Bottom Navigation" class="d-flex justify-content-between gap-md footer-bottom-nav"><a class="nav-link text-white fs-xs fw-regular" href="https://builtin.com/learning-lab-user-agreement">
+            Learning Lab User Agreement
+        </a>
+
+        <a class="nav-link text-white fs-xs fw-regular" href="https://builtin.com/accessibility-statement">
+            Accessibility Statement
+        </a>
+        <a class="nav-link text-white fs-xs fw-regular" href="https://builtin.com/copyright-policy">
+            Copyright Policy
+        </a>
+        <a class="nav-link text-white fs-xs fw-regular" href="https://builtin.com/privacy-policy">
+            Privacy Policy
+        </a>
+        <a class="nav-link text-white fs-xs fw-regular" href="https://builtin.com/community-terms-of-use">
+            Terms of Use
+        </a>
+        <a class="nav-link text-white fs-xs fw-regular do-not-sell-my-info" href="https://builtin.com/california-do-not-sell-my-information">
+            Your Privacy Choices/Cookie Settings
+        </a>
+        <a class="nav-link text-white fs-xs fw-regular" href="https://builtin.com/ca-notice-collection">
+            CA Notice of Collection
+        </a></nav>
+    <div class="d-flex justify-content-center mt-lg"> © Built In 2026</div></div></div></div>
+</footer>
+
+<script src="https://kit.fontawesome.com/e1bbd40aec.js" crossorigin="anonymous" defer></script>
+<script src="https://static.builtin.com/dist/js/common.bundle.js"></script>
+<script src="https://static.builtin.com/articles/js/main.bundle.7695cb936353c2982c71.js"></script>
+<script src="https://static.builtin.com/my-items/js/main.bundle.js" async crossorigin></script>
+<script type="text/javascript">
+    (function(w){
+        w.bix.eventTracking.init({
+            trackingBaseUrl: 'https://api.builtin.com',
+            trackingEventEndpoint: '/track/client-events',
+            trackingIdentityEndpoint: '/track/identity',
+            SubjectId: '',
+            UserId: '',
+            DrupalUserId: '',
+            siteId: 9
+        });
+    })(window);
+</script>
+
+    <script src="/articles/js/article.bundle.110319efbf3dff198044.js" defer></script>
+        <script type="text/javascript">
+           document.addEventListener('DOMContentLoaded', () => {
+               try {
+                   codeHighlightWorker("/articles/js/codeHighlightWorker.bundle.da7c85b859b2a628747b.js");
+               } catch (e) {
+                   console.error(e);
+               }
+           });
+        </script>
+
+    <script type="text/javascript">
+      (function (w){
+          try {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                      tooltipTriggerList.map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl, {
+                            trigger: 'hover focus',
+                            customClass: 'article-tooltip'
+                        })
+                      })
+          }catch (e){
+              console.error(e);
+          }
+          try {
+              w.bix.eventTracking.logBuiltinTrackEvent("blog_view", {
+                  blog_id: '41777',
+              });
+          } catch (e) {
+              console.error(e);
+          }
+      })(window)
+    </script>
+
+    <script type="text/javascript">
+        document.querySelectorAll('div.more').forEach(function(more) {
+            more.addEventListener('click', function() {
+                this.parentNode.querySelectorAll('div.more').forEach((div) => {
+                    div.classList.add('d-none');
+                    div.classList.remove('d-md-block');
+                });
+                this.parentNode.querySelectorAll('div.tag').forEach((div) => {
+                    div.classList.remove('d-none');
+                    div.classList.remove('d-sm-none');
+                });
+            });
+        });
+    </script>
+    <script type="module">
+        Builtin.initializeArticlePage({"id":41777,"isBrandStudio":false,"isGlobalSite":true,"externalApi":"https://api.builtin.com","globalSiteId":9,"remotePreferenceFilterOptions":[{"id":2,"name":"Fully Remote","alias":"remote"},{"id":3,"name":"Hybrid","alias":"hybrid"},{"id":1,"name":"On Site","alias":"office"}],"locationData":{"southWestCoordinate":null,"northEastCoordinate":null,"country":null,"city":null,"state":null,"stateAlpha2":null}});
+    </script>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        Alpine.start();
+    });
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e86ade1699cb083',t:'MTc3NTU0MDIzNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

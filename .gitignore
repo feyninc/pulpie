@@ -1,0 +1,37 @@
+# Build artifacts
+target/
+*.o
+*.so
+
+# Data files (large, stored elsewhere)
+data/*.csv
+data/*.jsonl
+data/*.json
+!data/selected_features.json
+!data/cc_relabel_urls.json
+data/*.pt
+data/*.txt
+!data/*.py
+
+# WARC files
+*.warc.gz
+
+# Logs
+data/.logs/
+data/*.log
+
+# Large binaries
+data/*.bin
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

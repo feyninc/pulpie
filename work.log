@@ -1,0 +1,359 @@
+# Hummingbird Work Log
+
+## Goal
+Build a fast, CPU-only pipeline for extracting main content from raw HTML and outputting clean markdown. Target: close the gap to Dripper-0.6B (0.878 ROUGE-5 on WebMainBench).
+
+## Architecture
+6-stage Rust pipeline (~2K LOC):
+1. **Sanitize** — Remove script/style tags, decode entities
+2. **Prune** — Strip boilerplate elements (ads, trackers, consent banners)
+3. **Segment** — Walk DOM, extract paragraph-level blocks with ~40 structural features
+4. **Classify** — LightGBM binary classifier (keep/discard per block)
+5. **Markdown** — Convert kept blocks to markdown
+6. **Cleanup** — Postprocess markdown output
+
+Exports: `extract(html) -> markdown` and `extract_html(html) -> html` (for piping through html2text).
+
+## Training Data
+
+### WebMainBench (primary)
+- 7,809 annotated pages with `cc-select="true"` on main content elements
+- DOM-based label projection: walk DOM same way hummingbird does, check for `cc-select` descendants, match to Rust-extracted blocks by normalized text
+- **446,509 training blocks**: 264,512 KEEP (59.4%) / 181,997 DISCARD (40.6%)
+- Script: `data/generate_training_data_dom.py`
+
+### Common Crawl (labeled + double-checking)
+- CC-MAIN-2026-12, 3 WARC files, 16,670 English pages (one per unique domain)
+- **DeepSeek V3.2 labeling** (complete): 16,376/16,670 OK, 294 LLM failures, 0 parse failures
+  - Cost: $129.23, 5.1 hours on Bedrock
+  - Script: `data/label_cc.py`, output: `data/cc_labeled.jsonl`
+- **Filtering** (complete): 15,880 pages kept after removing tiny (<5 blocks), all-main (>90%), capping empty at 500
+  - 1,227,257 total blocks: 337,856 main (27.5%) / 889,401 discard (72.5%)
+  - Script: `data/filter_and_audit_cc.py`, output: `data/cc_labeled_filtered.jsonl`
+- **Quality audit**: 20 random pages audited by LLM sub-agents → 11 GOOD, 6 ACCEPTABLE, 1 POOR
+  - Main systematic error: article titles/bylines/dates labeled OTHER (consistent, low-impact)
+- **Truncation fix**: 43 pages had output_tokens >= 3000 (MAX_TOKENS=4096 in original run)
+  - Re-labeled with MAX_TOKENS=16384 → same output, confirming model attention degrades on long prompts (not hard truncation)
+  - Dropped these 43 pages from dataset
+  - Script: `data/relabel_truncated.py`
+- **Dripper double-check** (in progress): Running Dripper 0.6B on all 15,880 pages to cross-validate DeepSeek labels
+  - 20-page pilot: 90.3% block-level agreement, median per-page 94.7%
+  - Disagreement is asymmetric: Dripper labels more blocks as main (8.2% dr→main vs 1.5% ds→main)
+  - Script: `data/doublecheck_with_dripper.py`, vLLM on port 8235 (64K context)
+  - ETA: ~4 hours for full run
+  - **Plan**: Keep only blocks where both models agree → high-confidence training labels
+  - Discard disagreeing blocks (~10%) — safe for block-level classifier training since each block is independent
+
+## Feature Engineering (40 features)
+
+Top features by LightGBM importance:
+
+| Feature | Importance | Description |
+|---------|-----------|-------------|
+| link_ratio | 573K | Fraction of block text that is link text |
+| page_total_blocks | 335K | Total blocks on page |
+| parent_tag_type | 282K | Parent element type |
+| page_total_link_ratio | 281K | Page-level link density |
+| tag_type | 244K | Block element type (p, h1-h6, li, pre, td, etc.) |
+| section_block_count | 235K | Blocks in current section |
+| page_total_text_len | 214K | Total text on page |
+| dom_depth | 141K | Depth in DOM tree |
+| section_link_density | 131K | Link density in current section |
+| position | 114K | Normalized position on page (0.0-1.0) |
+
+Full list in `data/selected_features.json`.
+
+## GBM Model
+
+### Hyperparameter tuning (7 configs tested):
+
+| Config | Leaves | LR | CV Loss |
+|--------|--------|-----|---------|
+| baseline | 31 | 0.05 | — |
+| leaves63 | 63 | 0.05 | — |
+| **leaves127** | **127** | **0.05** | **0.06925** |
+| leaves127_reg | 127 | 0.05 | — (regularized) |
+| leaves127_lr02 | 127 | 0.02 | — |
+| leaves255 | 255 | 0.05 | — |
+| depth10_leaves127 | 127 | 0.05 | — (depth=10) |
+
+### Best config:
+```
+num_leaves: 127
+learning_rate: 0.05
+min_data_in_leaf: 20
+max_depth: -1 (unlimited)
+feature_fraction: 0.8
+bagging_fraction: 0.8
+bagging_freq: 5
+scale_pos_weight: 0.68
+num_boost_round: 3,083 (early stopping @100)
+```
+
+### Model files:
+
+| File | Size | Description |
+|------|------|-------------|
+| model_dom.txt | 102 MB | **Deployed** — Combined WMB+CC, 7696 rounds |
+| model_dom_wmb_only.txt | 41 MB | Previous — WMB-only, 3083 rounds |
+| model_combined.txt | 102 MB | Copy of current model_dom.txt |
+| model.txt | 51 MB | Word-overlap labels (older, inferior) |
+| model_emb.txt | 29 MB | With 256-dim model2vec embeddings (experimental) |
+| model_split_test.txt | 1.3 MB | Test split model |
+
+## Benchmark Results
+
+### ROUGE-5 F1 (WebMainBench, English only, 6,647 pages):
+
+| Method | ROUGE-5 F1 | Notes |
+|--------|-----------|-------|
+| Hummingbird (WMB+CC) | **0.808** | Combined training data, 7696 rounds |
+| Hummingbird (WMB only) | 0.806 | Previous model, 3083 rounds |
+| Hummingbird (native md) | 0.745 | Custom markdown converter |
+| Dripper 0.6B (paper) | 0.878 | 7,809 pages including non-English |
+| magic-html (paper) | 0.714 | 7,809 pages including non-English |
+
+### Qrater Clean Rate (WebMainBench, 500 English pages):
+
+| Method | Clean% | Simple | Mid | Hard |
+|--------|--------|--------|-----|------|
+| Dripper 0.6B | **80.0%** | 83% | 78% | 80% |
+| Hummingbird (GBM) | 66.0% | 76% | 65% | 58% |
+| Raw html2text | 5.6% | 12% | 3% | 3% |
+
+**Key finding**: 14pp gap between hummingbird and Dripper on qrater clean rate. On hard pages, gap is 22pp (58% vs 80%). Dripper is remarkably consistent across difficulty levels while hummingbird degrades sharply.
+
+This confirms the GBM structural approach is **saturated at ~0.81 ROUGE / ~66% qrater clean**. More training data (CC) gave negligible gains (+0.2pp ROUGE). The remaining gap is architectural — structural features cannot capture the page-level context that Dripper's full-page classification provides.
+
+By difficulty (html2text path):
+
+| Level | Pages | F1 | P | R | Empty |
+|-------|-------|-----|---|---|-------|
+| Simple | 144 | 0.893 | 0.894 | 0.908 | 1 |
+| Mid | 193 | 0.825 | 0.839 | 0.849 | 4 |
+| Hard | 163 | 0.742 | 0.748 | 0.761 | 6 |
+
+F1 distribution (500-page sample):
+```
+  0.9-1.0:  300  (60.0%)  — working well
+  0.8-0.9:   55  (11.0%)
+  0.6-0.8:   63  (12.6%)
+  0.4-0.6:   31  ( 6.2%)
+  0.2-0.4:   20  ( 4.0%)
+  0.0-0.2:   17  ( 3.4%)
+      0.0:   14  ( 2.8%)  — empty extraction
+```
+
+71% of pages score >= 0.8. The 29% tail drags the average down.
+
+**Gap to Dripper: ~7pp**, split as:
+- Formatting: ~3pp (solved by html2text canonicalization)
+- Content extraction: ~4pp (fundamental)
+
+## Error Analysis (500 English pages, html2text)
+
+| Category | Pages | % | Avg F1 | Est. F1 Cost |
+|----------|-------|---|--------|-------------|
+| Good (F1>=0.8) | 355 | 71.0% | 0.961 | — |
+| Boilerplate leaking | 36 | 7.2% | 0.522 | ~2pp |
+| Formatting mismatch | 26 | 5.2% | 0.601 | ~3pp (native md only) |
+| Mixed issues | 30 | 6.0% | 0.624 | — |
+| Low recall | 21 | 4.2% | 0.557 | ~1pp |
+| Complete failures | 21 | 4.2% | 0.137 | ~0.5pp |
+| Empty | 11 | 2.2% | 0.000 | ~0.5pp |
+
+### Boilerplate leaking (biggest content issue)
+- Classifier keeps navigation tables, sidebars, product specs
+- Worst: esaral.com (P=0.044, pred=30K vs ref=1.3K), automobilemag.com (P=0.035)
+- **Root cause**: GBM lacks signal to distinguish content tables from nav tables
+
+### Low recall
+- Forums/multi-section pages: only first post extracted
+- Example: squarespace forum (P=1.0, R=0.081) — headline only
+- **Root cause**: classifier keeps first content cluster, drops subsequent identical-structure blocks
+
+### Empty extractions
+- Forums with non-block content, JS-rendered, comment sections
+- **Root cause**: no fallback for pages without block-level elements
+
+## Experiments Tried
+
+### 1. Word-overlap labels → DOM-based labels
+- **Before**: `generate_training_data.py` — project labels via word overlap between block text and reference
+- **After**: `generate_training_data_dom.py` — walk annotated DOM, check `cc-select="true"` descendants
+- **Result**: DOM labels are more accurate, model improved (model_dom.txt deployed over model.txt)
+
+### 2. Text features (TF-IDF)
+- Script: `data/prototype_text_classifier.py`
+- Tried: GBM structural (0.0447 loss) vs TF-IDF+LogReg (0.0589) vs GBM+SVD-TF-IDF (0.0441)
+- **Result**: Text features give <0.1pp improvement. Not worth the runtime cost.
+- **Decision**: Structural features only.
+
+### 3. Embedding features (model2vec)
+- Script: `data/add_embeddings.py` — Potion-base-8M, 256-dim per block
+- Trained: `model_emb.txt` (29MB, 296 features = 256 embedding + 40 structural)
+- **Result**: No improvement over structural-only. Smaller model but not better.
+- **Decision**: Don't use embeddings in production.
+
+### 4. CRF sequence smoothing
+- Scripts: `data/prototype_crf.py`, `data/prototype_crf_v2.py`
+- Approach: CRF on block sequences using GBM probability + position + link ratio + tag type
+- Learned: KEEP→KEEP slightly favored, DISCARD→DISCARD moderately favored
+- **Result**: CRF flipped ~5% of blocks but net-zero improvement. Some blocks corrected, others broken.
+- **Decision**: Don't use CRF. Simple GBM thresholding is good enough.
+
+### 5. Label noise estimation + cleaning
+- Script: `data/estimate_label_noise.py` — confident learning on 5-fold OOF predictions
+- Found: ~2,390 noisy labels (0.54% of dataset)
+- LLM audit (`data/audit_labels_llm.py`): sampled 50 high-confidence KEEP labels where OOF P(keep)<0.05 → **63% error rate**
+- Script: `data/relabel_noisy.py` — flipped 1,213 extreme KEEP labels (P<0.05)
+- **Result**: Cleaner labels, retrained model uses cleaned data. Marginal improvement.
+
+### 6. LLM block classification (Qwen3.5-27B via vLLM)
+- Scripts: `data/test_llm_classifier.py`, `data/test_llm_classifier_v2.py`
+- Prompted with ancestor chain, page position, surrounding block context
+- **Result**: ~90% block accuracy, but slow and infrastructure-dependent. Runs incomplete.
+- **Used for**: Label auditing, not production.
+
+### 7. DeepSeek V3.2 + MinerU-HTML pipeline (Dripper reproduction)
+- Script: `eval/test_deepseek_pipeline.py`
+- Full pipeline: MinerU-HTML simplify_html → Dripper v0 prompt → DeepSeek V3.2 on Bedrock → parse → reconstruct → html2text → jieba ROUGE-5
+- 18 pages: F1=0.8161 (jieba tokenization). Paper reports 0.9098 on full set.
+- **Conclusion**: Pipeline works. Used as-is for CC labeling.
+
+### 8. Potion static embedding classifier
+- Script: `data/train_potion_classifier.py`
+- Trained StaticModelForClassification (MLP head on potion-base-8M embeddings) on WebMainBench blocks
+- **Result**: 0.618 ROUGE-5 F1 on 200 val pages, 75.6% block accuracy
+- 19pp behind GBM (0.806) — structural features are 3x more predictive than embeddings for block classification
+- **Conclusion**: Confirms structural approach is correct. Embeddings alone can't solve this task.
+
+### 9. Dripper double-check of DeepSeek labels
+- Script: `data/doublecheck_with_dripper.py`
+- Uses Dripper 0.6B (opendatalab/MinerU-HTML-v1.1-hunyuan0.5B-compact) via local vLLM
+- Key implementation details (had to match Dripper's actual pipeline):
+  - Prompt version: `short_compact` (not `v0`) — Dripper's actual default
+  - `guided_regex` for constrained decoding: `<answer>\s*1(main|other)2(main|other)...\s*</answer>`
+  - vLLM context: 64K tokens (0.5B model fits easily on single A100)
+- Pilot (20 pages): 90.3% agreement, Dripper tends to be more permissive (labels more as main)
+- **Strategy**: For block-level GBM training, only keep blocks where both models agree. Discard ~10% disagreeing blocks — each block is an independent training sample, so this is safe.
+
+### 10. Combined WMB+CC GBM training
+- Script: `data/generate_cc_training_data.py` — CC feature extraction pipeline
+  - Filters to pages with >=70% Dripper agreement (14,959 of 15,880 pages)
+  - Simplifies HTML with MinerU-HTML to get block texts per _item_id
+  - Runs hummingbird `export_features` on raw HTML for Rust features
+  - Matches by normalized text → 346,959 matched blocks (57% match rate)
+  - KEEP: 164,591 (47.4%) / DISCARD: 182,368 (52.6%)
+- Script: `data/train_combined.py` — trains on WMB + CC
+  - Combined: 793,468 blocks (446K WMB + 347K CC)
+  - CV best rounds: 7,696 (up from 3,083 on WMB-only)
+  - Held-out block accuracy: 96%
+  - Model: `model_combined.txt` (102 MB)
+- **ROUGE-5 result: 0.808** — only +0.2pp over WMB-only (0.806)
+- **Conclusion**: More data from the same feature space doesn't fix structural limitations. GBM is saturated.
+
+### 11. Qrater clean rate comparison (hummingbird vs Dripper)
+- Script: `eval/eval_qrater_dripper.py`
+- Ran full Dripper pipeline (simplify → Dripper 0.6B via vLLM → reconstruct → html2text) on 500 WMB pages
+- Scored all outputs with qrater EuroBERT-210m clean/dirty classifier
+- **Results**:
+  - Raw html2text: 5.6% clean
+  - Hummingbird GBM: 66.0% clean (+60pp over raw)
+  - Dripper 0.6B: 80.0% clean (+14pp over hummingbird)
+  - Hard pages: hummingbird 58% vs Dripper 80% (22pp gap)
+- **Conclusion**: GBM approach is saturated at ~66% qrater clean rate. The 14pp gap to Dripper is architectural — need a model that sees full page context to close it.
+
+### 12. Empty page analysis
+- Script: `eval/test_empty_pages.py`
+- DeepSeek produces 0 empty pages on WebMainBench (always finds some main content)
+- On CC, expect ~10-20% empty pages (login walls, image galleries, etc.)
+- **Decision**: Include empties in training — they provide all-negative examples the GBM currently lacks.
+
+## Overfitting Problem
+
+The reason for the CC labeling effort:
+
+| Split | F1 |
+|-------|-----|
+| Full WebMainBench (train+test) | 0.806 |
+| Held-out test set | 0.723 |
+| **Gap** | **8.3pp** |
+
+GBM is massively overfitting to WebMainBench's page distribution. Need diverse CC data with zero eval-set overlap. Dripper used 986K DeepSeek-labeled CC pages for their 0.6B model.
+
+## Key Decisions
+
+1. **Structural features only** — text/embeddings don't help enough to justify runtime cost
+2. **DOM-based label projection** — more accurate than word overlap
+3. **html2text canonicalization for eval** — recovers 3pp from formatting, matches paper methodology
+4. **No CRF/sequence models** — didn't improve over simple thresholding
+5. **CC labeling with DeepSeek V3.2** — address overfitting with diverse training data
+6. **MinerU-HTML simplification + Dripper v0 prompt** — proven pipeline, skip custom simplification
+
+## Next Steps
+
+### Immediate (blocked on Dripper double-check, ~4h remaining)
+1. Build CC → GBM feature extraction pipeline (run Rust `export_features` on CC HTML, match to labels)
+2. Filter to agree-only blocks from double-check results
+3. Retrain GBM on CC + WebMainBench, measure generalization gap reduction
+
+### Model architecture ideas to try
+
+Current situation: GBM on structural features = 0.806, text embeddings alone = 0.618, combined = no gain. The gap to Dripper (0.878) is ~4pp on content extraction. The key insight is that per-block text doesn't help because the task is **contextual** — whether a block is "main" depends on what's around it on the page, not just what's in the block. Dripper works because it sees the entire page structure at once.
+
+**Idea 1: Mini-Dripper (fine-tune tiny LM on whole-page classification)**
+- Fine-tune SmolLM-135M or Qwen3-0.6B on: simplified HTML → `1main2other3main...` compact output
+- Same task format as Dripper, just smaller model
+- Training data: ~15K pages with high-confidence labels (DeepSeek + Dripper agree)
+- Pros: Proven approach (Dripper did exactly this with Hunyuan-0.5B), we have training data + pipeline
+- Cons: CPU inference speed — 0.5B model needs ONNX/quantization to be viable
+- This is the most exciting option. If 135M can get close to 0.878, it's a fundamentally better product.
+
+**Idea 2: Tiny sequence tagger (BERT-style encoder)**
+- Encode the whole page as a sequence of blocks, binary classification head per block
+- Each block's representation attends to surrounding blocks (captures context)
+- ModernBERT-small (~30M) or TinyBERT (~14M) — potentially fast enough on CPU
+- Pros: More architecturally suited for classification than autoregressive LM, faster inference
+- Cons: More custom work to build, need to handle variable-length pages, no existing pipeline to reuse
+
+**Idea 3: FastText + GBM hybrid**
+- Train FastText classifier on block texts (ultra-fast, CPU-native, ~100K blocks/sec)
+- Add FastText score as extra feature to GBM alongside existing 40 structural features
+- Pros: Cheapest experiment, no new infrastructure, stays CPU-only
+- Cons: FastText is still per-block (no page context), may not add much over what GBM already captures
+
+**Idea 4: GBM + tiny model on uncertain blocks**
+- First pass: GBM classifies all blocks (fast)
+- Second pass: tiny model re-classifies only blocks near the 0.5 threshold
+- Pros: Best latency/quality tradeoff, most blocks are easy and don't need a neural model
+- Cons: Two-model complexity, need to define uncertainty threshold
+
+### Error-mode-specific improvements
+5. Address boilerplate leaking (~2pp) — tighter threshold, post-filter, or new features
+6. Address forum/multi-section recall (~1pp) — cluster detection
+
+## Timeline
+
+| Date | Event |
+|------|-------|
+| Apr 7 | Initial commit; core Rust pipeline, baseline GBM (word-overlap labels) |
+| Apr 7 | Feature engineering, hyperparameter tuning (7 configs), embedding experiments |
+| Apr 8 | DOM-based label projection, GBM retrained → model_dom.txt (deployed) |
+| Apr 8 | Text classifier experiments (TF-IDF, CRF) — found: not helpful |
+| Apr 8 | Label noise analysis + cleaning (confident learning, LLM audit, 1,213 labels flipped) |
+| Apr 9 | Error analysis on 500-page eval set, categorized failure modes |
+| Apr 9 | LLM classification experiments (Qwen3.5-27B via vLLM) — incomplete |
+| Apr 10 | Studied Dripper paper, MinerU-HTML pipeline, scoring methodology |
+| Apr 10 | DeepSeek V3.2 pipeline validation (F1=0.8161 on 18 pages) |
+| Apr 10 | CC-MAIN-2026-12 download (3 WARCs), sampled 16,670 English pages |
+| Apr 10 | Launched CC labeling job (tmux "label", ~15h, ~$130) |
+| Apr 11 | CC labeling complete: 16,376 OK, $129.23, 5.1h |
+| Apr 15 | Filtered CC data → 15,880 pages, 1.23M blocks |
+| Apr 15 | Quality audit (20 pages) → 85% GOOD/ACCEPTABLE |
+| Apr 15 | Truncation investigation → 43 pages dropped (model attention, not hard truncation) |
+| Apr 15 | Potion embedding classifier → 0.618 F1 (confirms structural features dominate) |
+| Apr 15 | Dripper double-check complete: 93.3% agreement, 15,848 pages OK |
+| Apr 16 | CC feature extraction → 347K blocks from 14,959 high-agreement pages |
+| Apr 16 | Combined GBM training: 793K blocks, 7696 rounds → 0.808 ROUGE-5 (+0.2pp, saturated) |
+| Apr 16 | Qrater comparison: hummingbird 66% vs Dripper 80% clean rate — 14pp architectural gap confirmed |

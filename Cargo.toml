@@ -1,0 +1,26 @@
+[package]
+name = "hummingbird"
+version = "0.1.0"
+edition = "2021"
+description = "Fast CPU-only web content extraction pipeline"
+license = "AGPL-3.0"
+
+[dependencies]
+scraper = "0.22"
+regex = "1"
+ego-tree = "0.10.0"
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[[bin]]
+name = "hummingbird"
+path = "src/bin/hummingbird.rs"
+
+[[bin]]
+name = "export_features"
+path = "src/bin/export_features.rs"
+
+[lib]
+name = "hummingbird"
+path = "src/lib.rs"
