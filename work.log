@@ -293,45 +293,40 @@ GBM is massively overfitting to WebMainBench's page distribution. Need diverse C
 
 ## Next Steps
 
-### Immediate (blocked on Dripper double-check, ~4h remaining)
-1. Build CC → GBM feature extraction pipeline (run Rust `export_features` on CC HTML, match to labels)
-2. Filter to agree-only blocks from double-check results
-3. Retrain GBM on CC + WebMainBench, measure generalization gap reduction
+### GBM approach: saturated (done)
+- Combined WMB+CC training gave +0.2pp ROUGE (0.806 → 0.808) — diminishing returns
+- 14pp qrater clean rate gap to Dripper (66% vs 80%) is architectural, not data-limited
+- More data from the same feature space won't close it
 
-### Model architecture ideas to try
+### Next: encoder-based block classifier
 
-Current situation: GBM on structural features = 0.806, text embeddings alone = 0.618, combined = no gain. The gap to Dripper (0.878) is ~4pp on content extraction. The key insight is that per-block text doesn't help because the task is **contextual** — whether a block is "main" depends on what's around it on the page, not just what's in the block. Dripper works because it sees the entire page structure at once.
+The fundamental problem: GBM classifies each block independently using structural features. It cannot see page-level context (what other blocks surround this one, what the overall page structure looks like). Dripper sees the whole page but uses autoregressive decoding — 10-50x slower than needed.
 
-**Idea 1: Mini-Dripper (fine-tune tiny LM on whole-page classification)**
-- Fine-tune SmolLM-135M or Qwen3-0.6B on: simplified HTML → `1main2other3main...` compact output
-- Same task format as Dripper, just smaller model
-- Training data: ~15K pages with high-confidence labels (DeepSeek + Dripper agree)
-- Pros: Proven approach (Dripper did exactly this with Hunyuan-0.5B), we have training data + pipeline
-- Cons: CPU inference speed — 0.5B model needs ONNX/quantization to be viable
-- This is the most exciting option. If 135M can get close to 0.878, it's a fundamentally better product.
+**Solution: encoder with `[BLOCK]` marker tokens** (PL-Marker approach)
+- Insert a special `[BLOCK]` token at each block boundary in simplified HTML
+- Encoder (ModernBERT-base, 150M, 8K context) processes the full page in one forward pass
+- Self-attention lets each `[BLOCK]` token attend to all other blocks + content on the page
+- Binary classification head at `[BLOCK]` positions only → main/other per block
+- No pooling, no BIO aggregation, no span tracking — one prediction per marker
 
-**Idea 2: Tiny sequence tagger (BERT-style encoder)**
-- Encode the whole page as a sequence of blocks, binary classification head per block
-- Each block's representation attends to surrounding blocks (captures context)
-- ModernBERT-small (~30M) or TinyBERT (~14M) — potentially fast enough on CPU
-- Pros: More architecturally suited for classification than autoregressive LM, faster inference
-- Cons: More custom work to build, need to handle variable-length pages, no existing pipeline to reuse
+**Why this over alternatives:**
+- vs mean pooling over spans: no variable-length averaging issues (Lee et al. 2017, SpanBERT show boundary tokens > mean pooling)
+- vs BIO tagging: no aggregation noise, no inconsistent B/I predictions within a block
+- vs autoregressive (Dripper): single forward pass, ~10-50x faster
+- vs GBM: sees full page context through self-attention
 
-**Idea 3: FastText + GBM hybrid**
-- Train FastText classifier on block texts (ultra-fast, CPU-native, ~100K blocks/sec)
-- Add FastText score as extra feature to GBM alongside existing 40 structural features
-- Pros: Cheapest experiment, no new infrastructure, stays CPU-only
-- Cons: FastText is still per-block (no page context), may not add much over what GBM already captures
+**Speed target**: ≥100 pg/s per GPU → under 20K A100-hours for AICC-scale (7.3B pages)
 
-**Idea 4: GBM + tiny model on uncertain blocks**
-- First pass: GBM classifies all blocks (fast)
-- Second pass: tiny model re-classifies only blocks near the 0.5 threshold
-- Pros: Best latency/quality tradeoff, most blocks are easy and don't need a neural model
-- Cons: Two-model complexity, need to define uncertainty threshold
+**Other approaches considered** (detailed in `docs/encoder_classifier.md`):
+1. BIO token tagging — simplest but noisy aggregation
+2. Boundary token pairs (Lee et al.) — proven but more complex than single marker
+3. Two-stage block sequence model (Web2Text/BoilerNet) — handles any page length, proven for boilerplate
+4. MarkupLM — HTML-native but 512 token limit
+5. Mini-Dripper (fine-tune tiny AR model) — proven but inherently slower than encoder
 
-### Error-mode-specific improvements
-5. Address boilerplate leaking (~2pp) — tighter threshold, post-filter, or new features
-6. Address forum/multi-section recall (~1pp) — cluster detection
+### Error-mode-specific improvements (lower priority)
+- Boilerplate leaking (~2pp) — encoder should handle this natively
+- Forum/multi-section recall (~1pp) — encoder sees full page, should generalize better
 
 ## Timeline
 
