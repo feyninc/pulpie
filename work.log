@@ -298,31 +298,43 @@ GBM is massively overfitting to WebMainBench's page distribution. Need diverse C
 - 14pp qrater clean rate gap to Dripper (66% vs 80%) is architectural, not data-limited
 - More data from the same feature space won't close it
 
-### Next: encoder-based block classifier
+### 13. [BLOCK] marker encoder classifier (Qwen3-Embedding-0.6B)
+- **Architecture**: PL-Marker approach — insert `[BLOCK]` token before each `_item_id` in simplified HTML, classify binary (main/other) at marker positions only, IGNORE_LABEL (-100) everywhere else
+- **Model**: Qwen3-Embedding-0.6B with bidirectional SDPA (is_causal=False + dict mask bypass)
+- **Training**: 14,959 CC pages (≥70% Dripper agreement), 3 epochs on 4×A100, 38 min
+  - Block F1=0.840 on held-out CC val set
+  - Class weights: other=0.700, main=1.748 (28.6% main rate)
+- **BIO approach tried first**: Extreme class imbalance (B-MAIN=0.7% of tokens), F1=0.014 even with class weights → abandoned
+- **Bidirectional attention challenge**: Qwen3 applies causal masking despite `is_decoder: False`
+  - 4D zero mask works but prevents SDPA efficient kernels (O(n²) memory)
+  - Dict mask `{"full_attention": None}` bypasses `create_causal_mask` in Qwen3Model.forward
+  - `is_causal=False` on all attention modules → SDPA runs bidirectional with efficient kernels
+- Scripts: `data/train_bio_classifier.py`, `eval/eval_block_classifier.py`
+- Model saved: `data/block_classifier/final/` (1.1GB)
 
-The fundamental problem: GBM classifies each block independently using structural features. It cannot see page-level context (what other blocks surround this one, what the overall page structure looks like). Dripper sees the whole page but uses autoregressive decoding — 10-50x slower than needed.
+**WebMainBench ROUGE-5 F1 (6,647 English pages):**
 
-**Solution: encoder with `[BLOCK]` marker tokens** (PL-Marker approach)
-- Insert a special `[BLOCK]` token at each block boundary in simplified HTML
-- Encoder (ModernBERT-base, 150M, 8K context) processes the full page in one forward pass
-- Self-attention lets each `[BLOCK]` token attend to all other blocks + content on the page
-- Binary classification head at `[BLOCK]` positions only → main/other per block
-- No pooling, no BIO aggregation, no span tracking — one prediction per marker
+| Method | All | Simple | Mid | Hard |
+|--------|-----|--------|-----|------|
+| DeepSeek-V3.2 (LLM) | 0.9098 | 0.9415 | 0.9104 | 0.8771 |
+| GPT-4 (LLM) | 0.9024 | 0.9382 | 0.9042 | 0.8638 |
+| Dripper 0.6B | 0.8779 | 0.9205 | 0.8804 | 0.8313 |
+| Hummingbird GBM (h2t) | 0.808 | 0.885 | 0.805 | 0.740 |
+| magic-html | 0.714 | 0.786 | 0.712 | 0.643 |
+| **[BLOCK] classifier** | **0.687** | **0.772** | **0.698** | **0.594** |
+| Readability | 0.654 | 0.742 | 0.655 | 0.565 |
+| Trafilatura | 0.640 | 0.731 | 0.642 | 0.547 |
 
-**Why this over alternatives:**
-- vs mean pooling over spans: no variable-length averaging issues (Lee et al. 2017, SpanBERT show boundary tokens > mean pooling)
-- vs BIO tagging: no aggregation noise, no inconsistent B/I predictions within a block
-- vs autoregressive (Dripper): single forward pass, ~10-50x faster
-- vs GBM: sees full page context through self-attention
+- **12pp below GBM** (0.687 vs 0.808) — worse, not better
+- 222 empty extractions (3.3%), 428 zero-score pages (6.4%)
+- Main block rate: 19.6% — model too conservative (under-recalling)
+- Throughput: 6.8 pg/s (single A100, BS=1), 148 ms/page avg
 
-**Speed target**: ≥100 pg/s per GPU → under 20K A100-hours for AICC-scale (7.3B pages)
-
-**Other approaches considered** (detailed in `docs/encoder_classifier.md`):
-1. BIO token tagging — simplest but noisy aggregation
-2. Boundary token pairs (Lee et al.) — proven but more complex than single marker
-3. Two-stage block sequence model (Web2Text/BoilerNet) — handles any page length, proven for boilerplate
-4. MarkupLM — HTML-native but 512 token limit
-5. Mini-Dripper (fine-tune tiny AR model) — proven but inherently slower than encoder
+**Likely issues:**
+1. Trained only on CC data, never saw WMB pages — distribution mismatch
+2. Bidirectional attention may not be working correctly (needs verification)
+3. 3 epochs on 15K pages may be undertrained for 0.6B model
+4. No WMB-based eval during training — block F1 on CC doesn't reflect end-to-end ROUGE-5
 
 ### Error-mode-specific improvements (lower priority)
 - Boilerplate leaking (~2pp) — encoder should handle this natively
@@ -352,3 +364,51 @@ The fundamental problem: GBM classifies each block independently using structura
 | Apr 16 | CC feature extraction → 347K blocks from 14,959 high-agreement pages |
 | Apr 16 | Combined GBM training: 793K blocks, 7696 rounds → 0.808 ROUGE-5 (+0.2pp, saturated) |
 | Apr 16 | Qrater comparison: hummingbird 66% vs Dripper 80% clean rate — 14pp architectural gap confirmed |
+| Apr 16 | [BLOCK] classifier trained: Qwen3-0.6B, PL-Marker, 4×A100, 38 min, block F1=0.840 |
+| Apr 16 | [BLOCK] classifier eval: 0.687 ROUGE-5 on WMB — 12pp below GBM (0.808), needs investigation |
+| Apr 17 | EuroBERT-2.1B block classifier trained: <|sep|> chunking, 8K context, plateaued at 0.864 ROUGE-5 |
+| Apr 17 | Uploaded hummingbird-latte-large-v1 to HuggingFace (chonkie-ai, private) |
+| Apr 18 | DeepSeek V3.2 label quality verification: v0=0.840, short_compact=0.865, compact=0.862, v1=0.847, v2=0.835 |
+| Apr 19 | Dripper native vLLM eval: 0.854 (valid only) on 200 English pages — below paper's 0.878 claim |
+| Apr 20 | Error analysis: paper's 0.9001 uses jieba tokenization (+1-2pp), all languages, and eval conditions we can't reproduce |
+
+### 14. Hummingbird Latte Large (EuroBERT-2.1B, <|sep|> chunking)
+- **Architecture**: EuroBERT-2.1B with `<|sep|>` token separating blocks, packed into 8K chunks
+- **Training**: 14,959 CC pages, lr=2e-5, BS=4, grad_accum=2, class-weighted CE, gradient checkpointing
+- **Result**: ROUGE-5 = 0.864 on 200 English WMB pages (plateaued by epoch 0.75)
+- **Key insight**: Trained on DeepSeek v0 labels (0.840 quality) but EXCEEDS its teacher by +2.4pp
+- Scripts: `data/train_eurobert_classifier.py`, model: `data/block_classifier_eurobert_2.1B/checkpoint-5250`
+- Uploaded: `chonkie-ai/hummingbird-latte-large-v1` (private)
+
+### 15. Dripper / MinerU-HTML reproduction & label ceiling investigation
+- **Goal**: Reproduce Dripper's paper score (0.878) and understand the label quality ceiling
+- **Method**: Native vLLM with StructuredOutputsParams, short_compact prompt, 32K context
+- **Result**: 0.854 on 200 English pages (valid only), 0.828 on all 200 (6 too long)
+- Also ran with their full MinerUHTML class (256K context, trafilatura fallback): similar scores
+
+**DeepSeek V3.2 prompt comparison (200 English pages):**
+
+| Prompt | ROUGE-5 |
+|--------|---------|
+| short_compact | **0.865** |
+| compact | 0.862 |
+| v1 (Chinese) | 0.847 |
+| v0 (current labels) | 0.840 |
+| v2 (Chinese) | 0.835 |
+
+**Controlled comparison (same 200 English pages):**
+
+| Method | All | Simple | Mid | Hard |
+|--------|-----|--------|-----|------|
+| DeepSeek V3.2 (short_compact) | 0.865 | 0.932 | 0.875 | 0.786 |
+| Hummingbird Latte Large (2.1B) | 0.862 | 0.928 | 0.856 | 0.807 |
+| Dripper native (valid only) | 0.854 | 0.922 | 0.868 | 0.768 |
+| Hummingbird Latte Base (0.6B) | 0.847 | 0.907 | 0.848 | 0.787 |
+| DeepSeek V3.2 (v0, current labels) | 0.840 | 0.930 | 0.823 | 0.774 |
+
+**Key findings on paper's 0.9001 claim:**
+1. Jieba tokenization (designed for Chinese) gives +1-2pp on English text vs whitespace split
+2. Paper evaluates on ALL 7809 pages (1162 non-English where jieba is native)
+3. Even with their exact pipeline class (256K context, trafilatura fallback), we get 0.77-0.85 on English
+4. The 0.9001 is measured under evaluation conditions we cannot fully reproduce on our English subset
+5. No better labeling model exists — DeepSeek short_compact (0.865) is our practical ceiling
