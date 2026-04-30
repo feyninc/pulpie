@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pulpie"
+version = "0.1.0"
+description = "Fast content extraction from HTML using encoder models."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Chonkie AI", email = "team@chonkie.ai"},
+]
+keywords = ["html", "content-extraction", "web", "nlp", "encoder", "transformer"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Markup :: HTML",
+]
+dependencies = [
+    "torch>=2.0",
+    "transformers>=4.40",
+    "lxml>=5.0",
+]
+
+[project.optional-dependencies]
+markdown = ["html2text>=2024.2"]
+all = ["html2text>=2024.2"]
+dev = [
+    "pytest>=7.0",
+    "html2text>=2024.2",
+    "ruff>=0.9",
+    "ty>=0.0.20",
+]
+
+[project.urls]
+Homepage = "https://github.com/chonkie-inc/hummingbird"
+Documentation = "https://github.com/chonkie-inc/hummingbird"
+Repository = "https://github.com/chonkie-inc/hummingbird"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "SIM",   # flake8-simplify
+    "TCH",   # flake8-type-checking
+    "RUF",   # ruff-specific
+]
+ignore = [
+    "E501",  # line length (handled by formatter)
+    "B008",  # function call in default argument
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pulpie"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ty.environment]
+python-version = "3.9"
+
+[tool.ty.rules]
+unresolved-import = "ignore"
+invalid-return-type = "warn"
