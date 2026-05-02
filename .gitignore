@@ -23,6 +23,10 @@ data/*.log
 # Large binaries
 data/*.bin
 
+# Downloaded model checkpoints
+data/block_classifier_*/
+data/*.safetensors
+
 # Python
 __pycache__/
 *.pyc
