@@ -1,15 +1,16 @@
-"""Fully overlapped extraction pipeline: CPU ‖ GPU ‖ CPU.
+"""Fully overlapped multi-GPU extraction pipeline.
 
 Architecture:
-    [CPU Pool: simplify+chunk] → Queue → [GPU: sort+infer] → Queue → [CPU Pool: reconstruct+md]
+    [CPU Pool: simplify+chunk] → Shared Queue → [N GPU threads] → Shared Queue → [CPU Pool: reconstruct+md]
 
-All three stages run concurrently. The GPU consumer accumulates pages,
-sorts chunks by length within each batch for minimal padding, then infers.
-Post-processing starts as soon as classification results arrive.
+Each GPU thread pulls from the same prep queue, accumulates a local batch,
+sorts by length, runs inference on its device. Whichever GPU finishes first
+pulls the next batch — natural load balancing.
 """
 
 from __future__ import annotations
 
+import math
 import queue
 import threading
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -158,87 +159,132 @@ def _postprocess(
 
 _SENTINEL = None
 
+# Per-GPU throughput and per-worker throughput for auto-sizing
+_GPU_PPS = 14.9
+_PRE_WORKER_PPS = 21.0
+_POST_WORKER_PPS = 43.0
+
 
 class Pipeline:
-    """Fully overlapped HTML content extraction pipeline.
+    """Multi-GPU overlapped HTML content extraction pipeline.
 
-    All three stages run concurrently via queues:
-      1. CPU pool → simplify + tokenize + chunk
-      2. GPU → accumulate, sort by length, batched inference
-      3. CPU threads → reconstruct + markdown
+    All three stages run concurrently via shared queues:
+      1. CPU process pool → simplify + tokenize + chunk
+      2. N GPU threads → each pulls from shared queue, batches, infers
+      3. CPU process pool → reconstruct + markdown
+
+    GPUs self-balance: whichever finishes first pulls the next batch.
 
     Usage:
         from pulpie import Pipeline, PageInput
 
-        pipeline = Pipeline(model="orange-small", n_workers=4)
+        # Auto-detect all GPUs
+        pipeline = Pipeline()
+
+        # Specific GPUs
+        pipeline = Pipeline(devices=["cuda:0", "cuda:2", "cuda:5"])
+
+        # Single GPU (backward compatible)
+        pipeline = Pipeline(devices=["cuda:0"])
+
         results = pipeline.extract_batch([
             PageInput(html=page1, page_id=0),
             PageInput(html=page2, page_id=1),
         ])
-        for result in results:
-            print(result.markdown)
     """
 
     def __init__(
         self,
         model: str = "orange-small",
-        device: str | None = None,
-        n_workers: int = 4,
+        devices: list[str] | str | None = None,
+        n_pre_workers: int | None = None,
+        n_post_workers: int | None = None,
         max_tokens: int = 8192,
         cutoff_length: int = 500,
         max_batch_tokens: int = 16384,
     ):
-        if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.device = torch.device(device)
-        self.n_workers = n_workers
+        # Resolve devices
+        if devices is None:
+            if torch.cuda.is_available():
+                devices = [f"cuda:{i}" for i in range(torch.cuda.device_count())]
+            else:
+                devices = ["cpu"]
+        elif isinstance(devices, str):
+            devices = [devices]
+        self.devices = [torch.device(d) for d in devices]
+        self.n_gpus = len(self.devices)
+
+        # Auto-size worker pools based on GPU count
+        gpu_capacity = self.n_gpus * _GPU_PPS
+        self.n_pre_workers = n_pre_workers or max(2, math.ceil(gpu_capacity / _PRE_WORKER_PPS))
+        self.n_post_workers = n_post_workers or max(2, math.ceil(gpu_capacity / _POST_WORKER_PPS))
+
         self.max_tokens = max_tokens
         self.cutoff_length = cutoff_length
         self.max_batch_tokens = max_batch_tokens
 
         self.model_id = resolve_model_id(model)
-        self.model, self.tokenizer, self.sep_token_id = load_model_and_tokenizer(
-            self.model_id, self.device
-        )
+
+        # Load model on each device
+        self._gpu_models: list[_GPUWorkerState] = []
+        for device in self.devices:
+            model_inst, _tokenizer, sep_token_id = load_model_and_tokenizer(self.model_id, device)
+            self._gpu_models.append(
+                _GPUWorkerState(
+                    model=model_inst,
+                    sep_token_id=sep_token_id,
+                    device=device,
+                    pad_id=model_inst.config.pad_token_id or 0,
+                )
+            )
 
     def extract_batch(self, pages: list[PageInput]) -> list[PageResult]:
-        """Extract content from a batch of pages with full overlap.
+        """Extract content from a batch of pages with multi-GPU overlap.
 
         Returns results in the same order as input.
         """
         n_pages = len(pages)
         results: list[PageResult | None] = [None] * n_pages
 
-        # Queues
-        prep_queue: queue.Queue[_PreparedPage | None] = queue.Queue(maxsize=self.n_workers * 8)
-        post_queue: queue.Queue[tuple[int, int, dict, str] | None] = queue.Queue(maxsize=64)
+        # Shared queues
+        prep_queue: queue.Queue = queue.Queue(maxsize=self.n_pre_workers * 8)
+        post_queue: queue.Queue = queue.Queue(maxsize=64)
 
-        # Stage 3 thread: post-processing
+        # Stage 3: post-processing (process pool)
         post_thread = threading.Thread(
             target=self._stage3_postprocess,
-            args=(post_queue, results, n_pages),
+            args=(post_queue, results),
             daemon=True,
         )
         post_thread.start()
 
-        # Stage 2 thread: GPU inference
-        gpu_thread = threading.Thread(
-            target=self._stage2_gpu,
-            args=(prep_queue, post_queue),
-            daemon=True,
-        )
-        gpu_thread.start()
+        # Stage 2: one GPU consumer thread per device
+        gpu_threads = []
+        for gpu_state in self._gpu_models:
+            t = threading.Thread(
+                target=self._stage2_gpu_worker,
+                args=(gpu_state, prep_queue, post_queue),
+                daemon=True,
+            )
+            t.start()
+            gpu_threads.append(t)
 
-        # Stage 1: CPU producers (main thread pushes to prep_queue)
+        # Stage 1: CPU producers
         self._stage1_cpu(pages, prep_queue)
-        prep_queue.put(_SENTINEL)
 
-        # Wait for pipeline to drain
-        gpu_thread.join()
+        # Signal all GPU threads to stop (one sentinel per thread)
+        for _ in gpu_threads:
+            prep_queue.put(_SENTINEL)
+
+        # Wait for all GPUs to finish
+        for t in gpu_threads:
+            t.join()
+
+        # Signal post-processing to stop
         post_queue.put(_SENTINEL)
         post_thread.join()
 
-        # Fill gaps (shouldn't happen)
+        # Fill gaps
         for i in range(n_pages):
             if results[i] is None:
                 results[i] = PageResult(page_id=pages[i].page_id, labels={}, html="", markdown="")
@@ -246,9 +292,9 @@ class Pipeline:
         return results  # type: ignore[return-value]
 
     def _stage1_cpu(self, pages: list[PageInput], out_queue: queue.Queue) -> None:
-        """Stage 1: parallel CPU simplify+chunk, push to queue as completed."""
+        """Stage 1: parallel CPU simplify+chunk, push to shared queue as completed."""
         with ProcessPoolExecutor(
-            max_workers=self.n_workers,
+            max_workers=self.n_pre_workers,
             initializer=_init_worker,
             initargs=(self.model_id,),
         ) as executor:
@@ -266,23 +312,27 @@ class Pipeline:
             for future in as_completed(futures):
                 out_queue.put(future.result())
 
+    @staticmethod
     @torch.no_grad()
-    def _stage2_gpu(self, in_queue: queue.Queue, out_queue: queue.Queue) -> None:
-        """Stage 2: accumulate pages, sort chunks, run batched inference."""
-        pad_id = self.model.config.pad_token_id or 0
+    def _stage2_gpu_worker(
+        state: _GPUWorkerState,
+        in_queue: queue.Queue,
+        out_queue: queue.Queue,
+    ) -> None:
+        """Stage 2: single GPU consumer — pull from shared queue, batch, infer."""
         pending: list[_PreparedPage] = []
-        done = False
 
-        while not done or pending:
-            # Accumulate pages from queue
+        while True:
+            # Accumulate pages
             while True:
                 try:
-                    # Wait longer if buffer is small (let it fill for better sorting)
-                    timeout = 0.05 if len(pending) < 8 and not done else 0.001
+                    timeout = 0.05 if len(pending) < 4 else 0.001
                     item = in_queue.get(timeout=timeout)
                     if item is _SENTINEL:
-                        done = True
-                        break
+                        # Process remaining, then exit
+                        if pending:
+                            _infer_and_push(state, pending, out_queue)
+                        return
                     if item.error or not item.chunks:
                         out_queue.put((item.page_id, item.batch_idx, {}, item.map_html))
                     else:
@@ -290,75 +340,20 @@ class Pipeline:
                 except queue.Empty:
                     break
 
-            if not pending:
-                continue
+            if pending:
+                _infer_and_push(state, pending, out_queue)
+                pending.clear()
 
-            # Flatten chunks from accumulated pages, sort by length
-            all_chunks: list[tuple[list[int], list[int], int]] = []
-            for page_local_idx, page in enumerate(pending):
-                for chunk_ids, block_indices in page.chunks:
-                    all_chunks.append((chunk_ids, block_indices, page_local_idx))
-
-            all_chunks.sort(key=lambda x: len(x[0]))
-
-            # Batched inference
-            chunk_predictions: dict[int, list[tuple[list[int], list[int]]]] = {}
-            i = 0
-            while i < len(all_chunks):
-                max_seq = len(all_chunks[min(i + 64, len(all_chunks) - 1)][0])
-                bs = max(1, self.max_batch_tokens // max(max_seq, 1))
-                batch = all_chunks[i : i + bs]
-                i += bs
-
-                max_len = max(len(c[0]) for c in batch)
-                input_ids = []
-                attention_mask = []
-                for chunk_ids, _, _ in batch:
-                    pad_len = max_len - len(chunk_ids)
-                    input_ids.append(chunk_ids + [pad_id] * pad_len)
-                    attention_mask.append([1] * len(chunk_ids) + [0] * pad_len)
-
-                input_ids_t = torch.tensor(input_ids, dtype=torch.long, device=self.device)
-                attention_mask_t = torch.tensor(
-                    attention_mask, dtype=torch.long, device=self.device
-                )
-                outputs = self.model(input_ids=input_ids_t, attention_mask=attention_mask_t)
-
-                for batch_idx, (_, block_indices, page_local_idx) in enumerate(batch):
-                    logits = outputs.logits[batch_idx]
-                    sep_positions = (input_ids_t[batch_idx] == self.sep_token_id).nonzero(
-                        as_tuple=True
-                    )[0]
-                    preds = logits[sep_positions].argmax(dim=-1).cpu().tolist()
-                    if page_local_idx not in chunk_predictions:
-                        chunk_predictions[page_local_idx] = []
-                    chunk_predictions[page_local_idx].append((block_indices, preds))
-
-            # Assemble labels and push to post-processing
-            for page_local_idx, page in enumerate(pending):
-                predictions = [0] * page.n_blocks
-                for block_indices, preds in chunk_predictions.get(page_local_idx, []):
-                    for idx, block_idx in enumerate(block_indices):
-                        if idx < len(preds):
-                            predictions[block_idx] = preds[idx]
-                labels = predictions_to_labels(page.item_ids, predictions)
-                out_queue.put((page.page_id, page.batch_idx, labels, page.map_html))
-
-            pending.clear()
-
-    def _stage3_postprocess(
-        self, in_queue: queue.Queue, results: list[PageResult | None], n_pages: int
-    ) -> None:
-        """Stage 3: reconstruct + markdown in separate process pool (no GIL contention)."""
-        n_post_workers = max(2, self.n_workers // 2)
-        with ProcessPoolExecutor(max_workers=n_post_workers) as pool:
+    def _stage3_postprocess(self, in_queue: queue.Queue, results: list[PageResult | None]) -> None:
+        """Stage 3: reconstruct + markdown in separate process pool."""
+        with ProcessPoolExecutor(max_workers=self.n_post_workers) as pool:
             pending_futures: dict = {}
 
             while True:
                 try:
                     item = in_queue.get(timeout=0.01)
                 except queue.Empty:
-                    self._collect_futures(pending_futures, results)
+                    _collect_futures(pending_futures, results)
                     continue
 
                 if item is _SENTINEL:
@@ -371,17 +366,81 @@ class Pipeline:
                 future = pool.submit(_postprocess, page_id, batch_idx, labels, map_html)
                 pending_futures[future] = batch_idx
 
-                self._collect_futures(pending_futures, results)
+                _collect_futures(pending_futures, results)
 
-            # Collect remaining
             for future in as_completed(pending_futures):
                 batch_idx, result = future.result()
                 results[batch_idx] = result
 
-    def _collect_futures(self, pending: dict, results: list) -> None:
-        """Collect completed futures without blocking."""
-        done = [f for f in pending if f.done()]
-        for f in done:
-            batch_idx, result = f.result()
-            results[batch_idx] = result
-            del pending[f]
+
+@dataclass
+class _GPUWorkerState:
+    """State for a single GPU worker thread."""
+
+    model: torch.nn.Module
+    sep_token_id: int
+    device: torch.device
+    pad_id: int
+
+
+def _infer_and_push(
+    state: _GPUWorkerState,
+    pages: list[_PreparedPage],
+    out_queue: queue.Queue,
+) -> None:
+    """Run batched inference on accumulated pages and push results."""
+    max_batch_tokens = 16384
+
+    # Flatten chunks, sort by length
+    all_chunks: list[tuple[list[int], list[int], int]] = []
+    for page_local_idx, page in enumerate(pages):
+        for chunk_ids, block_indices in page.chunks:
+            all_chunks.append((chunk_ids, block_indices, page_local_idx))
+
+    all_chunks.sort(key=lambda x: len(x[0]))
+
+    chunk_predictions: dict[int, list[tuple[list[int], list[int]]]] = {}
+    i = 0
+    while i < len(all_chunks):
+        max_seq = len(all_chunks[min(i + 64, len(all_chunks) - 1)][0])
+        bs = max(1, max_batch_tokens // max(max_seq, 1))
+        batch = all_chunks[i : i + bs]
+        i += bs
+
+        max_len = max(len(c[0]) for c in batch)
+        input_ids = []
+        attention_mask = []
+        for chunk_ids, _, _ in batch:
+            pad_len = max_len - len(chunk_ids)
+            input_ids.append(chunk_ids + [state.pad_id] * pad_len)
+            attention_mask.append([1] * len(chunk_ids) + [0] * pad_len)
+
+        input_ids_t = torch.tensor(input_ids, dtype=torch.long, device=state.device)
+        attention_mask_t = torch.tensor(attention_mask, dtype=torch.long, device=state.device)
+        outputs = state.model(input_ids=input_ids_t, attention_mask=attention_mask_t)
+
+        for batch_idx, (_, block_indices, page_local_idx) in enumerate(batch):
+            logits = outputs.logits[batch_idx]
+            sep_positions = (input_ids_t[batch_idx] == state.sep_token_id).nonzero(as_tuple=True)[0]
+            preds = logits[sep_positions].argmax(dim=-1).cpu().tolist()
+            if page_local_idx not in chunk_predictions:
+                chunk_predictions[page_local_idx] = []
+            chunk_predictions[page_local_idx].append((block_indices, preds))
+
+    for page_local_idx, page in enumerate(pages):
+        predictions = [0] * page.n_blocks
+        for block_indices, preds in chunk_predictions.get(page_local_idx, []):
+            for idx, block_idx in enumerate(block_indices):
+                if idx < len(preds):
+                    predictions[block_idx] = preds[idx]
+        labels = predictions_to_labels(page.item_ids, predictions)
+        out_queue.put((page.page_id, page.batch_idx, labels, page.map_html))
+
+
+def _collect_futures(pending: dict, results: list) -> None:
+    """Collect completed futures without blocking."""
+    done = [f for f in pending if f.done()]
+    for f in done:
+        batch_idx, result = f.result()
+        results[batch_idx] = result
+        del pending[f]
