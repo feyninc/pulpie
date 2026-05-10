@@ -41,7 +41,7 @@ def load_model_and_tokenizer(
             model_id,
             num_labels=2,
             trust_remote_code=True,
-            torch_dtype=torch.bfloat16 if device.type == "cuda" else torch.float32,
+            dtype=torch.bfloat16 if device.type == "cuda" else torch.float32,
             attn_implementation="sdpa" if device.type == "cuda" else "eager",
         )
         .to(device)
