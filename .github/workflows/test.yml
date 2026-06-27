@@ -25,8 +25,10 @@ jobs:
 
       - name: Install pulpie with dev + markdown extras
         working-directory: pulpie
-        run: uv pip install --system -e ".[dev,markdown]"
+        run: |
+          uv venv
+          uv pip install -e ".[dev,markdown]"
 
       - name: Run simplify/reconstruct parity tests
         working-directory: pulpie
-        run: pytest tests -n auto -q
+        run: uv run --no-sync pytest tests -n auto -q
