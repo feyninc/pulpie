@@ -12,6 +12,7 @@ jobs:
       name: pypi
       url: https://pypi.org/p/pulpie
     permissions:
+      contents: read   # required for actions/checkout
       id-token: write  # required for PyPI trusted publishing (OIDC)
     steps:
       - uses: actions/checkout@v6
