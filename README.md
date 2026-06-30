@@ -6,7 +6,7 @@
 </picture>
 
 [![PyPI version](https://img.shields.io/pypi/v/pulpie.svg)](https://pypi.org/project/pulpie/)
-[![Python versions](https://img.shields.io/pypi/pyversions/pulpie.svg)](https://pypi.org/project/pulpie/)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://pypi.org/project/pulpie/)
 [![License](https://img.shields.io/github/license/chonkie-inc/pulpie.svg)](https://github.com/chonkie-inc/pulpie/blob/main/LICENSE)
 [![Downloads](https://static.pepy.tech/badge/pulpie)](https://pepy.tech/project/pulpie)
 [![Blog](https://img.shields.io/badge/blog-read%20the%20writeup-E34C26.svg)](https://usefeyn.com/blog/pulpie-pareto-optimal-models-for-cleaning-the-web/)
