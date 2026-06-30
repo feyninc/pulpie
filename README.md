@@ -1,76 +1,157 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chonkie-inc/pulpie/main/assets/banner-dark.png">
-    <img alt="pulpie" src="https://raw.githubusercontent.com/chonkie-inc/pulpie/main/assets/banner-light.png" width="440">
-  </picture>
-</p>
+<div align="center">
 
-Fast content extraction from HTML using encoder models. 16x faster than autoregressive approaches at the same quality.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chonkie-inc/pulpie/main/assets/banner-dark.png">
+  <img alt="pulpie" src="https://raw.githubusercontent.com/chonkie-inc/pulpie/main/assets/banner-light.png" width="460">
+</picture>
 
-## Install
+[![PyPI version](https://img.shields.io/pypi/v/pulpie.svg)](https://pypi.org/project/pulpie/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pulpie.svg)](https://pypi.org/project/pulpie/)
+[![License](https://img.shields.io/github/license/chonkie-inc/pulpie.svg)](https://github.com/chonkie-inc/pulpie/blob/main/LICENSE)
+[![Downloads](https://static.pepy.tech/badge/pulpie)](https://pepy.tech/project/pulpie)
+[![Blog](https://img.shields.io/badge/blog-read%20the%20writeup-E34C26.svg)](https://usefeyn.com/blog/pulpie-pareto-optimal-models-for-cleaning-the-web/)
+[![GitHub stars](https://img.shields.io/github/stars/chonkie-inc/pulpie.svg)](https://github.com/chonkie-inc/pulpie/stargazers)
+
+_Pareto-optimal models for cleaning the web — extract main content from HTML at one twentieth the cost._
+
+[Install](#installation) •
+[Usage](#usage) •
+[Models](#models) •
+[How it works](#how-it-works) •
+[Benchmarks](#benchmarks) •
+[Blog](https://usefeyn.com/blog/pulpie-pareto-optimal-models-for-cleaning-the-web/)
+
+</div>
+
+Pulpie extracts the main content from raw HTML — stripping navigation, ads, sidebars, and footers — using small encoder models that label every block in a single forward pass. It approaches state-of-the-art extraction quality while running up to **20x faster** and **20x cheaper** than autoregressive extractors.
+
+**⚡ Fast** — an encoder labels every block in one forward pass (13.7 pages/sec on an L4) </br>
+**🎯 Accurate** — matches SOTA quality: 0.862–0.873 ROUGE-5 F1 on WebMainBench </br>
+**🪶 Small** — the recommended model is 210M params, fits on any GPU </br>
+**💸 Cheap** — clean 1 billion pages for ~$7,900 vs ~$159,000 for the leading decoder </br>
+**📦 Simple** — `pip install pulpie`, then `Extractor().extract(html)` </br>
+**🔌 Batched** — overlapped CPU+GPU pipeline scales across multiple GPUs </br>
+
+## Installation
 
 ```bash
 pip install pulpie
 ```
 
-For markdown output:
+For Markdown output, install the `markdown` extra:
+
 ```bash
-pip install pulpie[markdown]
+pip install "pulpie[markdown]"
+```
+
+Or with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv pip install "pulpie[markdown]"
 ```
 
 ## Usage
 
+### Basic
+
 ```python
 from pulpie import Extractor
 
-extractor = Extractor()  # downloads pulpie-orange-small (210M) on first use
-
+extractor = Extractor()                # defaults to pulpie-orange-small (210M)
 result = extractor.extract(html)
-print(result.markdown)   # clean markdown
-print(result.html)       # clean HTML
-print(result.n_main)     # number of content blocks
-print(result.n_other)    # number of boilerplate blocks
+
+print(result.markdown)                 # clean Markdown
+print(result.html)                     # clean HTML
+print(result.n_main, result.n_other)   # blocks kept vs dropped
+```
+
+The model downloads from Hugging Face on first use.
+
+### Choosing a model
+
+```python
+extractor = Extractor(model="orange-large")   # "orange-small" (default), "orange-base", "orange-large"
+extractor = Extractor(model="path/to/model")  # or a custom checkpoint
+extractor = Extractor(device="cpu")           # force CPU
+```
+
+### Batch processing
+
+For bulk extraction, `Pipeline` overlaps CPU preprocessing with GPU inference and self-balances across one or more GPUs:
+
+```python
+from pulpie import Pipeline, PageInput
+
+pipeline = Pipeline(model="orange-small")
+results = pipeline.extract_batch(
+    [PageInput(html=h, page_id=i) for i, h in enumerate(pages)]
+)
 ```
 
 ## Models
 
-| Model | Size | ROUGE-5 | Speed (L4) |
-|-------|------|---------|------------|
-| `orange-small` | 210M | 0.864 | 15 pps |
-| `orange-base` | 610M | 0.849 | ~6 pps |
-| `orange-large` | 2.1B | 0.862 | ~2 pps |
+All three models are built on [EuroBERT](https://arxiv.org/abs/2503.05500), share a tokenizer, and use the same `<|sep|>` block-marker architecture. Large is the teacher; Base and Small are distilled from it.
 
-`orange-small` is the default and recommended model — it matches the 2.1B teacher at 1/10th the size.
+| Model | Hugging Face | Params | ROUGE-5 F1 | Notes |
+|-------|--------------|--------|------------|-------|
+| **Orange Small** | [`chonkie-ai/pulpie-orange-small`](https://huggingface.co/chonkie-ai/pulpie-orange-small) | 210M | 0.862 | **Recommended** — best size-to-quality ratio |
+| Orange Base | [`chonkie-ai/pulpie-orange-base`](https://huggingface.co/chonkie-ai/pulpie-orange-base) | 610M | 0.863 | Distilled from Large |
+| Orange Large | [`chonkie-ai/pulpie-orange-large`](https://huggingface.co/chonkie-ai/pulpie-orange-large) | 2.1B | 0.873 | Teacher (highest quality) |
 
-```python
-# Use a specific model
-extractor = Extractor(model="orange-large")
-
-# Use a custom model path
-extractor = Extractor(model="path/to/your/model")
-
-# Force CPU
-extractor = Extractor(device="cpu")
-```
+`orange-small` is the default. Despite being a third the size of Dripper (the leading extractor), it matches its quality (0.862 vs 0.864) while running 20x faster.
 
 ## How it works
 
-Pulpie classifies each HTML block as "main content" or "boilerplate" using a bidirectional encoder. The pipeline:
+Pulpie keeps the "read the page" approach of model-based extractors but moves the bottleneck from memory bandwidth to compute by using an encoder instead of a decoder. The pipeline runs in four stages:
 
-1. **Simplify** — Strip scripts, styles, normalize HTML (via MinerU-HTML)
-2. **Chunk** — Pack blocks into sequences separated by `<|sep|>` tokens
-3. **Classify** — Single encoder forward pass classifies all blocks simultaneously
-4. **Reconstruct** — Extract content blocks, convert to markdown
+1. **Simplify** — remove scripts, styles, and formatting noise; tag each content block with a unique ID.
+2. **Chunk** — split, tokenize, and pack blocks into chunks of up to 8,192 tokens (≈80% of pages fit in one chunk).
+3. **Classify** — a single encoder forward pass labels every block as content or boilerplate.
+4. **Reconstruct** — return the kept blocks as HTML, or convert them to Markdown.
 
-## Performance
+A decoder emits labels one token at a time, re-reading the full model from GPU memory each step. An encoder runs one dense forward pass over the whole input — so the gap widens on bandwidth-limited GPUs (7x faster than Dripper on A100, 20x on L4).
 
-On 500 real Common Crawl pages (NVIDIA L4 GPU):
+## Benchmarks
 
-- **15.1 pages/sec** (single GPU, 210M model)
-- **$6,500** to clean 1 billion pages
-- **16.4x faster** than Dripper (autoregressive) on the same hardware
-- **433 MB** VRAM — fits on any GPU
+Quality on the English subset of [WebMainBench](https://github.com/opendatalab/WebMainBench) (6,647 pages), ROUGE-5 F1:
 
-## License
+| Method | Params | ROUGE-5 F1 | Empty pages |
+|--------|--------|------------|-------------|
+| **Pulpie Orange Large** | 2.1B | **0.873** | 21 |
+| Dripper | 0.6B | 0.864 | 135 |
+| **Pulpie Orange Base** | 610M | 0.863 | 36 |
+| **Pulpie Orange Small** | 210M | 0.862 | 45 |
+| magic-html | — | 0.700 | 384 |
+| Trafilatura | — | 0.619 | 16 |
 
-Apache 2.0
+Speed and cost (Pulpie Orange Small vs Dripper, 1 billion pages):
+
+| | Pulpie Orange Small | Dripper |
+|--|--------------------|---------|
+| Throughput (L4) | **13.7 pages/sec** | 0.68 pages/sec |
+| Cost / 1B pages (L4) | **~$7,900** | ~$159,000 |
+
+Pulpie Orange Small matches Dripper's quality at **20x the throughput** and **20x lower cost** on an L4. See [BENCHMARKS.md](BENCHMARKS.md) for the full comparison, per-difficulty breakdown, and reproduction command.
+
+## Acknowledgements
+
+Pulpie builds directly on the work of the MinerU-HTML and Dripper team (Ma et al., 2025). Their `simplify_html` preprocessing, block-level annotation scheme, and the WebMainBench benchmark are foundational to this work. We also use their Dripper 0.6B model to cross-validate our training labels. We're grateful they released their tools and data.
+
+## Citation
+
+If you use Pulpie in your research, please cite:
+
+```bibtex
+@note{pulpie2026,
+  title  = {Pulpie: Pareto-Optimal Models for Cleaning the Web},
+  author = {Minhas, Bhavnick and Nigam, Shreyash and Feyn Research},
+  year   = {2026},
+  venue  = {Feyn Field Notes}
+}
+```
+
+---
+
+<div align="center">
+Built by <a href="https://github.com/chonkie-inc">Chonkie</a>, the open-source work behind <a href="https://usefeyn.com">Feyn</a>.
+</div>

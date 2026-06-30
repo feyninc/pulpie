@@ -20,23 +20,44 @@ Ground truth: `convert_main_content` field (html2text with bodywidth=0, ignore_l
 
 ### Notes
 
-- **pg/s**: pages/second on a single A100 80GB GPU.
-- **Pulpie models** use a naive sequential inference loop (no batching). Throughput can be improved with batched inference.
+- **pg/s** (this table): pages/second during the full WebMainBench quality run on a
+  single A100 80GB, with Pulpie using a naive sequential loop (no batching). The
+  batched throughput numbers in the section below are the ones to use for
+  speed/cost — batching roughly 6x's Pulpie Small on A100 (4.0 → 25.7).
+- **Dripper** ([MinerU-HTML v1.1](https://huggingface.co/opendatalab/MinerU-HTML-v1.1-hunyuan0.5B-compact)) uses vLLM with guided regex decoding for batched inference.
 - **Dripper** ([MinerU-HTML v1.1](https://huggingface.co/opendatalab/MinerU-HTML-v1.1-hunyuan0.5B-compact)) uses vLLM with guided regex decoding for batched inference.
 - **Empty**: pages where the method produced no output (context overflow for Dripper, no blocks detected for Pulpie).
 - **magic-html**: [opendatalab/magic-html](https://github.com/opendatalab/magic-html) rule-based extractor.
 - **Trafilatura**: [trafilatura](https://github.com/adbar/trafilatura) with `include_tables=True`.
 - **Raw html2text**: full HTML passed directly through html2text (no extraction).
 
+### Throughput (500 real Common Crawl pages)
+
+L4 throughput:
+
+| Method | Pages/sec (L4) | Pages/sec (A100, batched) |
+|--------|----------------|---------------------------|
+| Pulpie Small | **13.7** | 25.7 |
+| Pulpie Base | 3.9 | 7.7 |
+| Pulpie Large | 1.3 | 3.5 |
+| Dripper | 0.68 | 3.6 |
+
+Pulpie Small runs **20x faster than Dripper on L4** and **7.1x faster on A100**.
+
 ### Cost comparison (1B pages, projected)
 
-| Setup | pg/s | GPU-hours | Cost (RunPod) |
-|-------|------|-----------|---------------|
-| Pulpie Small on L4 | 15.1 | 18,400 | $6,500 |
-| Pulpie Small on A100 | 4.0 (unbatched) | 69,400 | $9,700 |
-| Dripper on A100 (vLLM) | 3.5 | 79,400 | $77,000 |
+L4 at $0.39/hr, using the throughputs above:
 
-Pulpie Small matches Dripper quality (0.862 vs 0.864) at ~12x lower cost.
+| Setup | Pages/sec | GPU-hours / 1B | Cost / 1B pages |
+|-------|-----------|----------------|-----------------|
+| Pulpie Small on L4 | 13.7 | 20,300 | **~$7,900** |
+| Pulpie Base on L4 | 3.9 | 71,200 | ~$28,000 |
+| Pulpie Large on L4 | 1.3 | 214,000 | ~$83,000 |
+| Dripper on L4 | 0.68 | 408,000 | ~$159,000 |
+
+Pulpie Small matches Dripper quality (0.862 vs 0.864) at **~20x lower cost** on an L4.
+
+Full analysis: [Pulpie: Pareto-Optimal Models for Cleaning the Web](https://usefeyn.com/blog/pulpie-pareto-optimal-models-for-cleaning-the-web/).
 
 ### Hardware
 
