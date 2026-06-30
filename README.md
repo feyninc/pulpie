@@ -153,5 +153,5 @@ If you use Pulpie in your research, please cite:
 ---
 
 <div align="center">
-Built by <a href="https://github.com/chonkie-inc">Chonkie</a>, the open-source work behind <a href="https://usefeyn.com">Feyn</a>.
+Built by <a href="https://usefeyn.com">Feyn</a>.
 </div>
