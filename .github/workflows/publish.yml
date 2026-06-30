@@ -20,9 +20,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
 
       - name: Build wheel and sdist
-        working-directory: pulpie
         run: uv build
 
       - name: Publish to PyPI
-        working-directory: pulpie
         run: uv publish
