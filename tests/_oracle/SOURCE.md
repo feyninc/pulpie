@@ -12,7 +12,7 @@ tests. It is not shipped in the pulpie wheel (the package is scoped to `src/` vi
 Only `mineru_html/process/{html_utils,simplify_html,map_to_main}.py` and their
 light dependencies (`base.py`, `constants.py`, `exceptions.py`) are exercised; the
 test conftest loads them via a synthetic-module shim (see
-`pulpie/tests/conftest.py`) to avoid importing the full package's vllm/transformers
+`tests/conftest.py`) to avoid importing the full package's vllm/transformers
 inference stack.
 
 To refresh: re-clone upstream, copy `mineru_html/` here, update the commit SHA above.

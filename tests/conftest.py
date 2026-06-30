@@ -126,7 +126,7 @@ def oracle_extract_main():
 
 def _fixture_paths():
     here = os.path.dirname(os.path.abspath(__file__))
-    html_dir = os.path.normpath(os.path.join(here, "..", "..", "eval", "html"))
+    html_dir = os.path.normpath(os.path.join(here, "..", "eval", "html"))
     return sorted(
         os.path.join(html_dir, f) for f in os.listdir(html_dir) if f.endswith(".html")
     )

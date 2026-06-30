@@ -8,7 +8,7 @@ models were trained for. No prior session context is needed; everything is here.
 
 pulpie's `simplify.py` was rewritten to faithfully reproduce MinerU-HTML's
 `simplify_html` output (the format the Orange models were distilled on). Offline
-byte-parity tests already pass (`pytest pulpie/tests -n auto`, CPU-only). This
+byte-parity tests already pass (`pytest tests -n auto`, CPU-only). This
 runbook is the **end-to-end quality gate**: run pulpie standalone and verify the
 score moved from the old **0.731 ROUGE-5** to **~0.862** (parity with MinerU's own
 pipeline). Hitting ~0.862 means the port closed the gap and pulpie no longer needs
@@ -112,7 +112,7 @@ python eval_simplify_port_gate.py
   checks:
   - `python -c "from pulpie.simplify import simplify; print(simplify('<html><body><nav>x</nav><p>hi</p></body>')[0])"`
     — output should drop `<nav>` and show `_item_id` on the `<p>`.
-  - Confirm `pytest pulpie/tests -n auto` is green (byte-parity holds).
+  - Confirm `pytest tests -n auto` is green (byte-parity holds).
   - Confirm the installed `pulpie` is this branch (not a stale PyPI build).
 
 Report back: model used, page count, mean ROUGE-5, and (if available) the
